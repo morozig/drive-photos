@@ -63,10 +63,12 @@ const createPicker = () => {
   const accessToken = authResponse.access_token;
 
   const view = new google.picker.DocsView(google.picker.ViewId.DOCS_IMAGES)
+    .setMimeTypes('image/apng,image/avif,image/gif,image/jpeg,image/png,image/svg+xml,image/webp')
     .setIncludeFolders(true)
     .setParent('root');
   
   picker = new google.picker.PickerBuilder()
+    .enableFeature(google.picker.Feature.NAV_HIDDEN)
     .addView(view)
     .setOAuthToken(accessToken)
     .setDeveloperKey(apiKey)
@@ -160,7 +162,7 @@ const listFiles = async (options: ListFilesOptions) => {
   } = options;
   try {
     const result = await gapi.client.drive.files.list({
-      q: `'${parentId}' in parents`,
+      q: `'${parentId}' in parents and mimeType contains 'image/'`,
       fields: 'files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
       // fields: '*',
       pageSize: 1000,
