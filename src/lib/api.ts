@@ -161,7 +161,8 @@ const listFiles = async (options: ListFilesOptions) => {
   try {
     const result = await gapi.client.drive.files.list({
       q: `'${parentId}' in parents`,
-      fields: 'files(id, name, thumbnailLink, webContentLink)',
+      fields: 'files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
+      // fields: '*',
       pageSize: 1000,
       orderBy: 'name',
       pageToken

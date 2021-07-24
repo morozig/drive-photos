@@ -66,17 +66,6 @@ const Viewer: React.FC<ViewerProps> = (props) => {
     scrollToBottom
   ]);
 
-  // const onImageLoad = useCallback(() => {
-  //   console.log('onImageLoad');
-  //   if (ref.current && isScrollToBottom) {
-  //     scrollToBottom();
-  //   }
-  // }, [
-  //   ref,
-  //   isScrollToBottom,
-  //   scrollToBottom
-  // ]);
-
   return (
     <Box sx={{
       ...sx,
@@ -90,10 +79,19 @@ const Viewer: React.FC<ViewerProps> = (props) => {
           left: 0,
           right: 0,
           bottom: 0,
-          overflow: 'auto'
+          overflow: 'auto',
+          whiteSpace: 'nowrap'
         }}
         ref={ref}
       >
+        <Box
+          component='span'
+          sx={{
+            height: '100%',
+            verticalAlign: 'middle',
+            display: 'inline-block'
+          }}
+        />
         {files.map((file, i) => (
           <Img
             key={file.id}
@@ -101,7 +99,7 @@ const Viewer: React.FC<ViewerProps> = (props) => {
             alt={file.name}
             sx={i === 0 ?
               {
-                marginBottom: '-7px',
+                verticalAlign: 'middle',
                 ...(fitMode === FitMode.Best && {
                   maxWidth: '100%',
                   maxHeight: '100%'
