@@ -1,0 +1,15 @@
+.VirtualGrid {
+  overflow: auto;
+  overflow-x: hidden;
+}
+
+.VirtualGrid-area {
+  overflow: hidden;
+  position: relative;
+}
+
+.VirtualGrid-visible {
+  width: calc(100%);
+  display: grid;
+  position: absolute;
+}
