@@ -53,6 +53,16 @@ const useFiles = (parentId?: string) => {
   const [ files, setFiles ] = useState<any[]>([]);
   const [ pageToken, setPageToken ] = useState<string | undefined>();
   const signal = useAbortSignal();
+  const parentIdRef = useRef<string | undefined>(parentId);
+
+  useEffect(() => {
+    if (parentId !== parentIdRef.current) {
+      setFiles([]);
+      parentIdRef.current = parentId;
+    }
+  }, [
+    parentId
+  ]);
 
   useEffect(() => {
     const run = async () => {
