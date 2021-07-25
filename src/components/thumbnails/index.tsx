@@ -33,6 +33,7 @@ const Thumbnails: React.FC<ThumbnailsProps> = (props) => {
       return (
         <Thumbnail
           file={file}
+          counter={index + 1}
           isActive={isActive}
           onClick={() => {
             if (virtualGridRef.current) {

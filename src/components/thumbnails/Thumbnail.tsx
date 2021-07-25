@@ -1,11 +1,13 @@
 import React from 'react';
 
 import {
-  Box
+  Box,
+  ImageListItemBar
 } from '@material-ui/core';
 
 interface ThumbnailProps {
   file: any;
+  counter: number,
   isActive: boolean;
   onClick: () => void;
 }
@@ -13,6 +15,7 @@ interface ThumbnailProps {
 const Thumbnail: React.FC<ThumbnailProps> = (props: ThumbnailProps) => {
   const {
     file,
+    counter,
     isActive,
     onClick
   } = props;
@@ -22,18 +25,41 @@ const Thumbnail: React.FC<ThumbnailProps> = (props: ThumbnailProps) => {
       sx={{
         height: 220,
         width: 220,
-        borderRadius: 1,
-        bgcolor: isActive ? 'grey.200' : 'grey.400',
+        borderRadius: '6px',
         boxSizing: 'border-box',
+        overflow: 'hidden',
         display: 'grid',
         alignContent: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        position: 'relative',
+        ...(isActive ?
+          {
+            bgcolor: 'grey.700'
+          } :
+          {
+            border: '1px solid #dadce0'
+          }
+        )
       }}
       onClick={onClick}
     >
       <img
         src={file.thumbnailLink}
         alt={file.name}
+      />
+      <ImageListItemBar
+        title={file.name}
+        subtitle={`#${counter}`}
+        sx={{
+          ...(!isActive &&
+            {
+              background: 'rgba(255, 255, 255, 0.5)',
+              [`& .MuiImageListItemBar-titleWrap`]: {
+                color: 'common.black'
+              }
+            }
+          )
+        }}
       />
     </Box>
   );

@@ -80,7 +80,10 @@ const Viewer: React.FC<ViewerProps> = (props) => {
           right: 0,
           bottom: 0,
           overflow: 'auto',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          ...(files.length > 0 && {
+            bgcolor: 'grey.700'
+          })
         }}
         ref={ref}
       >
