@@ -31,7 +31,7 @@ interface VirtualGridProps {
   className?: string;
   scrollBar?: 'right' | 'left' | 'none',
   scrollToIndex?: number;
-  onCurrentRow?: (row: number) => void;
+  onVisibleRows?: (rows: number[]) => void;
   center?: boolean;
 }
 
@@ -51,7 +51,7 @@ const VirtualGrid = forwardRef<VirtualGridRef, VirtualGridProps>(
     itemWidth,
     scrollBar = 'right',
     scrollToIndex,
-    onCurrentRow,
+    onVisibleRows,
     center = false
   } = props;
 
@@ -148,15 +148,26 @@ const VirtualGrid = forwardRef<VirtualGridRef, VirtualGridProps>(
 
   const offsetY = startRow * (itemHeight + rowGap);
 
-  const currentRow = Math.floor(
-    (scrollTop + height / 2 + rowGap) / (itemHeight + rowGap)
+  const firstVisibleRow = Math.floor(
+    (scrollTop) / (itemHeight + rowGap)
+  );
+  const lastVisibleRow = Math.floor(
+    (scrollTop + height) / (itemHeight + rowGap)
   );
 
   useEffect(() => {
-    if (onCurrentRow) {
-      onCurrentRow(currentRow);
+    if (onVisibleRows) {
+      const visibleRows = [] as number[];
+      for (let i = firstVisibleRow; i <= lastVisibleRow; i++) {
+        visibleRows.push(i);
+      }
+      onVisibleRows(visibleRows);
     }
-  }, [currentRow, onCurrentRow]);
+  }, [
+    firstVisibleRow,
+    lastVisibleRow,
+    onVisibleRows
+  ]);
 
   const visibleItems = useMemo(() =>
     (visibleItemsCount > 0) ?

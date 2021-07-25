@@ -11,6 +11,7 @@ interface ThumbnailsProps {
   files?: any[];
   fileId?: string;
   onSelect: (fileId: string) => void;
+  onVisibleFiles?: (indices: number[]) => void;
   sx?: SystemStyleObject;
 };
 
@@ -19,6 +20,7 @@ const Thumbnails: React.FC<ThumbnailsProps> = (props) => {
     files = [],
     fileId,
     onSelect,
+    onVisibleFiles,
     sx
   } = props;
 
@@ -87,6 +89,7 @@ const Thumbnails: React.FC<ThumbnailsProps> = (props) => {
           center
           rowGap={4}
           ref={virtualGridRef}
+          onVisibleRows={onVisibleFiles}
         />
       }
     </Box>

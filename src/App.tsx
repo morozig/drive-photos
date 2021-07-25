@@ -49,6 +49,10 @@ const App: React.FC = () => {
   const [ fileId, setFileId ] = useState('');
   const [ isScrollToBottom, setIsScrollToBottom ] = useState(false);
   const [ title, setTitle ] = useState(defaultTitle);
+  const [
+    visibleThumbnails,
+    setVisibleThumbnails
+  ] = useState<number[]>([]);
   const {
     isSignedIn,
     toggleSignedIn
@@ -165,11 +169,18 @@ const App: React.FC = () => {
         preloadFiles.add(file);
       }
     }
+    for (let i of visibleThumbnails) {
+      const file = files[i];
+      if (file) {
+        preloadFiles.add(file);
+      }
+    }
     preloadFiles.delete(activeFile);
     return [activeFile].concat(Array.from(preloadFiles));
   }, [
     activeIndex,
-    files
+    files,
+    visibleThumbnails
   ]);
 
   return (
@@ -278,6 +289,7 @@ const App: React.FC = () => {
           files={files}
           fileId={fileId}
           onSelect={onSelect}
+          onVisibleFiles={setVisibleThumbnails}
           sx={{
             height: '100%'
           }}
