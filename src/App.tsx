@@ -17,7 +17,7 @@ import {
   ToggleButton
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
-import { useFiles, useIsSignedIn } from './lib/hooks';
+import { useDirectory, useFiles, useIsSignedIn } from './lib/hooks';
 import {
   pickFile
 } from './lib/api';
@@ -27,10 +27,12 @@ import FitBestIcon from '@material-ui/icons/CropDin';
 import FitWidthIcon from '@material-ui/icons/CropPortrait';
 import FitHeightIcon from '@material-ui/icons/CropLandscape';
 import FitOriginalIcon from '@material-ui/icons/CropOriginal';
+import { useEffect } from 'react';
 
 
 const drawerWidth = 260;
 const preloadCount = 3;
+const defaultTitle = 'Drive Photos';
 
 export enum FitMode {
   Best = 1,
@@ -46,11 +48,15 @@ const App: React.FC = () => {
   const [ parentId, setParentId ] = useState('');
   const [ fileId, setFileId ] = useState('');
   const [ isScrollToBottom, setIsScrollToBottom ] = useState(false);
+  const [ title, setTitle ] = useState(defaultTitle);
   const {
     isSignedIn,
     toggleSignedIn
   } = useIsSignedIn();
   const files = useFiles(parentId);
+  const directory = useDirectory(parentId);
+
+
   const handleMenuClose = useCallback(() => {
     setMenuOpen(false);
   }, []);
@@ -75,6 +81,30 @@ const App: React.FC = () => {
     }
   }, [
     fileId,
+    files
+  ]);
+
+  useEffect(() => {
+    const activeFile = files[activeIndex];
+    const dirName = directory ? directory.name : '';
+    const fileName = activeFile ? activeFile.name : '';
+    const title = (dirName && fileName) ? 
+      `${dirName}/${fileName}` : '';
+    const documentTitle = title ?
+      `${title} | ${defaultTitle}` : defaultTitle;
+    setTitle(title || defaultTitle);
+    document.title = documentTitle;
+  }, [
+    activeIndex,
+    directory,
+    files
+  ]);
+
+  const counterTitle = useMemo(() => {
+    return (activeIndex >= 0 && files.length > 0) ?
+      `${activeIndex + 1}/${files.length}` : '';
+  }, [
+    activeIndex,
     files
   ]);
 
@@ -176,10 +206,33 @@ const App: React.FC = () => {
               {isSignedIn ? 'Sign Out' : 'Sign In'}
             </MenuItem>
           </Menu>
-          <Typography variant='h6' noWrap component='div'>
-            Clipped drawer
-          </Typography>
-          <Box sx={{ flexGrow: 1 }} />
+          <Box
+            sx={{
+              flexGrow: 1,
+              overflow: 'hidden'
+            }}
+          >
+            <Typography
+              variant='h6'
+              noWrap
+              sx={{
+                textOverflow: 'ellipsis'
+              }}
+            >
+              {title}
+            </Typography>
+          </Box>
+          {!!counterTitle &&
+            <Box
+              sx={{
+                m: 1
+              }}
+            >
+              <Typography variant='body1' noWrap>
+                {counterTitle}
+              </Typography>
+            </Box>
+          }
           <ToggleButtonGroup
             value={fitMode}
             exclusive

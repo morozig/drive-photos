@@ -5,6 +5,7 @@ import {
   useState
 } from 'react';
 import {
+  getParent,
   isSignedIn,
   listFiles,
   signIn,
@@ -98,8 +99,40 @@ const useFiles = (parentId?: string) => {
   return files;
 };
 
+const useDirectory = (parentId?: string) => {
+  const [ directory, setDirectory ] = useState<any | null>(null);
+  const signal = useAbortSignal();
+
+  useEffect(() => {
+    const run = async () => {
+      if (!parentId) {
+        return;
+      }
+      try {
+        const directory = await getParent(parentId);
+        if(!signal.aborted) {
+          setDirectory(directory);
+        }
+      }
+      catch(err) {
+        console.log(err);
+      }
+    };
+
+    if (parentId) {
+      run();
+    }
+  }, [
+    parentId,
+    signal
+  ]);
+  
+  return directory;
+};
+
 export {
   useAbortSignal,
   useIsSignedIn,
-  useFiles
+  useFiles,
+  useDirectory
 };

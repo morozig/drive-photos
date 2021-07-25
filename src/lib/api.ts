@@ -177,6 +177,19 @@ const listFiles = async (options: ListFilesOptions) => {
   }
 };
 
+const getParent = async (parentId: string) => {
+  try {
+    const result = await gapi.client.drive.files.get({
+      fileId: parentId,
+      fields: '*'
+    });
+    return result.result;
+  }
+  catch(err) {
+    console.log(err);
+  }
+};
+
 gapi.load('client:auth2:picker', onGapiLoaded);
 
 export {
@@ -186,5 +199,6 @@ export {
   subscribeToSignedInChange,
   pickFile,
   getFile,
-  listFiles
+  listFiles,
+  getParent
 };
