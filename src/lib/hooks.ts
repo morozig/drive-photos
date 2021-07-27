@@ -12,6 +12,7 @@ import {
   signOut,
   subscribeToSignedInChange
 } from './api';
+import Screenfull from './screenfull';
 
 const useAbortSignal = () => {
   const abortControllerRef = useRef(new AbortController());
@@ -130,9 +131,52 @@ const useDirectory = (parentId?: string) => {
   return directory;
 };
 
+const useFullScreen = () => {
+  const [ isFullscreen, setFullscreen ] = useState(Screenfull.isFullscreen);
+  const [ isEnabled ] = useState(Screenfull.isEnabled);
+
+  useEffect(() => {
+    if (!Screenfull.isEnabled) {
+      return;
+    }
+    const run = () => {
+      const isFullscreen = Screenfull.isFullscreen;
+      setFullscreen(isFullscreen);
+    };
+    run();
+    Screenfull.on('change', run);
+    return () => {
+      Screenfull.off('change', run);
+    };
+  }, []);
+
+  const toggleFullScreen = useCallback((div?: HTMLDivElement | null) => {
+    const run = async () => {
+      if (!Screenfull.isEnabled) {
+        return;
+      }
+
+      try {
+        Screenfull.toggle(div || undefined);
+      }
+      catch (err) {
+        console.log(err);
+      }
+    };
+    run();
+  }, []);
+
+  return {
+    isEnabled,
+    isFullscreen,
+    toggleFullScreen
+  };
+};
+
 export {
   useAbortSignal,
   useIsSignedIn,
   useFiles,
-  useDirectory
+  useDirectory,
+  useFullScreen
 };

@@ -14,6 +14,15 @@ const theme = createTheme({
       main: red.A400,
     },
   },
+  components: {
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+        }
+      }
+    }
+  }
 });
 
 export default theme;

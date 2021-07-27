@@ -2,32 +2,19 @@ import React, {
   useState,
   useRef,
   useCallback,
-  useMemo
+  useMemo,
+  useEffect
 } from 'react';
 import {
   AppBar,
   Box,
   Toolbar,
-  Typography,
-  Drawer,
-  IconButton,
-  Menu,
-  MenuItem,
-  ToggleButtonGroup,
-  ToggleButton
+  Drawer
 } from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu';
-import { useDirectory, useFiles, useIsSignedIn } from './lib/hooks';
-import {
-  pickFile
-} from './lib/api';
+import { useDirectory, useFiles } from './lib/hooks';
 import Thumbnails from './components/thumbnails';
-import Viewer from './components/viewer';
-import FitBestIcon from '@material-ui/icons/CropDin';
-import FitWidthIcon from '@material-ui/icons/CropPortrait';
-import FitHeightIcon from '@material-ui/icons/CropLandscape';
-import FitOriginalIcon from '@material-ui/icons/CropOriginal';
-import { useEffect } from 'react';
+import Viewer, { ViewerRef } from './components/viewer';
+import Topbar from './components/topbar';
 
 
 const drawerWidth = 260;
@@ -42,8 +29,6 @@ export enum FitMode {
 }
 
 const App: React.FC = () => {
-  const [ isMenuOpen, setMenuOpen ] = useState(false);
-  const menuRef = useRef<HTMLButtonElement>(null);
   const [ fitMode, setFitMode ] = useState<FitMode>(FitMode.Best);
   const [ parentId, setParentId ] = useState('');
   const [ fileId, setFileId ] = useState('');
@@ -53,28 +38,14 @@ const App: React.FC = () => {
     visibleThumbnails,
     setVisibleThumbnails
   ] = useState<number[]>([]);
-  const {
-    isSignedIn,
-    toggleSignedIn
-  } = useIsSignedIn();
+
   const files = useFiles(parentId);
   const directory = useDirectory(parentId);
 
-
-  const handleMenuClose = useCallback(() => {
-    setMenuOpen(false);
-  }, []);
-  const handleMenuClick = useCallback(() => {
-    setMenuOpen(current => !current);
-  }, []);
-  const onOpenClick = useCallback(async () => {
-    setMenuOpen(false);
-    const doc = await pickFile();
-    if (doc) {
-      setFileId(doc.id);
-      setParentId(doc.parentId);
-      setIsScrollToBottom(false);
-    }
+  const onOpenFile = useCallback((file: any) => {
+    setFileId(file.id);
+    setParentId(file.parentId);
+    setIsScrollToBottom(false);
   }, []);
 
   const activeIndex = useMemo(() => {
@@ -183,105 +154,37 @@ const App: React.FC = () => {
     visibleThumbnails
   ]);
 
+  const viewerRef = useRef<ViewerRef>(null);
+  const onToggleFullscreen = useCallback(() => {
+    if (viewerRef.current) {
+      viewerRef.current.toggleFullscreen();
+    }
+  }, []);
+
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position='fixed' sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
-        <Toolbar>
-          <IconButton
-            size='large'
-            edge='start'
-            color='inherit'
-            aria-label='menu'
-            sx={{ mr: 2 }}
-            ref={menuRef}
-            onClick={handleMenuClick}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Menu
-            anchorEl={menuRef.current}
-            open={isMenuOpen}
-            onClose={handleMenuClose}
-            MenuListProps={{
-              'aria-labelledby': 'basic-button',
-            }}
-          >
-            <MenuItem
-              onClick={onOpenClick}
-            >
-              {'Open File'}
-            </MenuItem>
-            <MenuItem
-              onClick={toggleSignedIn}
-            >
-              {isSignedIn ? 'Sign Out' : 'Sign In'}
-            </MenuItem>
-          </Menu>
-          <Box
-            sx={{
-              flexGrow: 1,
-              overflow: 'hidden'
-            }}
-          >
-            <Typography
-              variant='h6'
-              noWrap
-              sx={{
-                textOverflow: 'ellipsis'
-              }}
-            >
-              {title}
-            </Typography>
-          </Box>
-          {!!counterTitle &&
-            <Box
-              sx={{
-                m: 1
-              }}
-            >
-              <Typography variant='body1' noWrap>
-                {counterTitle}
-              </Typography>
-            </Box>
-          }
-          <ToggleButtonGroup
-            value={fitMode}
-            exclusive
-            onChange={(e, value) => setFitMode(value)}
-          >
-            <ToggleButton
-              value={FitMode.Best}
-              aria-label='best fit'
-            >
-              <FitBestIcon />
-            </ToggleButton>
-            <ToggleButton
-              value={FitMode.Width}
-              aria-label='fit width'
-            >
-              <FitWidthIcon />
-            </ToggleButton>
-            <ToggleButton
-              value={FitMode.Height}
-              aria-label='fit height'
-            >
-              <FitHeightIcon />
-            </ToggleButton>
-            <ToggleButton
-              value={FitMode.Original}
-              aria-label='fit original'
-            >
-              <FitOriginalIcon />
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Toolbar>
+        <Topbar
+          title={title}
+          counterTitle={counterTitle}
+          fitMode={fitMode}
+          onFitModeChange={setFitMode}
+          onOpenFile={onOpenFile}
+          fullscreenButtonActive={files.length > 0}
+          onToggleFullscreen={onToggleFullscreen}
+        />
       </AppBar>
       <Drawer
         variant='permanent'
         sx={{
           width: drawerWidth,
           flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+          [`& .MuiDrawer-paper`]: {
+            width: drawerWidth,
+            boxSizing: 'border-box'
+          },
+          display: 'flex',
+          flexDirection: 'column'
         }}
       >
         <Toolbar />
@@ -291,7 +194,7 @@ const App: React.FC = () => {
           onSelect={onSelect}
           onVisibleFiles={setVisibleThumbnails}
           sx={{
-            height: '100%'
+            flexGrow: 1
           }}
         />
       </Drawer>
@@ -308,10 +211,12 @@ const App: React.FC = () => {
             files={viewFiles}
             onPrev={onPrev}
             onNext={onNext}
+            onFitModeChange={setFitMode}
             isScrollToBottom={isScrollToBottom}
             sx={{
               flexGrow: 1
             }}
+            ref={viewerRef}
           />
         }
       </Box>

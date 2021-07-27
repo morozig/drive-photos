@@ -5,7 +5,7 @@ import Thumbnail from './Thumbnail';
 import VirtualGrid, { ItemProps, VirtualGridRef } from './VirtualGrid';
 import {
   SystemStyleObject
-} from '@material-ui/system'
+} from '@material-ui/system';
 
 interface ThumbnailsProps {
   files?: any[];
@@ -77,7 +77,10 @@ const Thumbnails: React.FC<ThumbnailsProps> = (props) => {
   return (
     <Box
       ref={ref}
-      sx={sx}
+      sx={{
+        ...sx,
+        overflow: 'hidden'
+      }}
     >
       {(files.length > 0 && rectSize.height > 0) &&
         <VirtualGrid

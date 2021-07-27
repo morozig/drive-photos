@@ -1,36 +1,68 @@
-import React, { useMemo, useEffect } from 'react';
+import React, {
+  useMemo,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+  useCallback,
+  useState
+} from 'react';
 import {
   SystemStyleObject,
   styled
 } from '@material-ui/system';
 import {
-  Box
+  Box,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText
 } from '@material-ui/core';
 import { useScrollActions } from './hooks';
 import { FitMode } from '../../App';
+import { useFullScreen } from '../../lib/hooks';
+import FullscreenEnterIcon from '@material-ui/icons/Fullscreen';
+import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
+import FitBestIcon from '@material-ui/icons/CropDin';
+import FitWidthIcon from '@material-ui/icons/CropPortrait';
+import FitHeightIcon from '@material-ui/icons/CropLandscape';
+import FitOriginalIcon from '@material-ui/icons/CropOriginal';
 
 const wheelCount = 3;
+
+export interface ViewerRef {
+  toggleFullscreen: () => void;
+}
 
 interface ViewerProps {
   fitMode: FitMode;
   files: any[];
   onNext: () => void;
   onPrev: () => void;
+  onFitModeChange: (fitMode: FitMode) => void;
   sx?: SystemStyleObject;
   isScrollToBottom?: boolean;
 };
 
+interface Point {
+  x: number;
+  y: number;
+};
+
 const Img = styled('img')({});
 
-const Viewer: React.FC<ViewerProps> = (props) => {
+const Viewer = forwardRef<ViewerRef, ViewerProps>(
+  (props, viewerRef) => {
   const {
     fitMode,
     files,
     onNext,
     onPrev,
+    onFitModeChange,
     sx,
     isScrollToBottom
   } = props;
+
+  const [ contextMenu, setContextMenu ] = useState<Point | null>(null);
 
   const {
     ref,
@@ -65,6 +97,80 @@ const Viewer: React.FC<ViewerProps> = (props) => {
     isScrollToBottom,
     scrollToBottom
   ]);
+  
+  const {
+    isEnabled,
+    isFullscreen,
+    toggleFullScreen
+  } = useFullScreen();
+  useImperativeHandle(viewerRef, () => ({
+    toggleFullscreen() {
+      if (isEnabled) {
+        toggleFullScreen(ref.current);
+      }
+    }
+  }), [
+    ref,
+    isEnabled,
+    toggleFullScreen
+  ]);
+
+  const onContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setContextMenu(
+      prev => !prev ?
+        {
+          x: e.clientX - 2,
+          y: e.clientY - 4
+        } :
+        null
+    );
+  }, []);
+
+  const onClose = useCallback(() => {
+    setContextMenu(null);
+  }, []);
+
+  const onClickFullscreen = useCallback(() => {
+    if (isEnabled) {
+      toggleFullScreen(ref.current);
+    }
+    onClose();
+  }, [
+    isEnabled,
+    ref,
+    toggleFullScreen,
+    onClose
+  ]);
+
+  const onClickFitBest = useCallback(() => {
+    onFitModeChange(FitMode.Best);
+    onClose();
+  }, [
+    onFitModeChange,
+    onClose
+  ]);
+  const onClickFitWidth = useCallback(() => {
+    onFitModeChange(FitMode.Width);
+    onClose();
+  }, [
+    onFitModeChange,
+    onClose
+  ]);
+  const onClickFitHeight = useCallback(() => {
+    onFitModeChange(FitMode.Height);
+    onClose();
+  }, [
+    onFitModeChange,
+    onClose
+  ]);
+  const onClickFitOriginal = useCallback(() => {
+    onFitModeChange(FitMode.Original);
+    onClose();
+  }, [
+    onFitModeChange,
+    onClose
+  ]);
 
   return (
     <Box sx={{
@@ -72,6 +178,8 @@ const Viewer: React.FC<ViewerProps> = (props) => {
       position: 'relative'
     }}>
       <Box
+        component='div'
+        onContextMenu={onContextMenu}
         sx={{
           textAlign: 'center',
           position: 'absolute',
@@ -121,9 +229,82 @@ const Viewer: React.FC<ViewerProps> = (props) => {
             // onLoad={i === 0 ? onImageLoad : undefined}
           />
         ))}
+        <Menu
+          container={ref.current}
+          disableScrollLock={true}
+          open={!!contextMenu}
+          onClose={onClose}
+          anchorReference='anchorPosition'
+          anchorPosition={!!contextMenu ?
+            {
+              top: contextMenu.y,
+              left: contextMenu.x
+            } :
+            undefined
+          }
+        >
+          {isEnabled &&
+            <MenuItem
+              onClick={onClickFullscreen}
+            >
+              <ListItemIcon>
+                {isFullscreen ?
+                  <FullscreenExitIcon /> :
+                  <FullscreenEnterIcon />
+                }
+              </ListItemIcon>
+              <ListItemText>
+                {isFullscreen ?
+                  'Exit Fullscreen' :
+                  'Enter Fullscreen'
+                }
+              </ListItemText>
+            </MenuItem>
+          }
+          <MenuItem
+            onClick={onClickFitBest}
+          >
+            <ListItemIcon>
+              <FitBestIcon/>
+            </ListItemIcon>
+            <ListItemText>
+              {'Best Fit'}
+            </ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={onClickFitWidth}
+          >
+            <ListItemIcon>
+              <FitWidthIcon/>
+            </ListItemIcon>
+            <ListItemText>
+              {'Fit Width'}
+            </ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={onClickFitHeight}
+          >
+            <ListItemIcon>
+              <FitHeightIcon/>
+            </ListItemIcon>
+            <ListItemText>
+              {'Fit Height'}
+            </ListItemText>
+          </MenuItem>
+          <MenuItem
+            onClick={onClickFitOriginal}
+          >
+            <ListItemIcon>
+              <FitOriginalIcon/>
+            </ListItemIcon>
+            <ListItemText>
+              {'Original Size'}
+            </ListItemText>
+          </MenuItem>
+        </Menu>
       </Box>
     </Box>
   );
-};
+});
 
 export default Viewer;
