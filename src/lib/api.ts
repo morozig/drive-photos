@@ -177,12 +177,62 @@ const listFiles = async (options: ListFilesOptions) => {
   }
 };
 
+export enum DirectoryEdge {
+  Begin = 1,
+  End
+};
+interface GetEdgeFileOptions {
+  parentId: string;
+  edge: DirectoryEdge;
+};
+
+const getEdgeFiles = async (options: GetEdgeFileOptions) => {
+  const {
+    parentId,
+    edge
+  } = options;
+  try {
+    const result = await gapi.client.drive.files.list({
+      q: `'${parentId}' in parents and mimeType contains 'image/'`,
+      fields: 'files(id, name)',
+      pageSize: 1,
+      orderBy: edge === DirectoryEdge.Begin ?
+        'name' : 'name desc'
+    });
+    return (
+      result.result ?
+        result.result.files as any[] : []
+    );
+  }
+  catch(err) {
+    console.log(err);
+    return [];
+  }
+};
+
 const getParent = async (parentId: string) => {
   try {
     const result = await gapi.client.drive.files.get({
       fileId: parentId,
       fields: '*'
     });
+    return result.result;
+  }
+  catch(err) {
+    console.log(err);
+  }
+};
+
+const listDirectories = async (grandParentId: string) => {
+  try {
+    const result = await gapi.client.drive.files.list({
+      q: `'${grandParentId}' in parents and mimeType = 'application/vnd.google-apps.folder'`,
+      // fields: 'files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
+      fields: '*',
+      pageSize: 1000,
+      orderBy: 'name'
+    });
+    // console.log({result});
     return result.result;
   }
   catch(err) {
@@ -200,5 +250,7 @@ export {
   pickFile,
   getFile,
   listFiles,
-  getParent
+  getParent,
+  getEdgeFiles,
+  listDirectories
 };

@@ -11,7 +11,7 @@ import {
   Toolbar,
   Drawer
 } from '@material-ui/core';
-import { useDirectory, useFiles } from './lib/hooks';
+import { useDrive } from './lib/hooks';
 import Thumbnails from './components/thumbnails';
 import Viewer, { ViewerRef } from './components/viewer';
 import Topbar from './components/topbar';
@@ -39,8 +39,14 @@ const App: React.FC = () => {
     setVisibleThumbnails
   ] = useState<number[]>([]);
 
-  const files = useFiles(parentId);
-  const directory = useDirectory(parentId);
+  const {
+    files,
+    directoryName,
+    prevDirId,
+    prevFileId,
+    nextDirId,
+    nextFileId
+  } = useDrive(parentId);
 
   const onOpenFile = useCallback((file: any) => {
     setFileId(file.id);
@@ -61,17 +67,16 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const activeFile = files[activeIndex];
-    const dirName = directory ? directory.name : '';
     const fileName = activeFile ? activeFile.name : '';
-    const title = (dirName && fileName) ? 
-      `${dirName}/${fileName}` : '';
+    const title = (directoryName && fileName) ? 
+      `${directoryName}/${fileName}` : '';
     const documentTitle = title ?
       `${title} | ${defaultTitle}` : defaultTitle;
     setTitle(title || defaultTitle);
     document.title = documentTitle;
   }, [
     activeIndex,
-    directory,
+    directoryName,
     files
   ]);
 
@@ -88,10 +93,18 @@ const App: React.FC = () => {
     if (files[newIndex]) {
       setFileId(files[newIndex].id);
       setIsScrollToBottom(false);
+    } else {
+      if (nextDirId && nextFileId) {
+        setFileId(nextFileId);
+        setParentId(nextDirId);
+        setIsScrollToBottom(false);
+      }
     }
   }, [
     activeIndex,
-    files
+    files,
+    nextDirId,
+    nextFileId
   ]);
 
   const onPrev = useCallback(() => {
@@ -99,10 +112,18 @@ const App: React.FC = () => {
     if (files[newIndex]) {
       setFileId(files[newIndex].id);
       setIsScrollToBottom(true);
+    } else {
+      if (prevDirId && prevFileId) {
+        setFileId(prevFileId);
+        setParentId(prevDirId);
+        setIsScrollToBottom(true);
+      }
     }
   }, [
     activeIndex,
-    files
+    files,
+    prevDirId,
+    prevFileId
   ]);
 
   const onSelect = useCallback((fileId: string) => {
