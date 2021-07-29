@@ -262,12 +262,12 @@ const useDrive = (parentId?: string) => {
   const [ prevDirId, setPrevDirId ] = useState('');
   const [ nextDirId, setNextDirId ] = useState('');
   
-  const prevFileId = useEdgeFileId({
+  const prevDirFileId = useEdgeFileId({
     parentId: prevDirId,
     edge: DirectoryEdge.End
   });
   const files = useFiles(parentId);
-  const nextFileId = useEdgeFileId({
+  const nextDirFileId = useEdgeFileId({
     parentId: nextDirId,
     edge: DirectoryEdge.Begin
   });
@@ -305,9 +305,9 @@ const useDrive = (parentId?: string) => {
     files,
     directoryName,
     prevDirId,
-    prevFileId,
+    prevDirFileId,
     nextDirId,
-    nextFileId
+    nextDirFileId
   }
 };
 

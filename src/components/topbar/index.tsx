@@ -21,6 +21,10 @@ import FitHeightIcon from '@material-ui/icons/CropLandscape';
 import FitOriginalIcon from '@material-ui/icons/CropOriginal';
 import FullscreenEnterIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
+import FirstImageIcon from '@material-ui/icons/FirstPage';
+import LastImageIcon from '@material-ui/icons/LastPage';
+import PrevImageIcon from '@material-ui/icons/NavigateBefore';
+import NextImageIcon from '@material-ui/icons/NavigateNext';
 import { FitMode } from '../../App';
 import { useFullScreen, useIsSignedIn } from '../../lib/hooks';
 import {
@@ -36,6 +40,14 @@ interface TopbarProps {
   onOpenFile: (file: any) => void;
   fullscreenButtonActive?: boolean;
   onToggleFullscreen: () => void;
+  isFirstImageEnabled?: boolean;
+  isPrevImageEnabled?: boolean;
+  isNextImageEnabled?: boolean;
+  isLastImageEnabled?: boolean;
+  onFirstImage: () => void;
+  onPrevImage: () => void;
+  onNextImage: () => void;
+  onLastImage: () => void;
 };
 
 const Topbar: React.FC<TopbarProps> = (props) => {
@@ -46,7 +58,15 @@ const Topbar: React.FC<TopbarProps> = (props) => {
     onFitModeChange,
     onOpenFile,
     fullscreenButtonActive,
-    onToggleFullscreen
+    onToggleFullscreen,
+    isFirstImageEnabled,
+    isPrevImageEnabled,
+    isNextImageEnabled,
+    isLastImageEnabled,
+    onFirstImage,
+    onPrevImage,
+    onNextImage,
+    onLastImage
   } = props;
   const [ isMenuOpen, setMenuOpen ] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
@@ -125,6 +145,66 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           </Typography>
         </Box>
       }
+      <Tooltip
+        title='First Image'
+      >
+        <span>
+          <IconButton
+            size='large'
+            color='inherit'
+            aria-label='first-image'
+            disabled={!isFirstImageEnabled}
+            onClick={onFirstImage}
+          >
+            <FirstImageIcon/>
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip
+        title='Previous Image'
+      >
+        <span>
+          <IconButton
+            size='large'
+            color='inherit'
+            aria-label='prev-image'
+            disabled={!isPrevImageEnabled}
+            onClick={onPrevImage}
+          >
+            <PrevImageIcon/>
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip
+        title='Next Image'
+      >
+        <span>
+          <IconButton
+            size='large'
+            color='inherit'
+            aria-label='next-image'
+            disabled={!isNextImageEnabled}
+            onClick={onNextImage}
+          >
+            <NextImageIcon/>
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip
+        title='Last Image'
+      >
+        <span>
+          <IconButton
+            size='large'
+            color='inherit'
+            aria-label='last-image'
+            disabled={!isLastImageEnabled}
+            onClick={onLastImage}
+          >
+            <LastImageIcon/>
+          </IconButton>
+        </span>
+      </Tooltip>
       <ToggleButtonGroup
         value={fitMode}
         exclusive

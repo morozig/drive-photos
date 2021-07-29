@@ -36,8 +36,8 @@ export interface ViewerRef {
 interface ViewerProps {
   fitMode: FitMode;
   files: any[];
-  onNext: () => void;
-  onPrev: () => void;
+  onNextImage: () => void;
+  onPrevImage: () => void;
   onFitModeChange: (fitMode: FitMode) => void;
   sx?: SystemStyleObject;
   isScrollToBottom?: boolean;
@@ -55,8 +55,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
   const {
     fitMode,
     files,
-    onNext,
-    onPrev,
+    onNextImage,
+    onPrevImage,
     onFitModeChange,
     sx,
     isScrollToBottom
@@ -70,8 +70,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     scrollToBottom
   } = useScrollActions({
     wheelCount,
-    onScrollOverTop: onPrev,
-    onScrollBelowBottom: onNext
+    onScrollOverTop: onPrevImage,
+    onScrollBelowBottom: onNextImage
   });
 
   const activeFileId = useMemo(() => {
@@ -225,7 +225,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
                 display: 'none'
               }
             }
-            onClick={onNext}
+            onClick={onNextImage}
             // onLoad={i === 0 ? onImageLoad : undefined}
           />
         ))}

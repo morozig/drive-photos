@@ -43,9 +43,9 @@ const App: React.FC = () => {
     files,
     directoryName,
     prevDirId,
-    prevFileId,
+    prevDirFileId,
     nextDirId,
-    nextFileId
+    nextDirFileId
   } = useDrive(parentId);
 
   const onOpenFile = useCallback((file: any) => {
@@ -88,33 +88,69 @@ const App: React.FC = () => {
     files
   ]);
 
-  const onNext = useCallback(() => {
-    const newIndex = activeIndex + 1;
+  const isFirstImageEnabled = useMemo(() => {
+    if (activeIndex < 0 || files.length < 0) {
+      return false;
+    }
+    return (activeIndex > 0);
+  }, [
+    activeIndex,
+    files.length
+  ]);
+  const isPrevImageEnabled = useMemo(() => {
+    if (activeIndex < 0 || files.length < 0) {
+      return false;
+    }
+    return (
+      activeIndex > 0 ||
+      !!prevDirFileId
+    )
+  }, [
+    activeIndex,
+    files.length,
+    prevDirFileId
+  ]);
+  const isNextImageEnabled = useMemo(() => {
+    if (activeIndex < 0 || files.length < 0) {
+      return false;
+    }
+    return (
+      activeIndex < files.length - 1 ||
+      !!nextDirFileId
+    )
+  }, [
+    activeIndex,
+    files.length,
+    nextDirFileId
+  ]);
+  const isLastImageEnabled = useMemo(() => {
+    if (activeIndex < 0 || files.length < 0) {
+      return false;
+    }
+    return (activeIndex < files.length - 1);
+  }, [
+    activeIndex,
+    files.length
+  ]);
+
+  const onFirstImage = useCallback(() => {
+    const newIndex = 0;
     if (files[newIndex]) {
       setFileId(files[newIndex].id);
       setIsScrollToBottom(false);
-    } else {
-      if (nextDirId && nextFileId) {
-        setFileId(nextFileId);
-        setParentId(nextDirId);
-        setIsScrollToBottom(false);
-      }
     }
   }, [
-    activeIndex,
-    files,
-    nextDirId,
-    nextFileId
+    files
   ]);
 
-  const onPrev = useCallback(() => {
+  const onPrevImage = useCallback(() => {
     const newIndex = activeIndex - 1;
     if (files[newIndex]) {
       setFileId(files[newIndex].id);
       setIsScrollToBottom(true);
     } else {
-      if (prevDirId && prevFileId) {
-        setFileId(prevFileId);
+      if (prevDirId && prevDirFileId) {
+        setFileId(prevDirFileId);
         setParentId(prevDirId);
         setIsScrollToBottom(true);
       }
@@ -123,7 +159,36 @@ const App: React.FC = () => {
     activeIndex,
     files,
     prevDirId,
-    prevFileId
+    prevDirFileId
+  ]);
+
+  const onNextImage = useCallback(() => {
+    const newIndex = activeIndex + 1;
+    if (files[newIndex]) {
+      setFileId(files[newIndex].id);
+      setIsScrollToBottom(false);
+    } else {
+      if (nextDirId && nextDirFileId) {
+        setFileId(nextDirFileId);
+        setParentId(nextDirId);
+        setIsScrollToBottom(false);
+      }
+    }
+  }, [
+    activeIndex,
+    files,
+    nextDirId,
+    nextDirFileId
+  ]);
+
+  const onLastImage = useCallback(() => {
+    const newIndex = files.length - 1;
+    if (files[newIndex]) {
+      setFileId(files[newIndex].id);
+      setIsScrollToBottom(false);
+    }
+  }, [
+    files
   ]);
 
   const onSelect = useCallback((fileId: string) => {
@@ -193,6 +258,14 @@ const App: React.FC = () => {
           onOpenFile={onOpenFile}
           fullscreenButtonActive={files.length > 0}
           onToggleFullscreen={onToggleFullscreen}
+          isFirstImageEnabled={isFirstImageEnabled}
+          isPrevImageEnabled={isPrevImageEnabled}
+          isNextImageEnabled={isNextImageEnabled}
+          isLastImageEnabled={isLastImageEnabled}
+          onFirstImage={onFirstImage}
+          onPrevImage={onPrevImage}
+          onNextImage={onNextImage}
+          onLastImage={onLastImage}
         />
       </AppBar>
       <Drawer
@@ -230,8 +303,8 @@ const App: React.FC = () => {
           <Viewer
             fitMode={fitMode}
             files={viewFiles}
-            onPrev={onPrev}
-            onNext={onNext}
+            onPrevImage={onPrevImage}
+            onNextImage={onNextImage}
             onFitModeChange={setFitMode}
             isScrollToBottom={isScrollToBottom}
             sx={{
