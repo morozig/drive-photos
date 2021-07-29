@@ -76,7 +76,7 @@ const useScrollActions = (options: ScrollActionsOptions) => {
               scrollOverTopCountRef.current >= wheelCount
             ) {
               scrollOverTopCountRef.current = 0;
-              requestAnimationFrame(onScrollOverTop);
+              onScrollOverTop();
             }
           }
         }
@@ -91,7 +91,7 @@ const useScrollActions = (options: ScrollActionsOptions) => {
               scrollBelowBottomCountRef.current >= wheelCount
             ) {
               scrollBelowBottomCountRef.current = 0;
-              requestAnimationFrame(onScrollBelowBottom);
+              onScrollBelowBottom();
             }
           }
         }

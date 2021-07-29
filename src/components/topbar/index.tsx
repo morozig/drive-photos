@@ -146,7 +146,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
         </Box>
       }
       <Tooltip
-        title='First Image'
+        title='First Image (Home)'
       >
         <span>
           <IconButton
@@ -161,7 +161,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
         </span>
       </Tooltip>
       <Tooltip
-        title='Previous Image'
+        title='Previous Image (Left Arrow)'
       >
         <span>
           <IconButton
@@ -176,7 +176,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
         </span>
       </Tooltip>
       <Tooltip
-        title='Next Image'
+        title='Next Image (Right Arrow)'
       >
         <span>
           <IconButton
@@ -191,7 +191,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
         </span>
       </Tooltip>
       <Tooltip
-        title='Last Image'
+        title='Last Image (End)'
       >
         <span>
           <IconButton

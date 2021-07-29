@@ -247,6 +247,40 @@ const App: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'Home': {
+          onFirstImage();
+          break;
+        }
+        case 'ArrowLeft': {
+          onPrevImage();
+          break;
+        }
+        case 'ArrowRight': {
+          onNextImage();
+          break;
+        }
+        case 'End': {
+          onLastImage();
+          break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [
+    onFirstImage,
+    onPrevImage,
+    onNextImage,
+    onLastImage
+  ]);
+
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position='fixed' sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
