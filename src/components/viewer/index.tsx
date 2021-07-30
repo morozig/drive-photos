@@ -26,8 +26,11 @@ import FitBestIcon from '@material-ui/icons/CropDin';
 import FitWidthIcon from '@material-ui/icons/CropPortrait';
 import FitHeightIcon from '@material-ui/icons/CropLandscape';
 import FitOriginalIcon from '@material-ui/icons/CropOriginal';
+import StartSlideshowIcon from '@material-ui/icons/PlayArrow';
+import EndSlideshowIcon from '@material-ui/icons/Pause';
 
 const wheelCount = 3;
+const slideShowInterval = 5000;
 
 export interface ViewerRef {
   toggleFullscreen: () => void;
@@ -41,6 +44,9 @@ interface ViewerProps {
   onFitModeChange: (fitMode: FitMode) => void;
   sx?: SystemStyleObject;
   isScrollToBottom?: boolean;
+  isSlideshowEnabled?: boolean;
+  isSlideshowPlaying?: boolean;
+  onToggleSlideshowPlaying: () => void;
 };
 
 interface Point {
@@ -59,7 +65,10 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     onPrevImage,
     onFitModeChange,
     sx,
-    isScrollToBottom
+    isScrollToBottom,
+    isSlideshowEnabled,
+    isSlideshowPlaying,
+    onToggleSlideshowPlaying
   } = props;
 
   const [ contextMenu, setContextMenu ] = useState<Point | null>(null);
@@ -67,12 +76,25 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
   const {
     ref,
     scrollToTop,
-    scrollToBottom
+    scrollToBottom,
+    scrollNextSlide
   } = useScrollActions({
     wheelCount,
     onScrollOverTop: onPrevImage,
     onScrollBelowBottom: onNextImage
   });
+
+  useEffect(() => {
+    if (isSlideshowPlaying) {
+      const timer = setInterval(scrollNextSlide, slideShowInterval);
+      return () => {
+        clearInterval(timer);
+      };
+    }
+  }, [
+    isSlideshowPlaying,
+    scrollNextSlide
+  ]);
 
   const activeFileId = useMemo(() => {
     return (files.length > 0) ?
@@ -171,6 +193,13 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     onFitModeChange,
     onClose
   ]);
+  const onClickSlideshow = useCallback(() => {
+    onToggleSlideshowPlaying();
+    onClose();
+  }, [
+    onToggleSlideshowPlaying,
+    onClose
+  ]);
 
   return (
     <Box sx={{
@@ -257,6 +286,24 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
                 {isFullscreen ?
                   'Exit Fullscreen' :
                   'Enter Fullscreen'
+                }
+              </ListItemText>
+            </MenuItem>
+          }
+          {isSlideshowEnabled &&
+            <MenuItem
+              onClick={onClickSlideshow}
+            >
+              <ListItemIcon>
+                {isSlideshowPlaying ?
+                  <EndSlideshowIcon/> :
+                  <StartSlideshowIcon/>
+                }
+              </ListItemIcon>
+              <ListItemText>
+                {isSlideshowPlaying ?
+                  'End Slideshow' :
+                  'Start Slideshow'
                 }
               </ListItemText>
             </MenuItem>

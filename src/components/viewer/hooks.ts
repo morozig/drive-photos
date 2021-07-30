@@ -35,6 +35,21 @@ const useScrollActions = (options: ScrollActionsOptions) => {
     }
   }, []);
 
+  const scrollNextSlide = useCallback(() => {
+    if (ref.current) {
+      const div = ref.current;
+      const scrollHeight = div.scrollHeight - div.offsetHeight;
+      if (scrollTopRef.current >= scrollHeight && onScrollBelowBottom) {
+        onScrollBelowBottom();
+      } else {
+        const slideSize = Math.max(div.offsetHeight - 50, 50);
+        div.scroll(0, scrollTopRef.current + slideSize);
+      }
+    }
+  }, [
+    onScrollBelowBottom
+  ]);
+
   useEffect(() => {
     const scrollContainer = ref.current;
     if (!scrollContainer) {
@@ -109,7 +124,8 @@ const useScrollActions = (options: ScrollActionsOptions) => {
   return {
     ref,
     scrollToTop,
-    scrollToBottom
+    scrollToBottom,
+    scrollNextSlide
   };
 };
 

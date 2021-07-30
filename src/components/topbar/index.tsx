@@ -25,6 +25,8 @@ import FirstImageIcon from '@material-ui/icons/FirstPage';
 import LastImageIcon from '@material-ui/icons/LastPage';
 import PrevImageIcon from '@material-ui/icons/NavigateBefore';
 import NextImageIcon from '@material-ui/icons/NavigateNext';
+import StartSlideshowIcon from '@material-ui/icons/PlayArrow';
+import EndSlideshowIcon from '@material-ui/icons/Pause';
 import { FitMode } from '../../App';
 import { useFullScreen, useIsSignedIn } from '../../lib/hooks';
 import {
@@ -44,6 +46,9 @@ interface TopbarProps {
   isPrevImageEnabled?: boolean;
   isNextImageEnabled?: boolean;
   isLastImageEnabled?: boolean;
+  isSlideshowEnabled?: boolean;
+  isSlideshowPlaying?: boolean;
+  onToggleSlideshowPlaying: () => void;
   onFirstImage: () => void;
   onPrevImage: () => void;
   onNextImage: () => void;
@@ -63,6 +68,9 @@ const Topbar: React.FC<TopbarProps> = (props) => {
     isPrevImageEnabled,
     isNextImageEnabled,
     isLastImageEnabled,
+    isSlideshowEnabled,
+    isSlideshowPlaying,
+    onToggleSlideshowPlaying,
     onFirstImage,
     onPrevImage,
     onNextImage,
@@ -172,6 +180,27 @@ const Topbar: React.FC<TopbarProps> = (props) => {
             onClick={onPrevImage}
           >
             <PrevImageIcon/>
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip
+        title={isSlideshowPlaying ?
+          'End Slideshow (Space)' :
+          'Start Slideshow (Space)'
+        }
+      >
+        <span>
+          <IconButton
+            size='large'
+            color='inherit'
+            aria-label='next-image'
+            disabled={!isSlideshowEnabled}
+            onClick={onToggleSlideshowPlaying}
+          >
+            {isSlideshowPlaying ?
+              <EndSlideshowIcon/> :
+              <StartSlideshowIcon/>
+            }
           </IconButton>
         </span>
       </Tooltip>

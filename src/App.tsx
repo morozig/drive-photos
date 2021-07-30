@@ -34,6 +34,7 @@ const App: React.FC = () => {
   const [ fileId, setFileId ] = useState('');
   const [ isScrollToBottom, setIsScrollToBottom ] = useState(false);
   const [ title, setTitle ] = useState(defaultTitle);
+  const [ isSlideshowPlaying, setSlideshowPlaying ] = useState(false);
   const [
     visibleThumbnails,
     setVisibleThumbnails
@@ -132,6 +133,11 @@ const App: React.FC = () => {
     activeIndex,
     files.length
   ]);
+  const isSlideshowEnabled = useMemo(() => {
+    return isNextImageEnabled;
+  }, [
+    isNextImageEnabled
+  ]);
 
   const onFirstImage = useCallback(() => {
     const newIndex = 0;
@@ -142,7 +148,6 @@ const App: React.FC = () => {
   }, [
     files
   ]);
-
   const onPrevImage = useCallback(() => {
     const newIndex = activeIndex - 1;
     if (files[newIndex]) {
@@ -161,7 +166,6 @@ const App: React.FC = () => {
     prevDirId,
     prevDirFileId
   ]);
-
   const onNextImage = useCallback(() => {
     const newIndex = activeIndex + 1;
     if (files[newIndex]) {
@@ -180,7 +184,6 @@ const App: React.FC = () => {
     nextDirId,
     nextDirFileId
   ]);
-
   const onLastImage = useCallback(() => {
     const newIndex = files.length - 1;
     if (files[newIndex]) {
@@ -194,6 +197,18 @@ const App: React.FC = () => {
   const onSelect = useCallback((fileId: string) => {
     setFileId(fileId);
     setIsScrollToBottom(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isSlideshowEnabled && isSlideshowPlaying) {
+      setSlideshowPlaying(false);
+    }
+  }, [
+    isSlideshowEnabled,
+    isSlideshowPlaying
+  ]);
+  const onToggleSlideshowPlaying = useCallback(() => {
+    setSlideshowPlaying(current => !current);
   }, []);
 
   const viewFiles = useMemo(() => {
@@ -266,6 +281,10 @@ const App: React.FC = () => {
           onLastImage();
           break;
         }
+        case ' ': {
+          onToggleSlideshowPlaying();
+          break;
+        }
       }
     };
 
@@ -278,7 +297,8 @@ const App: React.FC = () => {
     onFirstImage,
     onPrevImage,
     onNextImage,
-    onLastImage
+    onLastImage,
+    onToggleSlideshowPlaying
   ]);
 
   return (
@@ -296,6 +316,9 @@ const App: React.FC = () => {
           isPrevImageEnabled={isPrevImageEnabled}
           isNextImageEnabled={isNextImageEnabled}
           isLastImageEnabled={isLastImageEnabled}
+          isSlideshowEnabled={isSlideshowEnabled}
+          isSlideshowPlaying={isSlideshowPlaying}
+          onToggleSlideshowPlaying={onToggleSlideshowPlaying}
           onFirstImage={onFirstImage}
           onPrevImage={onPrevImage}
           onNextImage={onNextImage}
@@ -341,6 +364,9 @@ const App: React.FC = () => {
             onNextImage={onNextImage}
             onFitModeChange={setFitMode}
             isScrollToBottom={isScrollToBottom}
+            isSlideshowEnabled={isSlideshowEnabled}
+            isSlideshowPlaying={isSlideshowPlaying}
+            onToggleSlideshowPlaying={onToggleSlideshowPlaying}
             sx={{
               flexGrow: 1
             }}
