@@ -11,7 +11,7 @@ import {
   Toolbar,
   Drawer
 } from '@material-ui/core';
-import { useDrive } from './lib/hooks';
+import { useDrive, useRecentFiles } from './lib/hooks';
 import Thumbnails from './components/thumbnails';
 import Viewer, { ViewerRef } from './components/viewer';
 import Topbar from './components/topbar';
@@ -42,6 +42,7 @@ const App: React.FC = () => {
 
   const {
     files,
+    directoryId,
     directoryName,
     prevDirId,
     prevDirFileId,
@@ -49,10 +50,19 @@ const App: React.FC = () => {
     nextDirFileId
   } = useDrive(parentId);
 
+  const {
+    recentFiles,
+    replace,
+    shift,
+    clear
+  } = useRecentFiles();
+  const fileJustOpenedRef = useRef(false);
+
   const onOpenFile = useCallback((file: any) => {
     setFileId(file.id);
     setParentId(file.parentId);
     setIsScrollToBottom(false);
+    fileJustOpenedRef.current = true;
   }, []);
 
   const activeIndex = useMemo(() => {
@@ -75,10 +85,26 @@ const App: React.FC = () => {
       `${title} | ${defaultTitle}` : defaultTitle;
     setTitle(title || defaultTitle);
     document.title = documentTitle;
+    if (activeFile && directoryId && title) {
+      const recentFile = {
+        id: activeFile.id,
+        parentId: directoryId,
+        title
+      };
+      if (fileJustOpenedRef.current) {
+        shift(recentFile);
+        fileJustOpenedRef.current = false;
+      } else {
+        replace(recentFile);
+      }
+    }
   }, [
     activeIndex,
+    directoryId,
     directoryName,
-    files
+    files,
+    replace,
+    shift
   ]);
 
   const counterTitle = useMemo(() => {
@@ -198,7 +224,6 @@ const App: React.FC = () => {
     setFileId(fileId);
     setIsScrollToBottom(false);
   }, []);
-
   useEffect(() => {
     if (!isSlideshowEnabled && isSlideshowPlaying) {
       setSlideshowPlaying(false);
@@ -210,6 +235,19 @@ const App: React.FC = () => {
   const onToggleSlideshowPlaying = useCallback(() => {
     setSlideshowPlaying(current => !current);
   }, []);
+  const onCloseFile = useCallback(() => {
+    setFileId('');
+    setParentId('');
+    setIsScrollToBottom(false);
+  }, []);
+  const onSignOut = useCallback(() => {
+    onCloseFile();
+    clear();
+    localStorage.clear();
+  }, [
+    onCloseFile,
+    clear
+  ]);
 
   const viewFiles = useMemo(() => {
     if (activeIndex < 0 || files.length <= 0) {
@@ -323,6 +361,9 @@ const App: React.FC = () => {
           onPrevImage={onPrevImage}
           onNextImage={onNextImage}
           onLastImage={onLastImage}
+          recentFiles={recentFiles}
+          onSignOut={onSignOut}
+          onCloseFile={onCloseFile}
         />
       </AppBar>
       <Drawer

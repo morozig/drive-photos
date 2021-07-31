@@ -18,6 +18,9 @@ import {
 } from './api';
 import Screenfull from './screenfull';
 
+const localStorageKey = 'recent';
+const recentLength = 10;
+
 const useAbortSignal = () => {
   const abortControllerRef = useRef(new AbortController());
 
@@ -31,7 +34,7 @@ const useAbortSignal = () => {
   return abortControllerRef.current.signal;
 };
 
-const useIsSignedIn = () => {
+const useIsSignedIn = (onSignOut: () => void) => {
   const [ signedIn, setSignedIn ] = useState(isSignedIn());
   
   useEffect(() => {
@@ -43,10 +46,12 @@ const useIsSignedIn = () => {
     if (!signedIn) {
       signIn();
     } else {
+      onSignOut();
       signOut();
     }
   }, [
-    signedIn
+    signedIn,
+    onSignOut
   ]);
 
   return {
@@ -283,6 +288,11 @@ const useDrive = (parentId?: string) => {
     parentId,
     directories
   ]);
+  const directoryId = useMemo(() => {
+    return directory ? (directory.id as string || '') : '';
+  }, [
+    directory
+  ]);
   const directoryName = useMemo(() => {
     return directory ? (directory.name as string || '') : '';
   }, [
@@ -303,6 +313,7 @@ const useDrive = (parentId?: string) => {
 
   return {
     files,
+    directoryId,
     directoryName,
     prevDirId,
     prevDirFileId,
@@ -311,11 +322,72 @@ const useDrive = (parentId?: string) => {
   }
 };
 
+
+export interface RecentFile {
+  id: string;
+  parentId: string;
+  title: string;
+};
+
+const useRecentFiles = () => {
+  const [ recentFiles, setRecentFiles ] = useState<RecentFile[]>([]);
+  const recentJsonRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const recentJson = localStorage.getItem(localStorageKey);
+    recentJsonRef.current = recentJson;
+
+    if (recentJson) {
+      setRecentFiles(JSON.parse(recentJson));
+    }
+  }, []);
+
+  const replace = useCallback((file: RecentFile) => {
+    setRecentFiles(
+      current => [file].concat(current.slice(1))
+    );
+  }, []);
+  const shift = useCallback((file: RecentFile) => {
+    setRecentFiles(
+      current => [file].concat(current.slice(0, recentLength - 1))
+    );
+  }, []);
+  const clear = useCallback(() => {
+    setRecentFiles([]);
+  }, []);
+
+  useEffect(() => {
+    if (recentFiles.length > 0) {
+      const recentJson = JSON.stringify(recentFiles);
+  
+      if (recentJson !== recentJsonRef.current) {
+        localStorage.setItem(localStorageKey, recentJson);
+        recentJsonRef.current = recentJson;
+      }
+    } else {
+      if (localStorage.getItem(localStorageKey)) {
+        localStorage.removeItem(localStorageKey);
+        recentJsonRef.current = null
+      }
+    }
+  }, [
+    recentFiles
+  ]);
+
+  return {
+    recentFiles,
+    replace,
+    shift,
+    clear
+  };
+};
+
 export {
   useAbortSignal,
   useIsSignedIn,
   useFiles,
   useDirectory,
   useFullScreen,
-  useDrive
+  useDrive,
+  useRecentFiles
 };

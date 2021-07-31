@@ -28,7 +28,7 @@ import NextImageIcon from '@material-ui/icons/NavigateNext';
 import StartSlideshowIcon from '@material-ui/icons/PlayArrow';
 import EndSlideshowIcon from '@material-ui/icons/Pause';
 import { FitMode } from '../../App';
-import { useFullScreen, useIsSignedIn } from '../../lib/hooks';
+import { RecentFile, useFullScreen, useIsSignedIn } from '../../lib/hooks';
 import {
   pickFile
 } from '../../lib/api';
@@ -53,6 +53,9 @@ interface TopbarProps {
   onPrevImage: () => void;
   onNextImage: () => void;
   onLastImage: () => void;
+  recentFiles: RecentFile[];
+  onSignOut: () => void;
+  onCloseFile: () => void;
 };
 
 const Topbar: React.FC<TopbarProps> = (props) => {
@@ -74,10 +77,15 @@ const Topbar: React.FC<TopbarProps> = (props) => {
     onFirstImage,
     onPrevImage,
     onNextImage,
-    onLastImage
+    onLastImage,
+    recentFiles,
+    onSignOut,
+    onCloseFile
   } = props;
   const [ isMenuOpen, setMenuOpen ] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
+  const [ isRecentMenuOpen, setRecentMenuOpen ] = useState(false);
+  const recentMenuRef = useRef<HTMLLIElement>(null);
   const {
     isEnabled: isFullscreenEnabled,
     isFullscreen
@@ -86,7 +94,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
   const {
     isSignedIn,
     toggleSignedIn
-  } = useIsSignedIn();
+  } = useIsSignedIn(onSignOut);
 
   const handleMenuClose = useCallback(() => {
     setMenuOpen(false);
@@ -95,12 +103,29 @@ const Topbar: React.FC<TopbarProps> = (props) => {
     setMenuOpen(current => !current);
   }, []);
   const onOpenClick = useCallback(async () => {
-    setMenuOpen(false);
+    handleMenuClose();
     const doc = await pickFile();
     if (doc) {
       onOpenFile(doc);
     }
   }, [
+    handleMenuClose,
+    onOpenFile
+  ]);
+
+  const handleRecentMenuClose = useCallback(() => {
+    setRecentMenuOpen(false);
+  }, []);
+  const handleRecentMenuClick = useCallback(() => {
+    setRecentMenuOpen(current => !current);
+  }, []);
+  const onRecentFileClick = useCallback((recentFile: RecentFile) => {
+    handleRecentMenuClose();
+    handleMenuClose();
+    onOpenFile(recentFile);
+  }, [
+    handleRecentMenuClose,
+    handleMenuClose,
     onOpenFile
   ]);
 
@@ -131,10 +156,52 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           {'Open File'}
         </MenuItem>
         <MenuItem
+          onClick={handleRecentMenuClick}
+          disabled={recentFiles.length === 0}
+          ref={recentMenuRef}
+        >
+          {'Recent Files'}
+        </MenuItem>
+        {fullscreenButtonActive ?
+          <MenuItem
+            onClick={onCloseFile}
+          >
+            {'Close File'}
+          </MenuItem> :
+          null
+        }
+        <MenuItem
           onClick={toggleSignedIn}
         >
           {isSignedIn ? 'Sign Out' : 'Sign In'}
         </MenuItem>
+      </Menu>
+      <Menu
+        anchorEl={recentMenuRef.current}
+        open={isRecentMenuOpen}
+        onClose={handleRecentMenuClose}
+        PaperProps={{
+          sx: {
+            maxWidth: '400px'
+          }
+        }}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+      >
+        {recentFiles.map((recentFile, i) => (
+          <MenuItem
+            key={i}
+            onClick={() => onRecentFileClick(recentFile)}
+          >
+            <Typography
+              noWrap
+            >
+              {recentFile.title}
+            </Typography>
+          </MenuItem>
+        ))}
       </Menu>
       <TitleTooltip
         text={title}
