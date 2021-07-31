@@ -235,6 +235,22 @@ const App: React.FC = () => {
   const onToggleSlideshowPlaying = useCallback(() => {
     setSlideshowPlaying(current => !current);
   }, []);
+  const onDownloadFile = useCallback(() => {
+    const activeFile = files[activeIndex];
+    if (activeFile) {
+      const name = activeFile.name;
+      const url = activeFile.webContentLink;
+      const a = document.createElement('a');
+      a.download = name;
+      a.href = url;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  }, [
+    activeIndex,
+    files
+  ]);
   const onCloseFile = useCallback(() => {
     setFileId('');
     setParentId('');
@@ -362,8 +378,9 @@ const App: React.FC = () => {
           onNextImage={onNextImage}
           onLastImage={onLastImage}
           recentFiles={recentFiles}
-          onSignOut={onSignOut}
+          onDownloadFile={onDownloadFile}
           onCloseFile={onCloseFile}
+          onSignOut={onSignOut}
         />
       </AppBar>
       <Drawer

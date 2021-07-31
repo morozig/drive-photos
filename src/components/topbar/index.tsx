@@ -13,6 +13,8 @@ import {
   ToggleButtonGroup,
   Tooltip,
   ToggleButton,
+  ListItemIcon,
+  ListItemText,
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import FitBestIcon from '@material-ui/icons/CropDin';
@@ -27,6 +29,10 @@ import PrevImageIcon from '@material-ui/icons/NavigateBefore';
 import NextImageIcon from '@material-ui/icons/NavigateNext';
 import StartSlideshowIcon from '@material-ui/icons/PlayArrow';
 import EndSlideshowIcon from '@material-ui/icons/Pause';
+import OpenFileIcon from '@material-ui/icons/InsertDriveFile';
+import RecentFilesIcon from '@material-ui/icons/History';
+import DownloadFileIcon from '@material-ui/icons/FileDownload';
+import CloseFileIcon from '@material-ui/icons/Close';
 import { FitMode } from '../../App';
 import { RecentFile, useFullScreen, useIsSignedIn } from '../../lib/hooks';
 import {
@@ -54,8 +60,9 @@ interface TopbarProps {
   onNextImage: () => void;
   onLastImage: () => void;
   recentFiles: RecentFile[];
-  onSignOut: () => void;
+  onDownloadFile: () => void;
   onCloseFile: () => void;
+  onSignOut: () => void;
 };
 
 const Topbar: React.FC<TopbarProps> = (props) => {
@@ -79,8 +86,9 @@ const Topbar: React.FC<TopbarProps> = (props) => {
     onNextImage,
     onLastImage,
     recentFiles,
-    onSignOut,
-    onCloseFile
+    onDownloadFile,
+    onCloseFile,
+    onSignOut
   } = props;
   const [ isMenuOpen, setMenuOpen ] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
@@ -112,7 +120,20 @@ const Topbar: React.FC<TopbarProps> = (props) => {
     handleMenuClose,
     onOpenFile
   ]);
-
+  const onDownloadClick = useCallback(() => {
+    onDownloadFile();
+    handleMenuClose();
+  }, [
+    handleMenuClose,
+    onDownloadFile
+  ]);
+  const onCloseClick = useCallback(() => {
+    onCloseFile();
+    handleMenuClose();
+  }, [
+    onCloseFile,
+    handleMenuClose
+  ]);
   const handleRecentMenuClose = useCallback(() => {
     setRecentMenuOpen(false);
   }, []);
@@ -153,20 +174,48 @@ const Topbar: React.FC<TopbarProps> = (props) => {
         <MenuItem
           onClick={onOpenClick}
         >
-          {'Open File'}
+          <ListItemIcon>
+            <OpenFileIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Open File'}
+          </ListItemText>
         </MenuItem>
         <MenuItem
           onClick={handleRecentMenuClick}
           disabled={recentFiles.length === 0}
           ref={recentMenuRef}
         >
-          {'Recent Files'}
+          <ListItemIcon>
+            <RecentFilesIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Recent Files'}
+          </ListItemText>
         </MenuItem>
         {fullscreenButtonActive ?
           <MenuItem
-            onClick={onCloseFile}
+            onClick={onDownloadClick}
           >
-            {'Close File'}
+            <ListItemIcon>
+              <DownloadFileIcon/>
+            </ListItemIcon>
+            <ListItemText>
+              {'Download File'}
+            </ListItemText>
+          </MenuItem> :
+          null
+        }
+        {fullscreenButtonActive ?
+          <MenuItem
+            onClick={onCloseClick}
+          >
+            <ListItemIcon>
+              <CloseFileIcon/>
+            </ListItemIcon>
+            <ListItemText>
+              {'Close File'}
+            </ListItemText>
           </MenuItem> :
           null
         }
