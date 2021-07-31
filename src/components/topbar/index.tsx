@@ -33,6 +33,9 @@ import OpenFileIcon from '@material-ui/icons/InsertDriveFile';
 import RecentFilesIcon from '@material-ui/icons/History';
 import DownloadFileIcon from '@material-ui/icons/FileDownload';
 import CloseFileIcon from '@material-ui/icons/Close';
+import HelpIcon from '@material-ui/icons/HelpOutline';
+import PolicyIcon from '@material-ui/icons/Policy';
+import TermsIcon from '@material-ui/icons/Gavel';
 import { FitMode } from '../../App';
 import { RecentFile, useFullScreen, useIsSignedIn } from '../../lib/hooks';
 import {
@@ -94,6 +97,8 @@ const Topbar: React.FC<TopbarProps> = (props) => {
   const menuRef = useRef<HTMLButtonElement>(null);
   const [ isRecentMenuOpen, setRecentMenuOpen ] = useState(false);
   const recentMenuRef = useRef<HTMLLIElement>(null);
+  const [ isHelpMenuOpen, setHelpMenuOpen ] = useState(false);
+  const helpMenuRef = useRef<HTMLButtonElement>(null);
   const {
     isEnabled: isFullscreenEnabled,
     isFullscreen
@@ -149,6 +154,12 @@ const Topbar: React.FC<TopbarProps> = (props) => {
     handleMenuClose,
     onOpenFile
   ]);
+  const handleHelpMenuClose = useCallback(() => {
+    setHelpMenuOpen(false);
+  }, []);
+  const handleHelpMenuClick = useCallback(() => {
+    setHelpMenuOpen(current => !current);
+  }, []);
 
   return (
     <Toolbar>
@@ -462,7 +473,6 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           <span>
             <IconButton
               size='large'
-              edge='end'
               color='inherit'
               aria-label='fullscreen'
               disabled={!fullscreenButtonActive}
@@ -476,6 +486,50 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           </span>
         </Tooltip>
       }
+      <Tooltip
+        title='Terms And Conditions'
+      >
+        <IconButton
+          size='large'
+          color='inherit'
+          aria-label='terms-and-policy'
+          ref={helpMenuRef}
+          onClick={handleHelpMenuClick}
+        >
+          <HelpIcon/>
+        </IconButton>
+      </Tooltip>
+      <Menu
+        anchorEl={helpMenuRef.current}
+        open={isHelpMenuOpen}
+        onClose={handleHelpMenuClose}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem
+          component='a'
+          href={`${process.env.PUBLIC_URL}policy.html`}
+        >
+          <ListItemIcon>
+            <PolicyIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Privacy Policy'}
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          component='a'
+          href={`${process.env.PUBLIC_URL}terms.html`}
+        >
+          <ListItemIcon>
+            <TermsIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Terms And Conditions'}
+          </ListItemText>
+        </MenuItem>
+      </Menu>
     </Toolbar>
   );
 };
