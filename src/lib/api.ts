@@ -13,6 +13,7 @@ const clientId = '321539141956-kn4i96a10682t0l8agfo5158fln9ai5d.apps.googleuserc
 
 const gapi = (window as any).gapi;
 const signedInObservable = new Observable<boolean>();
+const gapiErrorsObservable = new Observable<any>();
 let GoogleAuth: any
 let google: any;
 const gapiReadyObservable = new Observable<void>();
@@ -49,6 +50,7 @@ const onGapiLoaded = async () => {
   }
   catch (err) {
     console.log(err);
+    gapiErrorsObservable.push(err);
   }
 };
 
@@ -83,9 +85,9 @@ const isSignedIn = () => {
   return !!GoogleAuth &&
     GoogleAuth.isSignedIn.get() as boolean;
 };
-export type signedInChangeHandler = (isSignedIn: boolean) => void;
+export type SignedInChangeHandler = (isSignedIn: boolean) => void;
 
-const subscribeToSignedInChange = (onChange: signedInChangeHandler) => {
+const subscribeToSignedInChange = (onChange: SignedInChangeHandler) => {
   signedInObservable.subscribe(onChange);
   return () => signedInObservable.unsubscribe(onChange);
 };
@@ -240,6 +242,21 @@ const listDirectories = async (grandParentId: string) => {
   }
 };
 
+const getProfile = () => {
+  const user = GoogleAuth.currentUser.get();
+  const profile = user.getBasicProfile();
+  const imageUrl = profile.getImageUrl();
+  return {
+    imageUrl
+  };
+};
+
+export type GapiErrorHandler = (error: any) => void;
+const subscribeToGapiErrors = (onError: GapiErrorHandler) => {
+  gapiErrorsObservable.subscribe(onError);
+  return () => gapiErrorsObservable.unsubscribe(onError);
+};
+
 gapi.load('client:auth2:picker', onGapiLoaded);
 
 export {
@@ -252,5 +269,7 @@ export {
   listFiles,
   getParent,
   getEdgeFiles,
-  listDirectories
+  listDirectories,
+  getProfile,
+  subscribeToGapiErrors
 };

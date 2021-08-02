@@ -9,11 +9,13 @@ import {
   DirectoryEdge,
   getEdgeFiles,
   getParent,
+  getProfile,
   isSignedIn,
   listDirectories,
   listFiles,
   signIn,
   signOut,
+  subscribeToGapiErrors,
   subscribeToSignedInChange
 } from './api';
 import Screenfull from './screenfull';
@@ -36,9 +38,16 @@ const useAbortSignal = () => {
 
 const useIsSignedIn = (onSignOut: () => void) => {
   const [ signedIn, setSignedIn ] = useState(isSignedIn());
+  const [ profile, setProfile ] = useState<any | null>(null);
+  const [ gapiError, setGapiError ] = useState<any | null>(null);
+  const [ isCookiesError, setCookiesError ] = useState(false);
   
   useEffect(() => {
     return subscribeToSignedInChange(setSignedIn);
+  }, []);
+
+  useEffect(() => {
+    return subscribeToGapiErrors(setGapiError);
   }, []);
 
   const toggleSignedIn = useCallback(() => {
@@ -54,9 +63,34 @@ const useIsSignedIn = (onSignOut: () => void) => {
     onSignOut
   ]);
 
+  useEffect(() => {
+    if (signedIn) {
+      const profile = getProfile();
+      setProfile(profile);
+    } else {
+      setProfile(null);
+    }
+  }, [
+    signedIn
+  ]);
+
+  useEffect(() => {
+    if (gapiError && gapiError.details &&
+      gapiError.details === 'Cookies are not enabled in current environment.'
+    ) {
+      setCookiesError(true);
+    } else {
+      setCookiesError(false);
+    }
+  }, [
+    gapiError
+  ]);
+
   return {
     isSignedIn: signedIn,
-    toggleSignedIn
+    toggleSignedIn,
+    profile,
+    isCookiesError
   };
 };
 

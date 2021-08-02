@@ -15,6 +15,7 @@ import {
   ToggleButton,
   ListItemIcon,
   ListItemText,
+  Avatar,
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import FitBestIcon from '@material-ui/icons/CropDin';
@@ -36,6 +37,9 @@ import CloseFileIcon from '@material-ui/icons/Close';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import PolicyIcon from '@material-ui/icons/Policy';
 import TermsIcon from '@material-ui/icons/Gavel';
+import SignOutIcon from '@material-ui/icons/Logout';
+import GoogleIcon from './GoogleIcon';
+import CookiesErrorIcon from '@material-ui/icons/VisibilityOff';
 import { FitMode } from '../../App';
 import { RecentFile, useFullScreen, useIsSignedIn } from '../../lib/hooks';
 import {
@@ -99,6 +103,8 @@ const Topbar: React.FC<TopbarProps> = (props) => {
   const recentMenuRef = useRef<HTMLLIElement>(null);
   const [ isHelpMenuOpen, setHelpMenuOpen ] = useState(false);
   const helpMenuRef = useRef<HTMLButtonElement>(null);
+  const [ isProfileMenuOpen, setProfileMenuOpen ] = useState(false);
+  const profileMenuRef = useRef<HTMLButtonElement>(null);
   const {
     isEnabled: isFullscreenEnabled,
     isFullscreen
@@ -106,7 +112,9 @@ const Topbar: React.FC<TopbarProps> = (props) => {
 
   const {
     isSignedIn,
-    toggleSignedIn
+    toggleSignedIn,
+    profile,
+    isCookiesError
   } = useIsSignedIn(onSignOut);
 
   const handleMenuClose = useCallback(() => {
@@ -160,6 +168,19 @@ const Topbar: React.FC<TopbarProps> = (props) => {
   const handleHelpMenuClick = useCallback(() => {
     setHelpMenuOpen(current => !current);
   }, []);
+  const handleProfileMenuClose = useCallback(() => {
+    setProfileMenuOpen(false);
+  }, []);
+  const handleProfileMenuClick = useCallback(() => {
+    setProfileMenuOpen(current => !current);
+  }, []);
+  const onSignOutClick = useCallback(() => {
+    handleProfileMenuClose();
+    toggleSignedIn();
+  }, [
+    handleProfileMenuClose,
+    toggleSignedIn
+  ]);
 
   return (
     <Toolbar>
@@ -182,29 +203,45 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem
-          onClick={onOpenClick}
-        >
-          <ListItemIcon>
-            <OpenFileIcon/>
-          </ListItemIcon>
-          <ListItemText>
-            {'Open File'}
-          </ListItemText>
-        </MenuItem>
-        <MenuItem
-          onClick={handleRecentMenuClick}
-          disabled={recentFiles.length === 0}
-          ref={recentMenuRef}
-        >
-          <ListItemIcon>
-            <RecentFilesIcon/>
-          </ListItemIcon>
-          <ListItemText>
-            {'Recent Files'}
-          </ListItemText>
-        </MenuItem>
-        {fullscreenButtonActive ?
+        {!isSignedIn &&
+          <MenuItem
+            onClick={toggleSignedIn}
+          >
+            <ListItemIcon>
+              <GoogleIcon/>
+            </ListItemIcon>
+            <ListItemText>
+              {'Sign in with Google'}
+            </ListItemText>
+          </MenuItem>
+        }
+        {isSignedIn &&
+          <MenuItem
+            onClick={onOpenClick}
+          >
+            <ListItemIcon>
+              <OpenFileIcon/>
+            </ListItemIcon>
+            <ListItemText>
+              {'Open File'}
+            </ListItemText>
+          </MenuItem>
+        }
+        {isSignedIn &&
+          <MenuItem
+            onClick={handleRecentMenuClick}
+            disabled={recentFiles.length === 0}
+            ref={recentMenuRef}
+          >
+            <ListItemIcon>
+              <RecentFilesIcon/>
+            </ListItemIcon>
+            <ListItemText>
+              {'Recent Files'}
+            </ListItemText>
+          </MenuItem>
+        }
+        {fullscreenButtonActive &&
           <MenuItem
             onClick={onDownloadClick}
           >
@@ -214,10 +251,9 @@ const Topbar: React.FC<TopbarProps> = (props) => {
             <ListItemText>
               {'Download File'}
             </ListItemText>
-          </MenuItem> :
-          null
+          </MenuItem>
         }
-        {fullscreenButtonActive ?
+        {fullscreenButtonActive &&
           <MenuItem
             onClick={onCloseClick}
           >
@@ -227,14 +263,8 @@ const Topbar: React.FC<TopbarProps> = (props) => {
             <ListItemText>
               {'Close File'}
             </ListItemText>
-          </MenuItem> :
-          null
+          </MenuItem>
         }
-        <MenuItem
-          onClick={toggleSignedIn}
-        >
-          {isSignedIn ? 'Sign Out' : 'Sign In'}
-        </MenuItem>
       </Menu>
       <Menu
         anchorEl={recentMenuRef.current}
@@ -480,7 +510,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
             >
               {isFullscreen ?
                 <FullscreenExitIcon /> :
-                <FullscreenEnterIcon />
+                <FullscreenEnterIcon/>
               }
             </IconButton>
           </span>
@@ -493,6 +523,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           size='large'
           color='inherit'
           aria-label='terms-and-policy'
+          edge={isSignedIn ? undefined : 'end'}
           ref={helpMenuRef}
           onClick={handleHelpMenuClick}
         >
@@ -530,6 +561,60 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           </ListItemText>
         </MenuItem>
       </Menu>
+      {isSignedIn && profile &&
+        <IconButton
+          size='large'
+          edge='end'
+          color='inherit'
+          aria-label='terms-and-policy'
+          ref={profileMenuRef}
+          onClick={handleProfileMenuClick}
+          sx={{
+            p: '6px'
+          }}
+        >
+          <Avatar
+            src={profile.imageUrl}
+            sx={{
+              width: 32,
+              height: 32
+            }}
+          />
+        </IconButton>
+      }
+      <Menu
+        anchorEl={profileMenuRef.current}
+        open={isProfileMenuOpen}
+        onClose={handleProfileMenuClose}
+        MenuListProps={{
+          'aria-labelledby': 'basic-button',
+        }}
+      >
+        <MenuItem
+          onClick={onSignOutClick}
+        >
+          <ListItemIcon>
+            <SignOutIcon/> 
+          </ListItemIcon>
+          <ListItemText>
+            {'Sign Out'}
+          </ListItemText>
+        </MenuItem>
+      </Menu>
+      {!isSignedIn && isCookiesError &&
+        <Tooltip
+          title={`You need to enable 3rd party cookies.
+            Click "eye" icon at the end of address bar`}
+        >
+          <CookiesErrorIcon
+            color='error'
+            sx={{
+              ml: '12px',
+              mr: '-6px'
+            }}
+          />
+        </Tooltip>
+      }
     </Toolbar>
   );
 };
