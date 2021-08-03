@@ -219,7 +219,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
           overflow: 'auto',
           whiteSpace: 'nowrap',
           ...(files.length > 0 && {
-            bgcolor: 'grey.700'
+            bgcolor: 'common.black'
           })
         }}
         ref={ref}

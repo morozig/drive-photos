@@ -34,7 +34,7 @@ const Thumbnail: React.FC<ThumbnailProps> = (props: ThumbnailProps) => {
         position: 'relative',
         ...(isActive ?
           {
-            bgcolor: 'grey.700'
+            bgcolor: 'common.black'
           } :
           {
             border: '1px solid #dadce0'
