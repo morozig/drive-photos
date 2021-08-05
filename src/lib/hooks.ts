@@ -53,7 +53,7 @@ const useIsSignedIn = (onSignOut: () => void) => {
   }, []);
 
   const toggleSignedIn = useCallback(() => {
-    console.log('toggleSignedIn');
+    // console.log('toggleSignedIn');
     if (!signedIn) {
       signIn();
     } else {

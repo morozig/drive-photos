@@ -22,7 +22,7 @@ const pickObservable = new Observable<any>();
 const pickerReadyObservable = new Observable<void>();
 
 const onSignedInChanged = (isSignedIn: boolean) => {
-  console.log('onSignedInChanged', isSignedIn);
+  // console.log('onSignedInChanged', isSignedIn);
   signedInObservable.push(isSignedIn);
   if (isSignedIn) {
     createPicker();
@@ -43,7 +43,7 @@ const onGapiLoaded = async () => {
     });
     GoogleAuth = gapi.auth2.getAuthInstance();
     google = (window as any).google;
-    console.log(gapi.auth2, GoogleAuth, GoogleAuth.isSignedIn, google);
+    // console.log(gapi.auth2, GoogleAuth, GoogleAuth.isSignedIn, google);
     onSignedInChanged(GoogleAuth.isSignedIn.get());
     GoogleAuth.isSignedIn.listen(onSignedInChanged);
     gapiReadyObservable.push();
@@ -55,7 +55,7 @@ const onGapiLoaded = async () => {
 };
 
 const onPick = (e: any) => {
-  console.log('onPick', e);
+  // console.log('onPick', e);
   pickObservable.push(e);
 };
 
@@ -76,10 +76,10 @@ const createPicker = () => {
     .setDeveloperKey(apiKey)
     .setCallback(onPick)
     .build();
-  console.log({picker});
+  // console.log({picker});
 };
 
-console.log(gapi);
+// console.log(gapi);
 
 const isSignedIn = () => {
   return !!GoogleAuth &&
@@ -171,7 +171,7 @@ const listFiles = async (options: ListFilesOptions) => {
       orderBy: 'name',
       pageToken
     });
-    console.log({result});
+    // console.log({result});
     return result.result;
   }
   catch(err) {

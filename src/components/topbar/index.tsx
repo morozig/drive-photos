@@ -570,7 +570,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
         </Box>
       </Tooltip>
       <Tooltip
-        title='Next Image (Right Arrow)'
+        title='Next Image (Right Arrow, Scroll Below, Click)'
       >
         <Box>
           <IconButton
