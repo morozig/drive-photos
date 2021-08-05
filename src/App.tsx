@@ -9,9 +9,10 @@ import {
   AppBar,
   Box,
   Toolbar,
-  Drawer
+  Drawer,
+  SwipeableDrawer
 } from '@material-ui/core';
-import { useDrive, useRecentFiles } from './lib/hooks';
+import { useDrive, useIsSmallScreen, useRecentFiles } from './lib/hooks';
 import Thumbnails from './components/thumbnails';
 import Viewer, { ViewerRef } from './components/viewer';
 import Topbar from './components/topbar';
@@ -39,6 +40,13 @@ const App: React.FC = () => {
     visibleThumbnails,
     setVisibleThumbnails
   ] = useState<number[]>([]);
+  const [ isMobileDrawerOpen, setMobileDrawerOpen ] = useState(false);
+
+  const toggleMobileDrawer = useCallback(() => {
+    setMobileDrawerOpen(current => !current);
+  }, []);
+  const isSmallScreen = useIsSmallScreen();
+
 
   const {
     files,
@@ -381,32 +389,66 @@ const App: React.FC = () => {
           onDownloadFile={onDownloadFile}
           onCloseFile={onCloseFile}
           onSignOut={onSignOut}
+          isMobileDrawerOpen={isMobileDrawerOpen}
+          toggleMobileDrawer={toggleMobileDrawer}
         />
       </AppBar>
-      <Drawer
-        variant='permanent'
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
-            boxSizing: 'border-box'
-          },
-          display: 'flex',
-          flexDirection: 'column'
-        }}
-      >
-        <Toolbar />
-        <Thumbnails
-          files={files}
-          fileId={fileId}
-          onSelect={onSelect}
-          onVisibleFiles={setVisibleThumbnails}
+      {isSmallScreen ?
+        <SwipeableDrawer
+          anchor='left'
+          open={isMobileDrawerOpen}
+          onOpen={toggleMobileDrawer}
+          onClose={toggleMobileDrawer}
           sx={{
-            flexGrow: 1
+            width: drawerWidth,
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: drawerWidth,
+              boxSizing: 'border-box'
+            },
+            display: 'flex',
+            flexDirection: 'column'
           }}
-        />
-      </Drawer>
+          ModalProps={{
+            keepMounted: true,
+          }}
+        >
+          <Toolbar />
+          <Thumbnails
+            files={files}
+            fileId={fileId}
+            onSelect={onSelect}
+            onVisibleFiles={setVisibleThumbnails}
+            sx={{
+              flexGrow: 1
+            }}
+          />
+        </SwipeableDrawer> :
+        <Drawer
+          variant='permanent'
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            [`& .MuiDrawer-paper`]: {
+              width: drawerWidth,
+              boxSizing: 'border-box'
+            },
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
+          <Toolbar />
+          <Thumbnails
+            files={files}
+            fileId={fileId}
+            onSelect={onSelect}
+            onVisibleFiles={setVisibleThumbnails}
+            sx={{
+              flexGrow: 1
+            }}
+          />
+        </Drawer>
+      }
       <Box component='main' sx={{
         flexGrow: 1,
         height: '100vh',

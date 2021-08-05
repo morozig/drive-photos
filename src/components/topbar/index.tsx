@@ -16,6 +16,7 @@ import {
   ListItemIcon,
   ListItemText,
   Avatar,
+  Divider,
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import FitBestIcon from '@material-ui/icons/CropDin';
@@ -40,6 +41,8 @@ import TermsIcon from '@material-ui/icons/Gavel';
 import SignOutIcon from '@material-ui/icons/Logout';
 import GoogleIcon from './GoogleIcon';
 import CookiesErrorIcon from '@material-ui/icons/VisibilityOff';
+import HideDrawerIcon from '@material-ui/icons/ArrowLeft';
+import ShowDrawerIcon from '@material-ui/icons/ArrowRight';
 import { FitMode } from '../../App';
 import { RecentFile, useFullScreen, useIsSignedIn } from '../../lib/hooks';
 import {
@@ -70,6 +73,8 @@ interface TopbarProps {
   onDownloadFile: () => void;
   onCloseFile: () => void;
   onSignOut: () => void;
+  isMobileDrawerOpen: boolean;
+  toggleMobileDrawer: () => void;
 };
 
 const Topbar: React.FC<TopbarProps> = (props) => {
@@ -95,7 +100,9 @@ const Topbar: React.FC<TopbarProps> = (props) => {
     recentFiles,
     onDownloadFile,
     onCloseFile,
-    onSignOut
+    onSignOut,
+    isMobileDrawerOpen,
+    toggleMobileDrawer
   } = props;
   const [ isMenuOpen, setMenuOpen ] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
@@ -132,6 +139,13 @@ const Topbar: React.FC<TopbarProps> = (props) => {
   }, [
     handleMenuClose,
     onOpenFile
+  ]);
+  const onDrawerClick = useCallback(() => {
+    toggleMobileDrawer();
+    handleMenuClose();
+  }, [
+    toggleMobileDrawer,
+    handleMenuClose
   ]);
   const onDownloadClick = useCallback(() => {
     onDownloadFile();
@@ -199,10 +213,26 @@ const Topbar: React.FC<TopbarProps> = (props) => {
         anchorEl={menuRef.current}
         open={isMenuOpen}
         onClose={handleMenuClose}
-        MenuListProps={{
-          'aria-labelledby': 'basic-button',
-        }}
       >
+        <MenuItem
+          onClick={onDrawerClick}
+          sx={{
+            display: { xs: 'flex', md: 'none' }
+          }}
+        >
+          <ListItemIcon>
+            {isMobileDrawerOpen ?
+              <HideDrawerIcon/> :
+              <ShowDrawerIcon/>
+            }
+          </ListItemIcon>
+          <ListItemText>
+            {isMobileDrawerOpen ?
+              'Hide Thumbnails' :
+              'Show Thumbnails'
+            }
+          </ListItemText>
+        </MenuItem>
         {!isSignedIn &&
           <MenuItem
             onClick={toggleSignedIn}
@@ -265,6 +295,173 @@ const Topbar: React.FC<TopbarProps> = (props) => {
             </ListItemText>
           </MenuItem>
         }
+        <Divider
+          sx={{
+            display: { xs: 'flex', md: 'none' }
+          }}
+        />
+        <MenuItem
+          disabled={!fullscreenButtonActive}
+          onClick={() => {
+            onFirstImage();
+            handleMenuClose();
+          }}
+          sx={{
+            display: { xs: 'flex', md: 'none' }
+          }}
+        >
+          <ListItemIcon>
+            <FirstImageIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'First Image'}
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          disabled={!fullscreenButtonActive}
+          onClick={() => {
+            onToggleSlideshowPlaying();
+            handleMenuClose();
+          }}
+          sx={{
+            display: { xs: 'flex', md: 'none' }
+          }}
+        >
+          <ListItemIcon>
+            {isSlideshowPlaying ?
+              <EndSlideshowIcon/> :
+              <StartSlideshowIcon/>
+            }
+          </ListItemIcon>
+          <ListItemText>
+            {isSlideshowPlaying ?
+              'End Slideshow' :
+              'Start Slideshow'
+            }
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          disabled={!fullscreenButtonActive}
+          onClick={() => {
+            onLastImage();
+            handleMenuClose();
+          }}
+          sx={{
+            display: { xs: 'flex', md: 'none' }
+          }}
+        >
+          <ListItemIcon>
+            <LastImageIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Last Image'}
+          </ListItemText>
+        </MenuItem>
+        <Divider
+          sx={{
+            display: { xs: 'flex', md: 'none' }
+          }}
+        />
+        <MenuItem
+          onClick={() => {
+            onFitModeChange(FitMode.Best);
+            handleMenuClose();
+          }}
+          sx={{
+            display: { xs: 'flex', md: 'none' },
+            backgroundColor: fitMode === FitMode.Best ?
+              'rgba(0, 0, 0, 0.08)' : undefined
+          }}
+        >
+          <ListItemIcon>
+            <FitBestIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Best Fit'}
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            onFitModeChange(FitMode.Width);
+            handleMenuClose();
+          }}
+          sx={{
+            display: { xs: 'flex', md: 'none' },
+            backgroundColor: fitMode === FitMode.Width ?
+              'rgba(0, 0, 0, 0.08)' : undefined
+          }}
+        >
+          <ListItemIcon>
+            <FitWidthIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Fit Width'}
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            onFitModeChange(FitMode.Height);
+            handleMenuClose();
+          }}
+          sx={{
+            display: { xs: 'flex', md: 'none' },
+            backgroundColor: fitMode === FitMode.Height ?
+              'rgba(0, 0, 0, 0.08)' : undefined
+          }}
+        >
+          <ListItemIcon>
+            <FitHeightIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Fit Height'}
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            onFitModeChange(FitMode.Original);
+            handleMenuClose();
+          }}
+          sx={{
+            display: { xs: 'flex', md: 'none' },
+            backgroundColor: fitMode === FitMode.Original ?
+              'rgba(0, 0, 0, 0.08)' : undefined
+          }}
+        >
+          <ListItemIcon>
+            <FitOriginalIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Original Size'}
+          </ListItemText>
+        </MenuItem>
+        <Divider
+          sx={{
+            display: { xs: 'flex', md: 'none' }
+          }}
+        />
+        <MenuItem
+          disabled={!fullscreenButtonActive}
+          onClick={() => {
+            onToggleFullscreen();
+            handleMenuClose();
+          }}
+          sx={{
+            display: { xs: 'flex', md: 'none' }
+          }}
+        >
+          <ListItemIcon>
+            {isFullscreen ?
+              <FullscreenExitIcon /> :
+              <FullscreenEnterIcon/>
+            }
+          </ListItemIcon>
+          <ListItemText>
+            {isFullscreen ?
+              'Exit Fullscreen' :
+              'Enter Fullscreen'
+            }
+          </ListItemText>
+        </MenuItem>
       </Menu>
       <Menu
         anchorEl={recentMenuRef.current}
@@ -313,7 +510,11 @@ const Topbar: React.FC<TopbarProps> = (props) => {
       <Tooltip
         title='First Image (Home)'
       >
-        <span>
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'block' }
+          }}
+        >
           <IconButton
             size='large'
             color='inherit'
@@ -323,22 +524,25 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           >
             <FirstImageIcon/>
           </IconButton>
-        </span>
+        </Box>
       </Tooltip>
       <Tooltip
         title='Previous Image (Left Arrow)'
       >
-        <span>
+        <Box>
           <IconButton
             size='large'
             color='inherit'
             aria-label='prev-image'
             disabled={!isPrevImageEnabled}
             onClick={onPrevImage}
+            sx={{
+              p: { xs: '6px', md: '12px'}
+            }}
           >
             <PrevImageIcon/>
           </IconButton>
-        </span>
+        </Box>
       </Tooltip>
       <Tooltip
         title={isSlideshowPlaying ?
@@ -346,7 +550,11 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           'Start Slideshow (Space)'
         }
       >
-        <span>
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'block' }
+          }}
+        >
           <IconButton
             size='large'
             color='inherit'
@@ -359,27 +567,34 @@ const Topbar: React.FC<TopbarProps> = (props) => {
               <StartSlideshowIcon/>
             }
           </IconButton>
-        </span>
+        </Box>
       </Tooltip>
       <Tooltip
         title='Next Image (Right Arrow)'
       >
-        <span>
+        <Box>
           <IconButton
             size='large'
             color='inherit'
             aria-label='next-image'
             disabled={!isNextImageEnabled}
             onClick={onNextImage}
+            sx={{
+              p: { xs: '6px', md: '12px'}
+            }}
           >
             <NextImageIcon/>
           </IconButton>
-        </span>
+        </Box>
       </Tooltip>
       <Tooltip
         title='Last Image (End)'
       >
-        <span>
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'block' }
+          }}
+        >
           <IconButton
             size='large'
             color='inherit'
@@ -389,12 +604,15 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           >
             <LastImageIcon/>
           </IconButton>
-        </span>
+        </Box>
       </Tooltip>
       <ToggleButtonGroup
         value={fitMode}
         exclusive
         onChange={(e, value) => onFitModeChange(value)}
+        sx={{
+          display: { xs: 'none', md: 'block' }
+        }}
       >
         <ToggleButton
           value={FitMode.Best}
@@ -500,7 +718,11 @@ const Topbar: React.FC<TopbarProps> = (props) => {
             'Enter Fullscreen'
           }
         >
-          <span>
+          <Box
+            sx={{
+              display: { xs: 'none', md: 'block' }
+            }}
+          >
             <IconButton
               size='large'
               color='inherit'
@@ -513,7 +735,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
                 <FullscreenEnterIcon/>
               }
             </IconButton>
-          </span>
+          </Box>
         </Tooltip>
       }
       <Tooltip
@@ -526,6 +748,9 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           edge={isSignedIn ? undefined : 'end'}
           ref={helpMenuRef}
           onClick={handleHelpMenuClick}
+          sx={{
+            p: { xs: '6px', md: '12px'}
+          }}
         >
           <HelpIcon/>
         </IconButton>

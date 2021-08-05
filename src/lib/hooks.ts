@@ -19,6 +19,8 @@ import {
   subscribeToSignedInChange
 } from './api';
 import Screenfull from './screenfull';
+import { useTheme } from '@material-ui/core/styles';
+import { useMediaQuery } from '@material-ui/core';
 
 const localStorageKey = 'recent';
 const recentLength = 10;
@@ -416,6 +418,12 @@ const useRecentFiles = () => {
   };
 };
 
+const useIsSmallScreen = () => {
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+  return isSmallScreen;
+};
+
 export {
   useAbortSignal,
   useIsSignedIn,
@@ -423,5 +431,6 @@ export {
   useDirectory,
   useFullScreen,
   useDrive,
-  useRecentFiles
+  useRecentFiles,
+  useIsSmallScreen
 };
