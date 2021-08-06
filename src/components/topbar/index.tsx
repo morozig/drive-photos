@@ -765,7 +765,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
       >
         <MenuItem
           component='a'
-          href={`${process.env.PUBLIC_URL}/policy.html`}
+          href={`${process.env.PUBLIC_URL}/privacy.html`}
         >
           <ListItemIcon>
             <PolicyIcon/>
