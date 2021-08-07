@@ -1,5 +1,5 @@
 # Drive Photos
 
-[Open In Your Browser](https://morozig.github.io/drive-photos/)
+[drivephotos.co](https://drivephotos.co)
 
 *Work in progress...*
