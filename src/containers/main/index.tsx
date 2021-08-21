@@ -13,9 +13,9 @@ import {
   SwipeableDrawer
 } from '@material-ui/core';
 import { useDrive, useIsSmallScreen, useRecentFiles } from '../../lib/hooks';
-import Thumbnails from '../../components/thumbnails';
-import Viewer, { ViewerRef } from '../../components/viewer';
-import Topbar from '../../components/topbar';
+import Thumbnails from './components/thumbnails';
+import Viewer, { ViewerRef } from './components/viewer';
+import Topbar from './components/topbar';
 
 
 const drawerWidth = 260;

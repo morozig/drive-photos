@@ -1,12 +1,5 @@
 import React from 'react';
-import Main from './pages/main';
-
-export enum FitMode {
-  Best = 1,
-  Width,
-  Height,
-  Original
-}
+import Main from './containers/main';
 
 const App: React.FC = () => {
   return (

@@ -4,7 +4,7 @@ import {
   useRef,
   useCallback
 } from 'react';
-import { useAbortSignal } from '../../lib/hooks';
+import { useAbortSignal } from '../../../../lib/hooks';
 
 const useDebounce = <T>(value: T, delay: number) => {
   const [debouncedValue, setDebouncedValue] = useState(value);

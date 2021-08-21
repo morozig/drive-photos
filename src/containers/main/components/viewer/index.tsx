@@ -18,8 +18,8 @@ import {
   ListItemText
 } from '@material-ui/core';
 import { useScrollActions } from './hooks';
-import { FitMode } from '../../App';
-import { useFullScreen } from '../../lib/hooks';
+import { FitMode } from '../..';
+import { useFullScreen } from '../../../../lib/hooks';
 import FullscreenEnterIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import FitBestIcon from '@material-ui/icons/CropDin';

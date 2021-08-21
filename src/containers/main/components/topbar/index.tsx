@@ -43,11 +43,11 @@ import GoogleIcon from './GoogleIcon';
 import CookiesErrorIcon from '@material-ui/icons/VisibilityOff';
 import HideDrawerIcon from '@material-ui/icons/ArrowLeft';
 import ShowDrawerIcon from '@material-ui/icons/ArrowRight';
-import { FitMode } from '../../App';
-import { RecentFile, useFullScreen, useIsSignedIn } from '../../lib/hooks';
+import { FitMode } from '../..';
+import { RecentFile, useFullScreen, useIsSignedIn } from '../../../../lib/hooks';
 import {
   pickFile
-} from '../../lib/api';
+} from '../../../../lib/api';
 import TitleTooltip from './TitleTooltip';
 
 interface TopbarProps {
