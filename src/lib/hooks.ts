@@ -22,7 +22,8 @@ import Screenfull from './screenfull';
 import { useTheme } from '@material-ui/core/styles';
 import { useMediaQuery } from '@material-ui/core';
 
-const localStorageKey = 'recent';
+const recentLocalStorageKey = 'recent';
+const hadSignedInLocalStorageKey = 'hadSignedIn';
 const recentLength = 10;
 
 const useAbortSignal = () => {
@@ -38,7 +39,7 @@ const useAbortSignal = () => {
   return abortControllerRef.current.signal;
 };
 
-const useIsSignedIn = (onSignOut: () => void) => {
+const useIsSignedIn = (onSignOut?: () => void) => {
   const [ signedIn, setSignedIn ] = useState(isSignedIn());
   const [ profile, setProfile ] = useState<any | null>(null);
   const [ gapiError, setGapiError ] = useState<any | null>(null);
@@ -57,7 +58,9 @@ const useIsSignedIn = (onSignOut: () => void) => {
     if (!signedIn) {
       signIn();
     } else {
-      onSignOut();
+      if (onSignOut) {
+        onSignOut();
+      }
       signOut();
     }
   }, [
@@ -370,7 +373,7 @@ const useRecentFiles = () => {
   const recentJsonRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const recentJson = localStorage.getItem(localStorageKey);
+    const recentJson = localStorage.getItem(recentLocalStorageKey);
     recentJsonRef.current = recentJson;
 
     if (recentJson) {
@@ -397,12 +400,12 @@ const useRecentFiles = () => {
       const recentJson = JSON.stringify(recentFiles);
   
       if (recentJson !== recentJsonRef.current) {
-        localStorage.setItem(localStorageKey, recentJson);
+        localStorage.setItem(recentLocalStorageKey, recentJson);
         recentJsonRef.current = recentJson;
       }
     } else {
-      if (localStorage.getItem(localStorageKey)) {
-        localStorage.removeItem(localStorageKey);
+      if (localStorage.getItem(recentLocalStorageKey)) {
+        localStorage.removeItem(recentLocalStorageKey);
         recentJsonRef.current = null
       }
     }
@@ -416,6 +419,48 @@ const useRecentFiles = () => {
     shift,
     clear
   };
+};
+
+const useHadSignedIn = () => {
+  const [ hadSignedIn, setHadSignedIn ] = useState(false);
+  const signedInRef = useRef(false);
+
+  useEffect(() => {
+    const hadSignedInJson = localStorage.getItem(
+      hadSignedInLocalStorageKey
+    );
+    if (hadSignedInJson) {
+      setHadSignedIn(JSON.parse(hadSignedInJson));
+    }
+  }, []);
+
+  const {
+    isSignedIn
+  } = useIsSignedIn();
+
+  useEffect(() => {
+    if (isSignedIn) {
+      if (!signedInRef.current) {
+        const hadSignedInJson = JSON.stringify(true);
+        localStorage.setItem(
+          hadSignedInLocalStorageKey,
+          hadSignedInJson
+        );
+        setHadSignedIn(true);
+      }
+    } else {
+      if (signedInRef.current) {
+        localStorage.removeItem(
+          hadSignedInLocalStorageKey
+        );
+        setHadSignedIn(false);
+      }
+    }
+    signedInRef.current = isSignedIn;
+  }, [
+    isSignedIn
+  ]);
+  return hadSignedIn;
 };
 
 const useIsSmallScreen = () => {
@@ -432,5 +477,6 @@ export {
   useFullScreen,
   useDrive,
   useRecentFiles,
-  useIsSmallScreen
+  useIsSmallScreen,
+  useHadSignedIn
 };
