@@ -3,59 +3,263 @@ import React, {
 import {
   Box,
   Paper,
-  Typography,
 } from '@material-ui/core';
+import SpeechBubble from './speech-bubble';
 
 const Landing: React.FC = () => {
   
   return (
     <Box>
       <Paper>
-        <Box>
-          <Typography>
+        <Box
+          sx={{
+            height: '100vh',
+            width: '100%',
+            position: 'relative',
+            backgroundColor: 'rgb(105 239 219)',
+            border: 'solid black 0.8vmin'
+          }}
+        >
+          <Box
+            component='img'
+            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              maxHeight: '100vh',
+              maxWidth: '90%',
+            }}
+          />
+          <SpeechBubble
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: '10%'
+            }}
+          >
             {'Drive Photos'}
-          </Typography>
+          </SpeechBubble>
         </Box>
-        <Box>
-          <Typography>
+        <Box
+          sx={{
+            height: '100vh',
+            width: '100%',
+            position: 'relative',
+            backgroundColor: 'rgb(105 239 219)',
+            border: 'solid black 0.8vmin',
+            marginTop: '3vmin'
+          }}
+        >
+          <Box
+            component='img'
+            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              maxHeight: '100vh',
+              maxWidth: '90%',
+            }}
+          />
+          <SpeechBubble
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: '10%'
+            }}
+          >
             {'Online image viewer for Google Drive.'}
-          </Typography>
+          </SpeechBubble>
         </Box>
       </Paper>
       <Paper>
-        <Box>
-          <Typography>
+        <Box
+          sx={{
+            height: '100vh',
+            width: '100%',
+            position: 'relative',
+            backgroundColor: 'rgb(105 239 219)',
+            border: 'solid black 0.8vmin'
+          }}
+        >
+          <Box
+            component='img'
+            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              maxHeight: '100vh',
+              maxWidth: '90%',
+            }}
+          />
+          <SpeechBubble
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: '10%'
+            }}
+          >
             {'Access your photos anywhere.'}
-          </Typography>
+          </SpeechBubble>
         </Box>
-        <Box>
-          <Typography>
+        <Box
+          sx={{
+            height: '100vh',
+            width: '100%',
+            position: 'relative',
+            backgroundColor: 'rgb(105 239 219)',
+            border: 'solid black 0.8vmin',
+            marginTop: '3vmin'
+          }}
+        >
+          <Box
+            component='img'
+            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              maxHeight: '100vh',
+              maxWidth: '90%',
+            }}
+          />
+          <SpeechBubble
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: '10%'
+            }}
+          >
             {'All devices are supported.'}
-          </Typography>
+          </SpeechBubble>
         </Box>
       </Paper>
       <Paper>
-        <Box>
-          <Typography>
+        <Box
+          sx={{
+            height: '100vh',
+            width: '100%',
+            position: 'relative',
+            backgroundColor: 'rgb(105 239 219)',
+            border: 'solid black 0.8vmin'
+          }}
+        >
+          <Box
+            component='img'
+            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              maxHeight: '100vh',
+              maxWidth: '90%',
+            }}
+          />
+          <SpeechBubble
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: '10%'
+            }}
+          >
             {'Free and open source.'}
-          </Typography>
+          </SpeechBubble>
         </Box>
-        <Box>
-          <Typography>
+        <Box
+          sx={{
+            height: '100vh',
+            width: '100%',
+            position: 'relative',
+            backgroundColor: 'rgb(105 239 219)',
+            border: 'solid black 0.8vmin',
+            marginTop: '3vmin'
+          }}
+        >
+          <Box
+            component='img'
+            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              maxHeight: '100vh',
+              maxWidth: '90%',
+            }}
+          />
+          <SpeechBubble
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: '10%'
+            }}
+          >
             {'No server, all personal data stays in your browser.'}
-          </Typography>
+          </SpeechBubble>
         </Box>
       </Paper>
       <Paper>
-        <Box>
-          <Typography>
+        <Box
+          sx={{
+            height: '100vh',
+            width: '100%',
+            position: 'relative',
+            backgroundColor: 'rgb(105 239 219)',
+            border: 'solid black 0.8vmin'
+          }}
+        >
+          <Box
+            component='img'
+            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              maxHeight: '100vh',
+              maxWidth: '90%',
+            }}
+          />
+          <SpeechBubble
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: '10%'
+            }}
+          >
             {'Image preloading for fast transition.'}
-          </Typography>
+          </SpeechBubble>
         </Box>
-        <Box>
-          <Typography>
+        <Box
+          sx={{
+            height: '100vh',
+            width: '100%',
+            position: 'relative',
+            backgroundColor: 'rgb(105 239 219)',
+            border: 'solid black 0.8vmin',
+            marginTop: '3vmin'
+          }}
+        >
+          <Box
+            component='img'
+            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              maxHeight: '100vh',
+              maxWidth: '90%',
+            }}
+          />
+          <SpeechBubble
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: '10%'
+            }}
+          >
             {'Fullscreen and slideshow modes.'}
-          </Typography>
+          </SpeechBubble>
         </Box>
       </Paper>
     </Box>
