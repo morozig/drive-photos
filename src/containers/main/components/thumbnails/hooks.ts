@@ -36,12 +36,10 @@ const useScrollAware = () => {
     }
 
     const onScroll = (e: Event) => {
-      requestAnimationFrame(() => {
-        const div = e.target as HTMLDivElement;
-        if (div && !signal.aborted) {
-          setScrollTop(+div.scrollTop);
-        }
-      });
+      const div = e.target as HTMLDivElement;
+      if (div && !signal.aborted) {
+        setScrollTop(+div.scrollTop);
+      }
     };
 
     setScrollTop(scrollContainer.scrollTop);

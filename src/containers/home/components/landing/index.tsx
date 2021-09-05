@@ -1,267 +1,48 @@
-import React, {
-} from 'react';
+import React from 'react';
 import {
-  Box,
-  Paper,
+  Box, Toolbar
 } from '@material-ui/core';
-import SpeechBubble from './speech-bubble';
+import Comix, {
+  slides,
+  jumpHeight
+} from './comix';
+import Space from './space';
+import { useScrollAware } from './hooks';
 
 const Landing: React.FC = () => {
-  
+  const scrollTop = useScrollAware();
+  const slideHeight = 2 * document.documentElement.clientHeight;
+
   return (
     <Box>
-      <Paper>
-        <Box
+      <Box
+        sx={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        <Toolbar/>
+        <Space
+          scrollTop={scrollTop}
+          slideHeight={slideHeight}
+          jumpHeight={jumpHeight}
+          slides={slides}
           sx={{
-            height: '100vh',
-            width: '100%',
-            position: 'relative',
-            backgroundColor: 'rgb(105 239 219)',
-            border: 'solid black 0.8vmin'
+            flexGrow: 1,
+            overflow: 'hidden'
           }}
-        >
-          <Box
-            component='img'
-            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              maxHeight: '100vh',
-              maxWidth: '90%',
-            }}
-          />
-          <SpeechBubble
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: '10%'
-            }}
-          >
-            {'Drive Photos'}
-          </SpeechBubble>
-        </Box>
-        <Box
-          sx={{
-            height: '100vh',
-            width: '100%',
-            position: 'relative',
-            backgroundColor: 'rgb(105 239 219)',
-            border: 'solid black 0.8vmin',
-            marginTop: '3vmin'
-          }}
-        >
-          <Box
-            component='img'
-            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              maxHeight: '100vh',
-              maxWidth: '90%',
-            }}
-          />
-          <SpeechBubble
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: '10%'
-            }}
-          >
-            {'Online image viewer for Google Drive.'}
-          </SpeechBubble>
-        </Box>
-      </Paper>
-      <Paper>
-        <Box
-          sx={{
-            height: '100vh',
-            width: '100%',
-            position: 'relative',
-            backgroundColor: 'rgb(105 239 219)',
-            border: 'solid black 0.8vmin'
-          }}
-        >
-          <Box
-            component='img'
-            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              maxHeight: '100vh',
-              maxWidth: '90%',
-            }}
-          />
-          <SpeechBubble
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: '10%'
-            }}
-          >
-            {'Access your photos anywhere.'}
-          </SpeechBubble>
-        </Box>
-        <Box
-          sx={{
-            height: '100vh',
-            width: '100%',
-            position: 'relative',
-            backgroundColor: 'rgb(105 239 219)',
-            border: 'solid black 0.8vmin',
-            marginTop: '3vmin'
-          }}
-        >
-          <Box
-            component='img'
-            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              maxHeight: '100vh',
-              maxWidth: '90%',
-            }}
-          />
-          <SpeechBubble
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: '10%'
-            }}
-          >
-            {'All devices are supported.'}
-          </SpeechBubble>
-        </Box>
-      </Paper>
-      <Paper>
-        <Box
-          sx={{
-            height: '100vh',
-            width: '100%',
-            position: 'relative',
-            backgroundColor: 'rgb(105 239 219)',
-            border: 'solid black 0.8vmin'
-          }}
-        >
-          <Box
-            component='img'
-            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              maxHeight: '100vh',
-              maxWidth: '90%',
-            }}
-          />
-          <SpeechBubble
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: '10%'
-            }}
-          >
-            {'Free and open source.'}
-          </SpeechBubble>
-        </Box>
-        <Box
-          sx={{
-            height: '100vh',
-            width: '100%',
-            position: 'relative',
-            backgroundColor: 'rgb(105 239 219)',
-            border: 'solid black 0.8vmin',
-            marginTop: '3vmin'
-          }}
-        >
-          <Box
-            component='img'
-            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              maxHeight: '100vh',
-              maxWidth: '90%',
-            }}
-          />
-          <SpeechBubble
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: '10%'
-            }}
-          >
-            {'No server, all personal data stays in your browser.'}
-          </SpeechBubble>
-        </Box>
-      </Paper>
-      <Paper>
-        <Box
-          sx={{
-            height: '100vh',
-            width: '100%',
-            position: 'relative',
-            backgroundColor: 'rgb(105 239 219)',
-            border: 'solid black 0.8vmin'
-          }}
-        >
-          <Box
-            component='img'
-            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              maxHeight: '100vh',
-              maxWidth: '90%',
-            }}
-          />
-          <SpeechBubble
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: '10%'
-            }}
-          >
-            {'Image preloading for fast transition.'}
-          </SpeechBubble>
-        </Box>
-        <Box
-          sx={{
-            height: '100vh',
-            width: '100%',
-            position: 'relative',
-            backgroundColor: 'rgb(105 239 219)',
-            border: 'solid black 0.8vmin',
-            marginTop: '3vmin'
-          }}
-        >
-          <Box
-            component='img'
-            src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
-            sx={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              maxHeight: '100vh',
-              maxWidth: '90%',
-            }}
-          />
-          <SpeechBubble
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: '10%'
-            }}
-          >
-            {'Fullscreen and slideshow modes.'}
-          </SpeechBubble>
-        </Box>
-      </Paper>
+        />
+      </Box>
+      <Comix
+        sx={{
+          visibility: 'hidden'
+        }}
+      />
     </Box>
   );
 };
