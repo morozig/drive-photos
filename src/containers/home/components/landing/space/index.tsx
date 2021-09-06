@@ -9,12 +9,13 @@ import {
   SystemStyleObject
 } from '@material-ui/system';
 import { useRectSize } from '../../../../main/components/thumbnails/hooks';
+import { easeInOutCap, easeInOutSine } from './helpers';
 
 const cellToSlideRatio = 2;
 const numColumns = 5;
 const slidePadding = 1;
-const jumpMaxRatio = 5;
-const jumpAngle = 5;
+const jumpCapRatio = 5;
+const jumpCapFraction = 0.3;
 
 interface SlideWithCoordinates {
   row: number;
@@ -170,14 +171,16 @@ const Space: React.FC<SpaceProps> = (props) => {
       const nextX = cellSize * next.column + next.shift[0];
       const nextY = cellSize * next.row + next.shift[1];
       const nextZ = next.shift[2];
-      const x = (scrollMax - scroll) / (scrollMax - scrollJump) * prevX + 
-        (scroll - scrollJump) / (scrollMax - scrollJump) * nextX;
-      const y = (scrollMax - scroll) / (scrollMax - scrollJump) * prevY + 
-        (scroll - scrollJump) / (scrollMax - scrollJump) * nextY;
-      const z = Math.min(
-        jumpAngle * (scroll - scrollJump) + prevZ,
-        jumpMaxRatio * slideHeight,
-        -jumpAngle * (scroll - scrollMax) + nextZ
+      const x = easeInOutSine(scroll, scrollJump, scrollMax, prevX, nextX);
+      const y = easeInOutSine(scroll, scrollJump, scrollMax, prevY, nextY);
+      const z = easeInOutCap(
+        scroll,
+        scrollJump,
+        jumpCapFraction,
+        scrollMax,
+        prevZ,
+        slideHeight * jumpCapRatio,
+        nextZ
       );
 
       // console.log({
