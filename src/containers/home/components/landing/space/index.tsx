@@ -232,6 +232,7 @@ const Space: React.FC<SpaceProps> = (props) => {
             .map(shift => `${shift}px`)
             .join(',')
           })`,
+          transition: 'transform 1s ease-out'
         }}
       >
         {cells}
