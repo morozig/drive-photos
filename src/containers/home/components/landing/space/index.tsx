@@ -11,10 +11,11 @@ import {
 import { useRectSize } from '../../../../main/components/thumbnails/hooks';
 import { easeInOutCap, easeInOutSine } from './helpers';
 
-const cellToSlideRatio = 2;
+const perspective = '150px';
+const cellToSlideRatio = 1.3;
 const numColumns = 5;
 const slidePadding = 1;
-const jumpCapRatio = 5;
+const jumpCapRatio = 1.5;
 const jumpCapFraction = 0.3;
 
 interface SlideWithCoordinates {
@@ -219,7 +220,7 @@ const Space: React.FC<SpaceProps> = (props) => {
       sx={{
         ...sx,
         backgroundColor: 'black',
-        perspective: '400px',
+        perspective,
         willChange: 'transform'
       }}
       ref={ref}
