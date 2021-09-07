@@ -52,7 +52,7 @@ export const slides = [
         position: 'relative',
         backgroundColor: 'rgb(105 239 219)',
         border: 'solid black 0.8vmin',
-        marginTop: '3vmin'
+        marginTop: '3vh'
       }}
     >
       <Box
@@ -115,7 +115,7 @@ export const slides = [
         position: 'relative',
         backgroundColor: 'rgb(105 239 219)',
         border: 'solid black 0.8vmin',
-        marginTop: '3vmin'
+        marginTop: '3vh'
       }}
     >
       <Box
@@ -178,7 +178,7 @@ export const slides = [
         position: 'relative',
         backgroundColor: 'rgb(105 239 219)',
         border: 'solid black 0.8vmin',
-        marginTop: '3vmin'
+        marginTop: '3vh'
       }}
     >
       <Box
@@ -241,7 +241,7 @@ export const slides = [
         position: 'relative',
         backgroundColor: 'rgb(105 239 219)',
         border: 'solid black 0.8vmin',
-        marginTop: '3vmin'
+        marginTop: '3vh'
       }}
     >
       <Box

@@ -11,7 +11,7 @@ import { useScrollAware } from './hooks';
 
 const Landing: React.FC = () => {
   const scrollTop = useScrollAware();
-  const slideHeight = 2 * document.documentElement.clientHeight;
+  const slideHeight = 2.03 * document.documentElement.clientHeight;
 
   return (
     <Box>
