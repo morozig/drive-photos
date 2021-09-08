@@ -11,7 +11,6 @@ import {
 import { useRectSize } from '../../../../main/components/thumbnails/hooks';
 import { easeInOutCap, easeInOutSine } from './helpers';
 
-const perspective = '150px';
 const cellToSlideRatio = 1.3;
 const numColumns = 5;
 const slidePadding = 1;
@@ -120,7 +119,7 @@ const Space: React.FC<SpaceProps> = (props) => {
             <Box
               key={key}
               component='img'
-              src={`https://picsum.photos/150/200?random=${key}`}
+              src={`https://picsum.photos/300/400?random=${key}`}
               loading='lazy'
               sx={{
                 height: `${slideHeight}px`,
@@ -220,7 +219,7 @@ const Space: React.FC<SpaceProps> = (props) => {
       sx={{
         ...sx,
         backgroundColor: 'black',
-        perspective,
+        perspective: '25vh',
         willChange: 'transform'
       }}
       ref={ref}
