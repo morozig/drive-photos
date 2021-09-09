@@ -287,6 +287,16 @@ export const slides = [
           alignContent: 'center'
         }}
       >
+        <Box
+          component={'img'}
+          src={`${process.env.PUBLIC_URL}/assets/Logo_48.svg`}
+          sx={{
+            height: '48px',
+            width: '48px',
+            justifySelf: 'center',
+            margin: '0 0 24px 0'
+          }}
+        />
         <GoogleSignIn/>
       </Box>
       <Toolbar
