@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box, Toolbar
 } from '@material-ui/core';
@@ -11,7 +11,8 @@ import { useScrollAware } from './hooks';
 
 const Landing: React.FC = () => {
   const scrollTop = useScrollAware();
-  const slideHeight = 2.03 * document.documentElement.clientHeight;
+  const slideHeight = Math.round(2.03 * document.documentElement.clientHeight);
+  const [ isJumping, setJumping ] = useState(false);
 
   return (
     <Box>
@@ -32,15 +33,18 @@ const Landing: React.FC = () => {
           slideHeight={slideHeight}
           jumpHeight={jumpHeight}
           slides={slides}
+          isJumping={isJumping}
+          setJumping={setJumping}
           sx={{
             flexGrow: 1,
-            overflow: 'hidden'
+            overflow: 'hidden',
+            visibility: isJumping ? 'visible' : 'hidden'
           }}
         />
       </Box>
       <Comix
         sx={{
-          visibility: 'hidden'
+          visibility: isJumping ? 'hidden' : 'visible'
         }}
       />
     </Box>

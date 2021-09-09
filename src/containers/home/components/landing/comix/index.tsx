@@ -275,7 +275,8 @@ const Comix: React.FC<ComixProps> = (props) => {
   return (
     <Box
       sx={{
-        ...sx
+        ...sx,
+        backgroundColor: 'black'
       }}
     >
       {slides.map((slide, i) => (

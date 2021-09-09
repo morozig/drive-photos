@@ -1,5 +1,6 @@
 import React, {
   useCallback,
+  useEffect,
   useMemo,
 } from 'react';
 import {
@@ -8,7 +9,7 @@ import {
 import {
   SystemStyleObject
 } from '@material-ui/system';
-import { useRectSize } from '../../../../main/components/thumbnails/hooks';
+import { useDebounce, useRectSize } from '../../../../main/components/thumbnails/hooks';
 import { easeInOutCap, easeInOutSine } from './helpers';
 
 const cellToSlideRatio = 1.3;
@@ -29,6 +30,8 @@ interface SpaceProps {
   slideHeight: number;
   jumpHeight: number;
   scrollTop: number;
+  isJumping: boolean;
+  setJumping: (isJumping: boolean) => void;
   sx?: SystemStyleObject;
 };
 
@@ -38,6 +41,8 @@ const Space: React.FC<SpaceProps> = (props) => {
     slideHeight,
     jumpHeight,
     scrollTop,
+    isJumping,
+    setJumping,
     sx
   } = props;
 
@@ -214,6 +219,32 @@ const Space: React.FC<SpaceProps> = (props) => {
   ]);
   const planeShift = calculateShift(scrollTop);
 
+  useEffect(() => {
+    const scrollJump = slideHeight - rectSize.height;
+    if (scrollTop % (slideHeight + jumpHeight) > scrollJump) {
+      setJumping(true);
+    }
+  }, [
+    slideHeight,
+    jumpHeight,
+    rectSize.height,
+    setJumping,
+    scrollTop
+  ]);
+  const debouncedSrollTop = useDebounce(scrollTop, 1000);
+  useEffect(() => {
+    const scrollJump = slideHeight - rectSize.height;
+    if (debouncedSrollTop % (slideHeight + jumpHeight) <= scrollJump) {
+      setJumping(false);
+    }
+  }, [
+    slideHeight,
+    jumpHeight,
+    rectSize.height,
+    setJumping,
+    debouncedSrollTop
+  ]);
+
   return (
     <Box
       sx={{
@@ -232,7 +263,7 @@ const Space: React.FC<SpaceProps> = (props) => {
             .map(shift => `${shift}px`)
             .join(',')
           })`,
-          transition: 'transform 1s ease-out'
+          transition: isJumping ? 'transform 1s ease-out' : undefined
         }}
       >
         {cells}

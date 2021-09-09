@@ -103,6 +103,7 @@ const useRectSize = () => {
 };
 
 export {
+  useDebounce,
   useScrollAware,
   useRectSize
 }
