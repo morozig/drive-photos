@@ -24,7 +24,8 @@ const Landing: React.FC = () => {
           bottom: 0,
           left: 0,
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          zIndex: -3
         }}
       >
         <Toolbar/>
