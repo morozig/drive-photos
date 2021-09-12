@@ -49,6 +49,7 @@ const GoogleSignIn: React.FC = () => {
     </ListItemButton>
   );
 };
+
 export const slides = [
   <Paper>
     <Box
@@ -56,13 +57,15 @@ export const slides = [
         height: '100vh',
         width: '100%',
         position: 'relative',
-        backgroundColor: 'rgb(105 239 219)',
-        border: 'solid black 0.8vmin'
+        backgroundColor: '#6df3db',
+        border: 'solid black 0.8vmin',
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}
     >
       <Box
         component='img'
-        src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+        src={`${process.env.PUBLIC_URL}/assets/girl1.jpg`}
         sx={{
           position: 'absolute',
           bottom: 0,
@@ -86,14 +89,16 @@ export const slides = [
         height: '100vh',
         width: '100%',
         position: 'relative',
-        backgroundColor: 'rgb(105 239 219)',
+        backgroundColor: '#ffdc2e',
         border: 'solid black 0.8vmin',
-        marginTop: '3vh'
+        marginTop: '3vh',
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}
     >
       <Box
         component='img'
-        src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+        src={`${process.env.PUBLIC_URL}/assets/girl2.jpg`}
         sx={{
           position: 'absolute',
           bottom: 0,
@@ -119,13 +124,15 @@ export const slides = [
         height: '100vh',
         width: '100%',
         position: 'relative',
-        backgroundColor: 'rgb(105 239 219)',
-        border: 'solid black 0.8vmin'
+        backgroundColor: '#f31872',
+        border: 'solid black 0.8vmin',
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}
     >
       <Box
         component='img'
-        src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+        src={`${process.env.PUBLIC_URL}/assets/girl3.jpg`}
         sx={{
           position: 'absolute',
           bottom: 0,
@@ -149,14 +156,16 @@ export const slides = [
         height: '100vh',
         width: '100%',
         position: 'relative',
-        backgroundColor: 'rgb(105 239 219)',
+        backgroundColor: '#02c7fc',
         border: 'solid black 0.8vmin',
-        marginTop: '3vh'
+        marginTop: '3vh',
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}
     >
       <Box
         component='img'
-        src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+        src={`${process.env.PUBLIC_URL}/assets/girl4.jpg`}
         sx={{
           position: 'absolute',
           bottom: 0,
@@ -182,13 +191,15 @@ export const slides = [
         height: '100vh',
         width: '100%',
         position: 'relative',
-        backgroundColor: 'rgb(105 239 219)',
-        border: 'solid black 0.8vmin'
+        backgroundColor: '#fe0000',
+        border: 'solid black 0.8vmin',
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}
     >
       <Box
         component='img'
-        src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+        src={`${process.env.PUBLIC_URL}/assets/girl5.jpg`}
         sx={{
           position: 'absolute',
           bottom: 0,
@@ -212,14 +223,16 @@ export const slides = [
         height: '100vh',
         width: '100%',
         position: 'relative',
-        backgroundColor: 'rgb(105 239 219)',
+        backgroundColor: '#fe3989',
         border: 'solid black 0.8vmin',
-        marginTop: '3vh'
+        marginTop: '3vh',
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}
     >
       <Box
         component='img'
-        src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+        src={`${process.env.PUBLIC_URL}/assets/girl6.jpg`}
         sx={{
           position: 'absolute',
           bottom: 0,
@@ -245,13 +258,15 @@ export const slides = [
         height: '100vh',
         width: '100%',
         position: 'relative',
-        backgroundColor: 'rgb(105 239 219)',
-        border: 'solid black 0.8vmin'
+        backgroundColor: '#db0285',
+        border: 'solid black 0.8vmin',
+        boxSizing: 'border-box',
+        overflow: 'hidden'
       }}
     >
       <Box
         component='img'
-        src={`${process.env.PUBLIC_URL}/assets/girl1.png`}
+        src={`${process.env.PUBLIC_URL}/assets/girl7.jpg`}
         sx={{
           position: 'absolute',
           bottom: 0,

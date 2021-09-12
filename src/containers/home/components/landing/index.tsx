@@ -25,7 +25,7 @@ const Landing: React.FC = () => {
           left: 0,
           display: 'flex',
           flexDirection: 'column',
-          zIndex: -3
+          zIndex: isJumping ? undefined : -1
         }}
       >
         <Toolbar/>
