@@ -1,7 +1,7 @@
 @font-face {
-  font-family: 'SequentialistBB';
-  src: url('SequentialistBB.woff2') format('woff2'),
-    url('SequentialistBB.woff') format('woff');
+  font-family: 'Comic Sans MS';
+  src: url('ComicSansMS.woff2') format('woff2'),
+    url('ComicSansMS.woff') format('woff');
   font-style: normal;
   font-weight: 400;
 }

@@ -78,7 +78,7 @@ export const slides = [
         sx={{
           position: 'absolute',
           top: 0,
-          right: '10%'
+          right: '20%',
         }}
       >
         {'Drive Photos'}
@@ -111,7 +111,7 @@ export const slides = [
         sx={{
           position: 'absolute',
           top: 0,
-          right: '10%'
+          right: '20%'
         }}
       >
         {'Online image viewer for Google Drive.'}
@@ -145,7 +145,7 @@ export const slides = [
         sx={{
           position: 'absolute',
           top: 0,
-          right: '10%'
+          right: '20%'
         }}
       >
         {'Access your photos anywhere.'}
@@ -178,7 +178,7 @@ export const slides = [
         sx={{
           position: 'absolute',
           top: 0,
-          right: '10%'
+          right: '20%'
         }}
       >
         {'All devices are supported.'}
@@ -212,7 +212,7 @@ export const slides = [
         sx={{
           position: 'absolute',
           top: 0,
-          right: '10%'
+          right: '20%'
         }}
       >
         {'Free and open source.'}
@@ -245,7 +245,7 @@ export const slides = [
         sx={{
           position: 'absolute',
           top: 0,
-          right: '10%'
+          right: '20%'
         }}
       >
         {'No server, all personal data stays in your browser.'}
@@ -279,7 +279,7 @@ export const slides = [
         sx={{
           position: 'absolute',
           top: 0,
-          right: '10%'
+          right: '20%'
         }}
       >
         {'Fullscreen and slideshow modes.'}

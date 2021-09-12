@@ -26,17 +26,17 @@ const SpeechBubble: React.FC<SpeechBubbleProps> = (props) => {
         backgroundPosition: 'center',
         backgroundSize: '100% 100%',
         backgroundRepeat: 'no-repeat',
-        width: '40%',
+        width: '30%',
         textAlign: 'center',
-        padding: '6% 0 20% 0',
+        padding: '8% 1% 20% 1%',
         boxSizing: 'content-box',
         lineHeight: 1,
-        fontFamily: 'SequentialistBB'
+        fontFamily: 'Comic Sans MS'
       }}
     >
       {/* {props.children} */}
       <Typography
-        fontFamily={'SequentialistBB'}
+        fontFamily={'Comic Sans MS'}
         fontSize={'7vmin'}
         lineHeight={'7vmin'}
       >
