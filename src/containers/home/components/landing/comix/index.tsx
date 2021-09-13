@@ -69,16 +69,28 @@ export const slides = [
         sx={{
           position: 'absolute',
           bottom: 0,
-          left: 0,
-          maxHeight: '100vh',
-          maxWidth: '90%',
+          left: {
+            xs: '-5%',
+            md: '0',
+          },
+          maxHeight: {
+            xs: '60vh',
+            md: '100%',
+          },
+          maxWidth: {
+            xs: undefined,
+            md: '70vw',
+          },
         }}
       />
       <SpeechBubble
         sx={{
           position: 'absolute',
-          top: 0,
-          right: '20%',
+          top: {
+            xs: '10%',
+            md: '0',
+          },
+          right: 0,
         }}
       >
         {'Drive Photos'}
@@ -102,16 +114,28 @@ export const slides = [
         sx={{
           position: 'absolute',
           bottom: 0,
-          left: 0,
-          maxHeight: '100vh',
-          maxWidth: '90%',
+          left: {
+            xs: '-5%',
+            md: '0',
+          },
+          maxHeight: {
+            xs: '60vh',
+            md: '100%',
+          },
+          maxWidth: {
+            xs: undefined,
+            md: '70vw',
+          },
         }}
       />
       <SpeechBubble
         sx={{
           position: 'absolute',
-          top: 0,
-          right: '20%'
+          top: {
+            xs: '10%',
+            md: '0',
+          },
+          right: 0
         }}
       >
         {'Online image viewer for Google Drive.'}
@@ -136,16 +160,28 @@ export const slides = [
         sx={{
           position: 'absolute',
           bottom: 0,
-          left: 0,
-          maxHeight: '100vh',
-          maxWidth: '90%',
+          left: {
+            xs: '-5%',
+            md: '0',
+          },
+          maxHeight: {
+            xs: '60vh',
+            md: '100%',
+          },
+          maxWidth: {
+            xs: undefined,
+            md: '70vw',
+          },
         }}
       />
       <SpeechBubble
         sx={{
           position: 'absolute',
-          top: 0,
-          right: '20%'
+          top: {
+            xs: '10%',
+            md: '0',
+          },
+          right: 0
         }}
       >
         {'Access your photos anywhere.'}
@@ -169,16 +205,28 @@ export const slides = [
         sx={{
           position: 'absolute',
           bottom: 0,
-          left: 0,
-          maxHeight: '100vh',
-          maxWidth: '90%',
+          left: {
+            xs: '-5%',
+            md: '0',
+          },
+          maxHeight: {
+            xs: '60vh',
+            md: '100%',
+          },
+          maxWidth: {
+            xs: undefined,
+            md: '70vw',
+          },
         }}
       />
       <SpeechBubble
         sx={{
           position: 'absolute',
-          top: 0,
-          right: '20%'
+          top: {
+            xs: '10%',
+            md: '0',
+          },
+          right: 0
         }}
       >
         {'All devices are supported.'}
@@ -203,16 +251,28 @@ export const slides = [
         sx={{
           position: 'absolute',
           bottom: 0,
-          left: 0,
-          maxHeight: '100vh',
-          maxWidth: '90%',
+          left: {
+            xs: '-5%',
+            md: '0',
+          },
+          maxHeight: {
+            xs: '60vh',
+            md: '100%',
+          },
+          maxWidth: {
+            xs: undefined,
+            md: '70vw',
+          },
         }}
       />
       <SpeechBubble
         sx={{
           position: 'absolute',
-          top: 0,
-          right: '20%'
+          top: {
+            xs: '10%',
+            md: '0',
+          },
+          right: 0
         }}
       >
         {'Free and open source.'}
@@ -236,16 +296,28 @@ export const slides = [
         sx={{
           position: 'absolute',
           bottom: 0,
-          left: 0,
-          maxHeight: '100vh',
-          maxWidth: '90%',
+          left: {
+            xs: '-5%',
+            md: '0',
+          },
+          maxHeight: {
+            xs: '60vh',
+            md: '100%',
+          },
+          maxWidth: {
+            xs: undefined,
+            md: '70vw',
+          },
         }}
       />
       <SpeechBubble
         sx={{
           position: 'absolute',
-          top: 0,
-          right: '20%'
+          top: {
+            xs: '10%',
+            md: '0',
+          },
+          right: 0
         }}
       >
         {'No server, all personal data stays in your browser.'}
@@ -270,16 +342,28 @@ export const slides = [
         sx={{
           position: 'absolute',
           bottom: 0,
-          left: 0,
-          maxHeight: '100vh',
-          maxWidth: '90%',
+          left: {
+            xs: '-5%',
+            md: '0',
+          },
+          maxHeight: {
+            xs: '60vh',
+            md: '100%',
+          },
+          maxWidth: {
+            xs: undefined,
+            md: '70vw',
+          },
         }}
       />
       <SpeechBubble
         sx={{
           position: 'absolute',
-          top: 0,
-          right: '20%'
+          top: {
+            xs: '10%',
+            md: '0',
+          },
+          right: 0
         }}
       >
         {'Fullscreen and slideshow modes.'}

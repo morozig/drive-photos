@@ -9,6 +9,7 @@ import {
   SystemStyleObject
 } from '@material-ui/system';
 import speechBubble from './speech-bubble.svg';
+import speechBubbleWide from './speech-bubble-wide.svg';
 
 interface SpeechBubbleProps {
   sx?: SystemStyleObject;
@@ -22,16 +23,27 @@ const SpeechBubble: React.FC<SpeechBubbleProps> = (props) => {
     <Box
       sx={{
         ...sx,
-        background: `url(${speechBubble})`,
+        background: {
+          xs: `url(${speechBubble})`,
+          md: `url(${speechBubbleWide})`,
+        },
         backgroundPosition: 'center',
         backgroundSize: '100% 100%',
         backgroundRepeat: 'no-repeat',
-        width: '30%',
         textAlign: 'center',
-        padding: '8% 1% 20% 1%',
-        boxSizing: 'content-box',
-        lineHeight: 1,
-        fontFamily: 'Comic Sans MS'
+        fontFamily: 'Comic Sans MS',
+        padding: {
+          xs: '10vmin 5vmin 30vmin 5vmin',
+          md: '15vmin 15vmin 15vmin 15vmin',
+        },
+        maxWidth: {
+          xs: '60vmin',
+          md: '100vmin',
+        },
+        marginRight: {
+          xs: '0',
+          md: '-5vmin',
+        },
       }}
     >
       {/* {props.children} */}
