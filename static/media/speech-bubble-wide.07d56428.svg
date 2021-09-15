@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" viewBox="0 0 800 400">
+<defs>
+<style>
+	path { 
+		fill: white;
+		stroke: #000;
+		stroke-width: 4;
+		stroke-linejoin: bevel;
+		vector-effect: non-scaling-stroke;
+	}
+</style>
+</defs>
+<path d="M 100 200 A 100 50 0 1 1 700 200 C 681 352 351 380 219 317 Q 144 348 4 349 Q 137 325 137 268 Q 101 242 100 200 Z"/></svg>
