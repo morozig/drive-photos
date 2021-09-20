@@ -16,7 +16,8 @@ import {
   signIn,
   signOut,
   subscribeToGapiErrors,
-  subscribeToSignedInChange
+  subscribeToSignedInChange,
+  getGapiError
 } from './api';
 import Screenfull from './screenfull';
 import { useTheme } from '@material-ui/core/styles';
@@ -41,7 +42,7 @@ const useAbortSignal = () => {
 const useIsSignedIn = (onSignOut?: () => void) => {
   const [ signedIn, setSignedIn ] = useState(isSignedIn());
   const [ profile, setProfile ] = useState<any | null>(null);
-  const [ gapiError, setGapiError ] = useState<any | null>(null);
+  const [ gapiError, setGapiError ] = useState(getGapiError());
   const [ isCookiesError, setCookiesError ] = useState(false);
   
   useEffect(() => {

@@ -22,6 +22,7 @@ const gapiReadyObservable = new Observable<void>();
 let picker: any;
 const pickObservable = new Observable<any>();
 const pickerReadyObservable = new Observable<void>();
+let gapiError = null as null | any;
 
 const onSignedInChanged = (isSignedIn: boolean) => {
   // console.log('onSignedInChanged', isSignedIn);
@@ -53,6 +54,7 @@ const onGapiLoaded = async () => {
   catch (err) {
     console.log(err);
     gapiErrorsObservable.push(err);
+    gapiError = err;
   }
 };
 
@@ -258,6 +260,7 @@ const subscribeToGapiErrors = (onError: GapiErrorHandler) => {
   gapiErrorsObservable.subscribe(onError);
   return () => gapiErrorsObservable.unsubscribe(onError);
 };
+const getGapiError = () => gapiError;
 
 gapi.load('client:auth2:picker', onGapiLoaded);
 
@@ -273,5 +276,6 @@ export {
   getEdgeFiles,
   listDirectories,
   getProfile,
-  subscribeToGapiErrors
+  subscribeToGapiErrors,
+  getGapiError
 };
