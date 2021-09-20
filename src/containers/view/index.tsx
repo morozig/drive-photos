@@ -20,7 +20,7 @@ import Topbar from './components/topbar';
 
 const drawerWidth = 260;
 const preloadCount = 3;
-const defaultTitle = 'Drive Photos';
+export const defaultTitle = 'Drive Photos';
 
 export enum FitMode {
   Best = 1,
@@ -29,7 +29,7 @@ export enum FitMode {
   Original
 }
 
-const Main: React.FC = () => {
+const View: React.FC = () => {
   const [ fitMode, setFitMode ] = useState<FitMode>(FitMode.Best);
   const [ parentId, setParentId ] = useState('');
   const [ fileId, setFileId ] = useState('');
@@ -478,4 +478,4 @@ const Main: React.FC = () => {
   );
 }
 
-export default Main;
+export default View;

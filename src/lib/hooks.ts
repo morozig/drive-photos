@@ -23,7 +23,6 @@ import { useTheme } from '@material-ui/core/styles';
 import { useMediaQuery } from '@material-ui/core';
 
 const recentLocalStorageKey = 'recent';
-const hadSignedInLocalStorageKey = 'hadSignedIn';
 const recentLength = 10;
 
 const useAbortSignal = () => {
@@ -421,48 +420,6 @@ const useRecentFiles = () => {
   };
 };
 
-const useHadSignedIn = () => {
-  const [ hadSignedIn, setHadSignedIn ] = useState(false);
-  const signedInRef = useRef(false);
-
-  useEffect(() => {
-    const hadSignedInJson = localStorage.getItem(
-      hadSignedInLocalStorageKey
-    );
-    if (hadSignedInJson) {
-      setHadSignedIn(JSON.parse(hadSignedInJson));
-    }
-  }, []);
-
-  const {
-    isSignedIn
-  } = useIsSignedIn();
-
-  useEffect(() => {
-    if (isSignedIn) {
-      if (!signedInRef.current) {
-        const hadSignedInJson = JSON.stringify(true);
-        localStorage.setItem(
-          hadSignedInLocalStorageKey,
-          hadSignedInJson
-        );
-        setHadSignedIn(true);
-      }
-    } else {
-      if (signedInRef.current) {
-        localStorage.removeItem(
-          hadSignedInLocalStorageKey
-        );
-        setHadSignedIn(false);
-      }
-    }
-    signedInRef.current = isSignedIn;
-  }, [
-    isSignedIn
-  ]);
-  return hadSignedIn;
-};
-
 const useIsSmallScreen = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
@@ -478,5 +435,4 @@ export {
   useDrive,
   useRecentFiles,
   useIsSmallScreen,
-  useHadSignedIn
 };

@@ -18,20 +18,14 @@ import MenuIcon from '@material-ui/icons/Menu';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import PolicyIcon from '@material-ui/icons/Policy';
 import TermsIcon from '@material-ui/icons/Gavel';
-import GoogleIcon from './GoogleIcon';
-import CookiesErrorIcon from '@material-ui/icons/VisibilityOff';
-import { useIsSignedIn } from '../../../../lib/hooks';
+import { Link } from 'react-router-dom';
+import OpenViewIcon from '@material-ui/icons/OpenInBrowser';
 
 const Topbar: React.FC = () => {
   const [ isMenuOpen, setMenuOpen ] = useState(false);
   const menuRef = useRef<HTMLButtonElement>(null);
   const [ isHelpMenuOpen, setHelpMenuOpen ] = useState(false);
   const helpMenuRef = useRef<HTMLButtonElement>(null);
-
-  const {
-    toggleSignedIn,
-    isCookiesError
-  } = useIsSignedIn();
 
   const handleMenuClose = useCallback(() => {
     setMenuOpen(false);
@@ -65,13 +59,14 @@ const Topbar: React.FC = () => {
         onClose={handleMenuClose}
       >
         <MenuItem
-          onClick={toggleSignedIn}
+          component={Link}
+          to={'/view'}
         >
           <ListItemIcon>
-            <GoogleIcon/>
+            <OpenViewIcon/>
           </ListItemIcon>
           <ListItemText>
-            {'Sign in with Google'}
+            {'Open View'}
           </ListItemText>
         </MenuItem>
       </Menu>
@@ -139,20 +134,6 @@ const Topbar: React.FC = () => {
           </ListItemText>
         </MenuItem>
       </Menu>
-      {isCookiesError &&
-        <Tooltip
-          title={`You need to enable 3rd party cookies.
-            Click "eye" icon at the end of address bar`}
-        >
-          <CookiesErrorIcon
-            color='error'
-            sx={{
-              ml: '12px',
-              mr: '-6px'
-            }}
-          />
-        </Tooltip>
-      }
     </Toolbar>
   );
 };

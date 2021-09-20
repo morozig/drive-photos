@@ -6,6 +6,10 @@ const theme = createTheme({
       main: '#ffffff',
       contrastText: '#595959'
     },
+    secondary: {
+      main: '#3476dd',
+      contrastText: '#ffffff'
+    }
   },
   components: {
     MuiTooltip: {

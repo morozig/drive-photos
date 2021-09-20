@@ -2,18 +2,16 @@ import React, { Fragment } from 'react';
 import {
   Box,
   Link,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
   Paper,
   Toolbar,
+  Button
 } from '@material-ui/core';
 import SpeechBubble from '../speech-bubble';
 import {
   SystemStyleObject
 } from '@material-ui/system';
-import { useIsSignedIn } from '../../../../../lib/hooks';
-import GoogleIcon from '../../topbar/GoogleIcon';
+import { Link as RouterLink } from 'react-router-dom';
+import OpenViewIcon from '@material-ui/icons/OpenInBrowser';
 
 interface ComixProps {
   sx?: SystemStyleObject;
@@ -21,32 +19,17 @@ interface ComixProps {
 
 export const jumpHeight = 2500;
 
-const GoogleSignIn: React.FC = () => {
-  const {
-    toggleSignedIn
-  } = useIsSignedIn();
+const OpenView: React.FC = () => {
   return (
-    <ListItemButton
-      onClick={toggleSignedIn}
-      sx={{
-        boxShadow: `
-          0px 2px 1px -1px rgb(0 0 0 / 20%),
-          0px 1px 1px 0px rgb(0 0 0 / 14%),
-          0px 1px 3px 0px rgb(0 0 0 / 12%)
-        `
-      }}
+    <Button
+      component={RouterLink}
+      to={'/view'}
+      variant={'contained'}
+      color='secondary'
+      startIcon={<OpenViewIcon/>}
     >
-      <ListItemIcon
-        sx={{
-          minWidth: '36px'
-        }}
-      >
-        <GoogleIcon/>
-      </ListItemIcon>
-      <ListItemText>
-        {'Sign in with Google'}
-      </ListItemText>
-    </ListItemButton>
+      {'Open View'}
+    </Button>
   );
 };
 
@@ -396,7 +379,7 @@ export const slides = [
             margin: '0 0 24px 0'
           }}
         />
-        <GoogleSignIn/>
+        <OpenView/>
       </Box>
       <Toolbar
         sx={{

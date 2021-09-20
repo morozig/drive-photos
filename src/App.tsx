@@ -1,15 +1,24 @@
 import React from 'react';
 import Home from './containers/home';
-import Main from './containers/main';
-import { useHadSignedIn } from './lib/hooks';
+import View from './containers/view';
+import {
+  HashRouter as Router,
+  Switch,
+  Route
+} from 'react-router-dom';
 
 const App: React.FC = () => {
-  const hadSignedIn = useHadSignedIn();
-
   return (
-    hadSignedIn ?
-      <Main/> :
-      <Home/>
+    <Router>
+      <Switch>
+        <Route path='/view'>
+          <View />
+        </Route>
+        <Route path='/'>
+          <Home />
+        </Route>
+      </Switch>
+    </Router>
   );
 }
 

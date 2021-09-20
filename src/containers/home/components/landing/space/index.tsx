@@ -9,7 +9,7 @@ import {
 import {
   SystemStyleObject
 } from '@material-ui/system';
-import { useDebounce, useRectSize } from '../../../../main/components/thumbnails/hooks';
+import { useDebounce, useRectSize } from '../../../../view/components/thumbnails/hooks';
 import { easeInOutCap, easeInOutSine } from './helpers';
 
 const cellToSlideRatio = 1.3;

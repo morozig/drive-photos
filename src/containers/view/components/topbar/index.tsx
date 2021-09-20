@@ -43,12 +43,14 @@ import GoogleIcon from './GoogleIcon';
 import CookiesErrorIcon from '@material-ui/icons/VisibilityOff';
 import HideDrawerIcon from '@material-ui/icons/ArrowLeft';
 import ShowDrawerIcon from '@material-ui/icons/ArrowRight';
-import { FitMode } from '../..';
+import { defaultTitle, FitMode } from '../..';
 import { RecentFile, useFullScreen, useIsSignedIn } from '../../../../lib/hooks';
 import {
   pickFile
 } from '../../../../lib/api';
 import TitleTooltip from './TitleTooltip';
+import { Link } from 'react-router-dom';
+import CloseViewIcon from '@material-ui/icons/CancelPresentation';
 
 interface TopbarProps {
   title: string;
@@ -460,6 +462,20 @@ const Topbar: React.FC<TopbarProps> = (props) => {
               'Exit Fullscreen' :
               'Enter Fullscreen'
             }
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          component={Link}
+          to={'/'}
+          onClick={() => {
+            document.title = defaultTitle;
+          }}
+        >
+          <ListItemIcon>
+            <CloseViewIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Close View'}
           </ListItemText>
         </MenuItem>
       </Menu>
