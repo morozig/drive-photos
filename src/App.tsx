@@ -2,7 +2,7 @@ import React from 'react';
 import Home from './containers/home';
 import View from './containers/view';
 import {
-  HashRouter as Router,
+  BrowserRouter as Router,
   Switch,
   Route
 } from 'react-router-dom';
