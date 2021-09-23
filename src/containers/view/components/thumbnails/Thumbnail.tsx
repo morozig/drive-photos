@@ -6,7 +6,7 @@ import {
 } from '@material-ui/core';
 
 interface ThumbnailProps {
-  file: any;
+  file: gapi.client.drive.File;
   counter: number,
   isActive: boolean;
   onClick: () => void;

@@ -13,16 +13,18 @@ const apiKey = process.env.NODE_ENV === 'production' ?
     process.env.REACT_APP_GAPI_KEY;
 const clientId = '321539141956-kn4i96a10682t0l8agfo5158fln9ai5d.apps.googleusercontent.com';
 
-const gapi = (window as any).gapi;
 const signedInObservable = new Observable<boolean>();
 const gapiErrorsObservable = new Observable<any>();
-let GoogleAuth: any
-let google: any;
+let GoogleAuth: gapi.auth2.GoogleAuth | undefined;
 const gapiReadyObservable = new Observable<void>();
-let picker: any;
-const pickObservable = new Observable<any>();
+let picker: google.picker.Picker | undefined;
+const pickObservable = new Observable<google.picker.ResponseObject>();
 const pickerReadyObservable = new Observable<void>();
 let gapiError = null as null | any;
+
+export interface Profile {
+  imageUrl: string;
+}
 
 const onSignedInChanged = (isSignedIn: boolean) => {
   // console.log('onSignedInChanged', isSignedIn);
@@ -45,7 +47,6 @@ const onGapiLoaded = async () => {
       discoveryDocs
     });
     GoogleAuth = gapi.auth2.getAuthInstance();
-    google = (window as any).google;
     // console.log(gapi.auth2, GoogleAuth, GoogleAuth.isSignedIn, google);
     onSignedInChanged(GoogleAuth.isSignedIn.get());
     GoogleAuth.isSignedIn.listen(onSignedInChanged);
@@ -58,12 +59,15 @@ const onGapiLoaded = async () => {
   }
 };
 
-const onPick = (e: any) => {
-  // console.log('onPick', e);
-  pickObservable.push(e);
+const onPick = (response: google.picker.ResponseObject) => {
+  // console.log('onPick', response);
+  pickObservable.push(response);
 };
 
 const createPicker = () => {
+  if (!GoogleAuth || !apiKey) {
+    throw new Error('not authed');
+  }
   const user = GoogleAuth.currentUser.get();
   const authResponse = user.getAuthResponse(true);
   const accessToken = authResponse.access_token;
@@ -114,14 +118,14 @@ const signOut = () => {
     GoogleAuth.signOut();
   }
 };
-const pickFile = () => new Promise<any>(
+const pickFile = () => new Promise<google.picker.DocumentObject | null>(
   (resolve, reject) => {
-    const onThisPick = (e: any) => {
-      if (e.action === 'picked') {
-        const doc = e.docs[0];
+    const onThisPick = (response: google.picker.ResponseObject) => {
+      if (response.action === 'picked') {
+        const doc = response.docs[0];
         pickObservable.unsubscribe(onThisPick);
         resolve(doc);
-      } else if (e.action === 'cancel') {
+      } else if (response.action === 'cancel') {
         pickObservable.unsubscribe(onThisPick);
         resolve(null);
       }
@@ -207,7 +211,7 @@ const getEdgeFiles = async (options: GetEdgeFileOptions) => {
     });
     return (
       result.result ?
-        result.result.files as any[] : []
+        result.result.files : []
     );
   }
   catch(err) {
@@ -247,12 +251,15 @@ const listDirectories = async (grandParentId: string) => {
 };
 
 const getProfile = () => {
+  if (!GoogleAuth) {
+    return null;
+  }
   const user = GoogleAuth.currentUser.get();
   const profile = user.getBasicProfile();
   const imageUrl = profile.getImageUrl();
   return {
     imageUrl
-  };
+  } as Profile;
 };
 
 export type GapiErrorHandler = (error: any) => void;

@@ -8,7 +8,7 @@ import {
 } from '@material-ui/system';
 
 interface ThumbnailsProps {
-  files?: any[];
+  files?: gapi.client.drive.File[];
   fileId?: string;
   onSelect: (fileId: string) => void;
   onVisibleFiles?: (indices: number[]) => void;
@@ -42,7 +42,9 @@ const Thumbnails: React.FC<ThumbnailsProps> = (props) => {
               scrollIndexRef.current = index;
               virtualGridRef.current.scrollToIndex(index, 'smart');
             }
-            onSelect(file.id);
+            if (file.id) {
+              onSelect(file.id);
+            }
           }}
         />
       );

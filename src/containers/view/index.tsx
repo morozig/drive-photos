@@ -22,6 +22,11 @@ const drawerWidth = 260;
 const preloadCount = 3;
 export const defaultTitle = 'Drive Photos';
 
+export interface FileEntry {
+  id: string;
+  parentId: string;
+};
+
 export enum FitMode {
   Best = 1,
   Width,
@@ -66,7 +71,7 @@ const View: React.FC = () => {
   } = useRecentFiles();
   const fileJustOpenedRef = useRef(false);
 
-  const onOpenFile = useCallback((file: any) => {
+  const onOpenFile = useCallback((file: FileEntry) => {
     setFileId(file.id);
     setParentId(file.parentId);
     setIsScrollToBottom(false);
@@ -93,7 +98,7 @@ const View: React.FC = () => {
       `${title} | ${defaultTitle}` : defaultTitle;
     setTitle(title || defaultTitle);
     document.title = documentTitle;
-    if (activeFile && directoryId && title) {
+    if (activeFile && directoryId && title && activeFile.id) {
       const recentFile = {
         id: activeFile.id,
         parentId: directoryId,
@@ -175,8 +180,8 @@ const View: React.FC = () => {
 
   const onFirstImage = useCallback(() => {
     const newIndex = 0;
-    if (files[newIndex]) {
-      setFileId(files[newIndex].id);
+    if (files[newIndex] && files[newIndex].id) {
+      setFileId(files[newIndex].id || '');
       setIsScrollToBottom(false);
     }
   }, [
@@ -184,8 +189,8 @@ const View: React.FC = () => {
   ]);
   const onPrevImage = useCallback(() => {
     const newIndex = activeIndex - 1;
-    if (files[newIndex]) {
-      setFileId(files[newIndex].id);
+    if (files[newIndex] && files[newIndex].id) {
+      setFileId(files[newIndex].id || '');
       setIsScrollToBottom(true);
     } else {
       if (prevDirId && prevDirFileId) {
@@ -202,8 +207,8 @@ const View: React.FC = () => {
   ]);
   const onNextImage = useCallback(() => {
     const newIndex = activeIndex + 1;
-    if (files[newIndex]) {
-      setFileId(files[newIndex].id);
+    if (files[newIndex] && files[newIndex].id) {
+      setFileId(files[newIndex].id || '');
       setIsScrollToBottom(false);
     } else {
       if (nextDirId && nextDirFileId) {
@@ -220,8 +225,8 @@ const View: React.FC = () => {
   ]);
   const onLastImage = useCallback(() => {
     const newIndex = files.length - 1;
-    if (files[newIndex]) {
-      setFileId(files[newIndex].id);
+    if (files[newIndex] && files[newIndex].id) {
+      setFileId(files[newIndex].id || '');
       setIsScrollToBottom(false);
     }
   }, [
@@ -245,7 +250,7 @@ const View: React.FC = () => {
   }, []);
   const onDownloadFile = useCallback(() => {
     const activeFile = files[activeIndex];
-    if (activeFile) {
+    if (activeFile && activeFile.name && activeFile.webContentLink) {
       const name = activeFile.name;
       const url = activeFile.webContentLink;
       const a = document.createElement('a');
@@ -278,7 +283,7 @@ const View: React.FC = () => {
       return [];
     }
     const activeFile = files[activeIndex];
-    const preloadFiles = new Set<any>();
+    const preloadFiles = new Set<gapi.client.drive.File>();
     for (let i = 1; i <= preloadCount; i++) {
       const file = files[activeIndex + i];
       if (file) {
@@ -372,6 +377,7 @@ const View: React.FC = () => {
           fitMode={fitMode}
           onFitModeChange={setFitMode}
           onOpenFile={onOpenFile}
+          onRecentFile={onOpenFile}
           fullscreenButtonActive={files.length > 0}
           onToggleFullscreen={onToggleFullscreen}
           isFirstImageEnabled={isFirstImageEnabled}

@@ -17,7 +17,8 @@ import {
   signOut,
   subscribeToGapiErrors,
   subscribeToSignedInChange,
-  getGapiError
+  getGapiError,
+  Profile
 } from './api';
 import Screenfull from './screenfull';
 import { useTheme } from '@material-ui/core/styles';
@@ -41,7 +42,7 @@ const useAbortSignal = () => {
 
 const useIsSignedIn = (onSignOut?: () => void) => {
   const [ signedIn, setSignedIn ] = useState(isSignedIn());
-  const [ profile, setProfile ] = useState<any | null>(null);
+  const [ profile, setProfile ] = useState<Profile | null>(null);
   const [ gapiError, setGapiError ] = useState(getGapiError());
   const [ isCookiesError, setCookiesError ] = useState(false);
   
@@ -100,7 +101,7 @@ const useIsSignedIn = (onSignOut?: () => void) => {
 };
 
 const useFiles = (parentId?: string) => {
-  const [ files, setFiles ] = useState<any[]>([]);
+  const [ files, setFiles ] = useState<gapi.client.drive.File[]>([]);
   const [ pageToken, setPageToken ] = useState<string | undefined>();
   const signal = useAbortSignal();
   const parentIdRef = useRef<string | undefined>(parentId);
@@ -124,8 +125,8 @@ const useFiles = (parentId?: string) => {
           parentId,
           pageToken
         });
-        if(!signal.aborted) {
-          setFiles(prevFiles => prevFiles.concat(result.files))
+        if(!signal.aborted && result) {
+          setFiles(prevFiles => prevFiles.concat(result.files || []))
           if (result.nextPageToken) {
             setPageToken(result.nextPageToken);
           }
@@ -149,7 +150,10 @@ const useFiles = (parentId?: string) => {
 };
 
 const useDirectory = (parentId?: string) => {
-  const [ directory, setDirectory ] = useState<any | null>(null);
+  const [
+    directory,
+    setDirectory
+  ] = useState<gapi.client.drive.File | null>(null);
   const signal = useAbortSignal();
 
   useEffect(() => {
@@ -159,7 +163,7 @@ const useDirectory = (parentId?: string) => {
       }
       try {
         const directory = await getParent(parentId);
-        if(!signal.aborted) {
+        if(!signal.aborted && directory) {
           setDirectory(directory);
         }
       }
@@ -245,7 +249,7 @@ const useEdgeFileId = (options: UseEdgeFileIdOptions) => {
           edge
         });
         if(!signal.aborted){
-          if (edgeFiles.length) {
+          if (edgeFiles && edgeFiles.length && edgeFiles[0].id) {
             setEdgeFileId(edgeFiles[0].id);
           } else {
             setEdgeFileId('');
@@ -272,7 +276,10 @@ const useEdgeFileId = (options: UseEdgeFileIdOptions) => {
 };
 
 const useDirectories = (grandParentId?: string) => {
-  const [ directories, setDirectories ] = useState<any[]>([]);
+  const [
+    directories,
+    setDirectories
+  ] = useState<gapi.client.drive.File[]>([]);
   const signal = useAbortSignal();
 
   useEffect(() => {
@@ -282,8 +289,8 @@ const useDirectories = (grandParentId?: string) => {
       }
       try {
         const result = await listDirectories(grandParentId);
-        if(!signal.aborted) {
-          setDirectories(result.files)
+        if(!signal.aborted && result) {
+          setDirectories(result.files || [])
         }
       }
       catch(err) {
@@ -317,7 +324,7 @@ const useDrive = (parentId?: string) => {
   });
   const directory = useDirectory(parentId);
   const directories = useDirectories(
-    directory ?
+    (directory && directory.parents) ?
       directory.parents[0] :
       ''
   );
@@ -341,9 +348,13 @@ const useDrive = (parentId?: string) => {
   useEffect(() => {
     if (directoryIndex >= 0) {
       const prev = directories[directoryIndex - 1];
-      setPrevDirId(prev ? prev.id : '');
+      if (prev && prev.id) {
+        setPrevDirId(prev.id);
+      }
       const next = directories[directoryIndex + 1];
-      setNextDirId(next ? next.id : '');
+      if (next && next.id) {
+        setNextDirId(next.id);
+      }
     }
   }, [
     directories,

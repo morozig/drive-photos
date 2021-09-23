@@ -38,7 +38,7 @@ export interface ViewerRef {
 
 interface ViewerProps {
   fitMode: FitMode;
-  files: any[];
+  files: gapi.client.drive.File[];
   onNextImage: () => void;
   onPrevImage: () => void;
   onFitModeChange: (fitMode: FitMode) => void;

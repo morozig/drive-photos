@@ -57,7 +57,8 @@ interface TopbarProps {
   counterTitle: string;
   fitMode: FitMode;
   onFitModeChange: (fitMode: FitMode) => void;
-  onOpenFile: (file: any) => void;
+  onOpenFile: (file: google.picker.DocumentObject) => void;
+  onRecentFile: (file: RecentFile) => void;
   fullscreenButtonActive?: boolean;
   onToggleFullscreen: () => void;
   isFirstImageEnabled?: boolean;
@@ -86,6 +87,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
     fitMode,
     onFitModeChange,
     onOpenFile,
+    onRecentFile,
     fullscreenButtonActive,
     onToggleFullscreen,
     isFirstImageEnabled,
@@ -172,11 +174,11 @@ const Topbar: React.FC<TopbarProps> = (props) => {
   const onRecentFileClick = useCallback((recentFile: RecentFile) => {
     handleRecentMenuClose();
     handleMenuClose();
-    onOpenFile(recentFile);
+    onRecentFile(recentFile);
   }, [
     handleRecentMenuClose,
     handleMenuClose,
-    onOpenFile
+    onRecentFile
   ]);
   const handleHelpMenuClose = useCallback(() => {
     setHelpMenuOpen(false);
