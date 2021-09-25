@@ -176,7 +176,7 @@ const listFiles = async (options: ListFilesOptions) => {
       fields: 'files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
       // fields: '*',
       pageSize: 1000,
-      orderBy: 'name',
+      orderBy: 'name_natural',
       pageToken
     });
     // console.log({result});
@@ -207,7 +207,7 @@ const getEdgeFiles = async (options: GetEdgeFileOptions) => {
       fields: 'files(id, name)',
       pageSize: 1,
       orderBy: edge === DirectoryEdge.Begin ?
-        'name' : 'name desc'
+        'name_natural' : 'name_natural desc'
     });
     return (
       result.result ?
@@ -240,7 +240,7 @@ const listDirectories = async (grandParentId: string) => {
       // fields: 'files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
       fields: '*',
       pageSize: 1000,
-      orderBy: 'name'
+      orderBy: 'name_natural'
     });
     // console.log({result});
     return result.result;
