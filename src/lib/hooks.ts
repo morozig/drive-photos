@@ -402,6 +402,11 @@ const useRecentFiles = () => {
       current => [file].concat(current.slice(0, recentLength - 1))
     );
   }, []);
+  const remove = useCallback((file: RecentFile) => {
+    setRecentFiles(
+      current => current.filter(other => other.id !== file.id)
+    );
+  }, []);
   const clear = useCallback(() => {
     setRecentFiles([]);
   }, []);
@@ -428,6 +433,7 @@ const useRecentFiles = () => {
     recentFiles,
     replace,
     shift,
+    remove,
     clear
   };
 };

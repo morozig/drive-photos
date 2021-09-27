@@ -12,7 +12,12 @@ import {
   Drawer,
   SwipeableDrawer
 } from '@material-ui/core';
-import { useDrive, useIsSmallScreen, useRecentFiles } from '../../lib/hooks';
+import {
+  RecentFile,
+  useDrive,
+  useIsSmallScreen,
+  useRecentFiles
+} from '../../lib/hooks';
 import Thumbnails from './components/thumbnails';
 import Viewer, { ViewerRef } from './components/viewer';
 import Topbar from './components/topbar';
@@ -67,6 +72,7 @@ const View: React.FC = () => {
     recentFiles,
     replace,
     shift,
+    remove,
     clear
   } = useRecentFiles();
   const fileJustOpenedRef = useRef(false);
@@ -77,6 +83,15 @@ const View: React.FC = () => {
     setIsScrollToBottom(false);
     fileJustOpenedRef.current = true;
   }, []);
+  const onRecentFile = useCallback((file: RecentFile) => {
+    setFileId(file.id);
+    setParentId(file.parentId);
+    setIsScrollToBottom(false);
+    remove(file);
+    fileJustOpenedRef.current = true;
+  }, [
+    remove
+  ]);
 
   const activeIndex = useMemo(() => {
     if (fileId && files.length > 0) {
@@ -377,7 +392,7 @@ const View: React.FC = () => {
           fitMode={fitMode}
           onFitModeChange={setFitMode}
           onOpenFile={onOpenFile}
-          onRecentFile={onOpenFile}
+          onRecentFile={onRecentFile}
           fullscreenButtonActive={files.length > 0}
           onToggleFullscreen={onToggleFullscreen}
           isFirstImageEnabled={isFirstImageEnabled}
