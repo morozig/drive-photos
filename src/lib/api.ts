@@ -151,7 +151,8 @@ const getFile = async (fileId: string) => {
   try {
     const result = await gapi.client.drive.files.get({
       fileId,
-      fields: '*'
+      // fields: '*'
+      fields: 'id, name, thumbnailLink, webContentLink, imageMediaMetadata/*',
     });
     return result.result;
   }
@@ -173,7 +174,7 @@ const listFiles = async (options: ListFilesOptions) => {
   try {
     const result = await gapi.client.drive.files.list({
       q: `'${parentId}' in parents and mimeType contains 'image/'`,
-      fields: 'files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
+      fields: 'nextPageToken, files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
       // fields: '*',
       pageSize: 1000,
       orderBy: 'name_natural',

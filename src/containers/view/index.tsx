@@ -60,13 +60,12 @@ const View: React.FC = () => {
 
   const {
     files,
-    directoryId,
-    directoryName,
-    prevDirId,
-    prevDirFileId,
-    nextDirId,
-    nextDirFileId
-  } = useDrive(parentId);
+    parent,
+    prevFile,
+    prevDirectory,
+    nextFile,
+    nextDirectory,
+  } = useDrive(fileId, parentId);
 
   const {
     recentFiles,
@@ -107,16 +106,14 @@ const View: React.FC = () => {
   useEffect(() => {
     const activeFile = files[activeIndex];
     const fileName = activeFile ? activeFile.name : '';
-    const title = (directoryName && fileName) ? 
-      `${directoryName}/${fileName}` : '';
-    const documentTitle = title ?
-      `${title} | ${defaultTitle}` : defaultTitle;
-    setTitle(title || defaultTitle);
-    document.title = documentTitle;
-    if (activeFile && directoryId && title && activeFile.id) {
+    if (parent && parent.name && fileName) {
+      const title = `${parent.name}/${fileName}`;
+      const documentTitle = `${title} | ${defaultTitle}`;
+      setTitle(title);
+      document.title = documentTitle;
       const recentFile = {
-        id: activeFile.id,
-        parentId: directoryId,
+        id: activeFile.id || '',
+        parentId: parent.id || '',
         title
       };
       if (fileJustOpenedRef.current) {
@@ -128,8 +125,7 @@ const View: React.FC = () => {
     }
   }, [
     activeIndex,
-    directoryId,
-    directoryName,
+    parent,
     files,
     replace,
     shift
@@ -158,12 +154,12 @@ const View: React.FC = () => {
     }
     return (
       activeIndex > 0 ||
-      !!prevDirFileId
+      !!prevFile
     )
   }, [
     activeIndex,
     files.length,
-    prevDirFileId
+    prevFile
   ]);
   const isNextImageEnabled = useMemo(() => {
     if (activeIndex < 0 || files.length < 0) {
@@ -171,12 +167,12 @@ const View: React.FC = () => {
     }
     return (
       activeIndex < files.length - 1 ||
-      !!nextDirFileId
+      !!nextFile
     )
   }, [
     activeIndex,
     files.length,
-    nextDirFileId
+    nextFile
   ]);
   const isLastImageEnabled = useMemo(() => {
     if (activeIndex < 0 || files.length < 0) {
@@ -208,17 +204,23 @@ const View: React.FC = () => {
       setFileId(files[newIndex].id || '');
       setIsScrollToBottom(true);
     } else {
-      if (prevDirId && prevDirFileId) {
-        setFileId(prevDirFileId);
-        setParentId(prevDirId);
+      if (prevDirectory && prevFile) {
+        setFileId(prevFile.id || '');
+        setParentId(prevDirectory.id || '');
         setIsScrollToBottom(true);
+        if (prevDirectory.name && prevFile.name) {
+          const title = `${prevDirectory.name}/${prevFile.name}`;
+          setTitle(title);
+          const documentTitle = `${title} | ${defaultTitle}`;
+          document.title = documentTitle;
+        }
       }
     }
   }, [
     activeIndex,
     files,
-    prevDirId,
-    prevDirFileId
+    prevDirectory,
+    prevFile
   ]);
   const onNextImage = useCallback(() => {
     const newIndex = activeIndex + 1;
@@ -226,17 +228,23 @@ const View: React.FC = () => {
       setFileId(files[newIndex].id || '');
       setIsScrollToBottom(false);
     } else {
-      if (nextDirId && nextDirFileId) {
-        setFileId(nextDirFileId);
-        setParentId(nextDirId);
+      if (nextDirectory && nextFile) {
+        setFileId(nextFile.id || '');
+        setParentId(nextDirectory.id || '');
         setIsScrollToBottom(false);
+        if (nextDirectory.name && nextFile.name) {
+          const title = `${nextDirectory.name}/${nextFile.name}`;
+          setTitle(title);
+          const documentTitle = `${title} | ${defaultTitle}`;
+          document.title = documentTitle;
+        }
       }
     }
   }, [
     activeIndex,
     files,
-    nextDirId,
-    nextDirFileId
+    nextDirectory,
+    nextFile
   ]);
   const onLastImage = useCallback(() => {
     const newIndex = files.length - 1;

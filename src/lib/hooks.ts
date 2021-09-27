@@ -18,7 +18,8 @@ import {
   subscribeToGapiErrors,
   subscribeToSignedInChange,
   getGapiError,
-  Profile
+  Profile,
+  getFile
 } from './api';
 import Screenfull from './screenfull';
 import { useTheme } from '@material-ui/core/styles';
@@ -100,19 +101,45 @@ const useIsSignedIn = (onSignOut?: () => void) => {
   };
 };
 
-const useFiles = (parentId?: string) => {
+const useFiles = (fileId: string, parentId: string) => {
+  const [ file, setFile ] = useState<gapi.client.drive.File | undefined>();
   const [ files, setFiles ] = useState<gapi.client.drive.File[]>([]);
   const [ pageToken, setPageToken ] = useState<string | undefined>();
   const signal = useAbortSignal();
   const parentIdRef = useRef<string | undefined>(parentId);
+  const isFinishedRef = useRef(false);
 
   useEffect(() => {
+    const run = async () => {
+      try {
+        const file = await getFile(fileId);
+        if(!signal.aborted && file) {
+          setFile(file);
+        }
+      }
+      catch(err) {
+        console.log(err);
+      }
+    };
+
     if (parentId !== parentIdRef.current) {
-      setFiles([]);
+      if (parentIdRef.current) {
+        setFiles([]);
+        setFile(undefined);
+        setPageToken(undefined);
+        isFinishedRef.current = false;
+      }
       parentIdRef.current = parentId;
+      if (fileId) {
+        run();
+      } else {
+        setFile(undefined);
+      }
     }
   }, [
-    parentId
+    parentId,
+    fileId,
+    signal
   ]);
 
   useEffect(() => {
@@ -127,9 +154,8 @@ const useFiles = (parentId?: string) => {
         });
         if(!signal.aborted && result) {
           setFiles(prevFiles => prevFiles.concat(result.files || []))
-          if (result.nextPageToken) {
-            setPageToken(result.nextPageToken);
-          }
+          isFinishedRef.current = !result.nextPageToken;
+          setPageToken(result.nextPageToken);
         }
       }
       catch(err) {
@@ -137,25 +163,45 @@ const useFiles = (parentId?: string) => {
       }
     };
 
-    if (parentId) {
+    if (parentId && !isFinishedRef.current) {
       run();
     }
   }, [
-    pageToken,
     parentId,
+    pageToken,
     signal
   ]);
   
-  return files;
+  const readyFiles = useMemo(() => {
+    if (file && file.id && !files.find(other => other.id === file.id)) {
+      return [ file ];
+    } else return files;
+  }, [
+    file,
+    files
+  ]);
+  return readyFiles;
 };
 
 const useDirectory = (parentId?: string) => {
   const [
     directory,
     setDirectory
-  ] = useState<gapi.client.drive.File | null>(null);
+  ] = useState<gapi.client.drive.File | undefined>(undefined);
   const signal = useAbortSignal();
+  const parentIdRef = useRef<string | undefined>(parentId);
 
+  useEffect(() => {
+    if (parentId !== parentIdRef.current) {
+      if (parentIdRef.current) {
+        setDirectory(undefined);
+      }
+      parentIdRef.current = parentId;
+    }
+  }, [
+    parentId
+  ]);
+  
   useEffect(() => {
     const run = async () => {
       if (!parentId) {
@@ -225,34 +271,34 @@ const useFullScreen = () => {
   };
 };
 
-interface UseEdgeFileIdOptions {
-  parentId?: string;
+interface UseEdgeFileOptions {
+  parent: gapi.client.drive.File | undefined;
   edge: DirectoryEdge;
 };
 
-const useEdgeFileId = (options: UseEdgeFileIdOptions) => {
+const useEdgeFile = (options: UseEdgeFileOptions) => {
   const {
-    parentId,
+    parent,
     edge
   } = options;
-  const [ edgeFileId, setEdgeFileId ] = useState('');
+  const [ file, setFile ] = useState<gapi.client.drive.File | undefined>();
   const signal = useAbortSignal();
 
   useEffect(() => {
     const run = async () => {
-      if (!parentId) {
+      if (!parent || !parent.id) {
         return;
       }
       try {
         const edgeFiles = await getEdgeFiles({
-          parentId,
+          parentId: parent.id,
           edge
         });
         if(!signal.aborted){
-          if (edgeFiles && edgeFiles.length && edgeFiles[0].id) {
-            setEdgeFileId(edgeFiles[0].id);
+          if (edgeFiles && edgeFiles.length && edgeFiles[0]) {
+            setFile(edgeFiles[0]);
           } else {
-            setEdgeFileId('');
+            setFile(undefined);
           }
         }
       }
@@ -261,18 +307,18 @@ const useEdgeFileId = (options: UseEdgeFileIdOptions) => {
       }
     };
 
-    if (parentId) {
+    if (parent && parent.id) {
       run();
     } else {
-      setEdgeFileId('');
+      setFile(undefined);
     }
   }, [
-    parentId,
+    parent,
     edge,
     signal
   ]);
   
-  return edgeFileId;
+  return file;
 };
 
 const useDirectories = (grandParentId?: string) => {
@@ -309,23 +355,12 @@ const useDirectories = (grandParentId?: string) => {
   return directories;
 };
 
-const useDrive = (parentId?: string) => {
-  const [ prevDirId, setPrevDirId ] = useState('');
-  const [ nextDirId, setNextDirId ] = useState('');
-  
-  const prevDirFileId = useEdgeFileId({
-    parentId: prevDirId,
-    edge: DirectoryEdge.End
-  });
-  const files = useFiles(parentId);
-  const nextDirFileId = useEdgeFileId({
-    parentId: nextDirId,
-    edge: DirectoryEdge.Begin
-  });
-  const directory = useDirectory(parentId);
+const useDrive = (fileId: string, parentId: string) => {
+  const files = useFiles(fileId, parentId);
+  const parent = useDirectory(parentId);
   const directories = useDirectories(
-    (directory && directory.parents) ?
-      directory.parents[0] :
+    (parent && parent.parents) ?
+      parent.parents[0] :
       ''
   );
   const directoryIndex = useMemo(() => {
@@ -334,41 +369,36 @@ const useDrive = (parentId?: string) => {
     parentId,
     directories
   ]);
-  const directoryId = useMemo(() => {
-    return directory ? (directory.id as string || '') : '';
-  }, [
-    directory
-  ]);
-  const directoryName = useMemo(() => {
-    return directory ? (directory.name as string || '') : '';
-  }, [
-    directory
-  ]);
-
-  useEffect(() => {
-    if (directoryIndex >= 0) {
-      const prev = directories[directoryIndex - 1];
-      if (prev && prev.id) {
-        setPrevDirId(prev.id);
-      }
-      const next = directories[directoryIndex + 1];
-      if (next && next.id) {
-        setNextDirId(next.id);
-      }
-    }
+  const prevDirectory = useMemo(() => {
+    return directories[directoryIndex - 1] ?
+      directories[directoryIndex - 1] : undefined;
   }, [
     directories,
     directoryIndex
   ]);
+  const nextDirectory = useMemo(() => {
+    return directories[directoryIndex + 1] ?
+      directories[directoryIndex + 1] : undefined;
+  }, [
+    directories,
+    directoryIndex
+  ]);
+  const prevFile = useEdgeFile({
+    parent: prevDirectory,
+    edge: DirectoryEdge.End
+  });
+  const nextFile = useEdgeFile({
+    parent: nextDirectory,
+    edge: DirectoryEdge.Begin
+  });
 
   return {
     files,
-    directoryId,
-    directoryName,
-    prevDirId,
-    prevDirFileId,
-    nextDirId,
-    nextDirFileId
+    parent,
+    prevFile,
+    prevDirectory,
+    nextFile,
+    nextDirectory
   }
 };
 
