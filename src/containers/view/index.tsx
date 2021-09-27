@@ -485,9 +485,10 @@ const View: React.FC = () => {
         flexDirection: 'column'
       }}>
         <Toolbar />
-        {files.length > 0 &&
+        {!!fileId &&
           <Viewer
             fitMode={fitMode}
+            fileId={fileId}
             files={viewFiles}
             onPrevImage={onPrevImage}
             onNextImage={onNextImage}

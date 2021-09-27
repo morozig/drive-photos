@@ -1,5 +1,4 @@
 import React, {
-  useMemo,
   useEffect,
   forwardRef,
   useImperativeHandle,
@@ -38,6 +37,7 @@ export interface ViewerRef {
 
 interface ViewerProps {
   fitMode: FitMode;
+  fileId: string;
   files: gapi.client.drive.File[];
   onNextImage: () => void;
   onPrevImage: () => void;
@@ -60,6 +60,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
   (props, viewerRef) => {
   const {
     fitMode,
+    fileId,
     files,
     onNextImage,
     onPrevImage,
@@ -96,16 +97,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     scrollNextSlide
   ]);
 
-  const activeFileId = useMemo(() => {
-    return (files.length > 0) ?
-      files[0].id as string :
-      '';
-  }, [
-    files
-  ]);
-
   useEffect(() => {
-    if (activeFileId && ref.current) {
+    if (fileId && ref.current) {
       if (isScrollToBottom) {
         scrollToBottom();
       } else {
@@ -113,7 +106,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
       }
     }
   }, [
-    activeFileId,
+    fileId,
     ref,
     scrollToTop,
     isScrollToBottom,
@@ -218,7 +211,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
           bottom: 0,
           overflow: 'auto',
           whiteSpace: 'nowrap',
-          ...(files.length > 0 && {
+          ...(!!fileId && {
             bgcolor: 'common.black'
           })
         }}
