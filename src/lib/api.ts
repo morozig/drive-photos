@@ -65,8 +65,11 @@ const onPick = (response: google.picker.ResponseObject) => {
 };
 
 const createPicker = () => {
-  if (!GoogleAuth || !apiKey) {
+  if (!GoogleAuth) {
     throw new Error('not authed');
+  }
+  if (!apiKey) {
+    throw new Error('set gapi key');
   }
   const user = GoogleAuth.currentUser.get();
   const authResponse = user.getAuthResponse(true);
