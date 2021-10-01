@@ -16,7 +16,7 @@ import {
   ListItemIcon,
   ListItemText
 } from '@material-ui/core';
-import { useScrollActions } from './hooks';
+import { useDelayedId, useScrollActions } from './hooks';
 import { FitMode } from '../..';
 import { useFullScreen } from '../../../../lib/hooks';
 import FullscreenEnterIcon from '@material-ui/icons/Fullscreen';
@@ -193,6 +193,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     onToggleSlideshowPlaying,
     onClose
   ]);
+  const preRenderId = useDelayedId(files[1]);
 
   return (
     <Box sx={{
@@ -230,7 +231,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
             key={file.id}
             src={file.webContentLink}
             alt={file.name}
-            sx={i === 0 ?
+            sx={i <= 1 ?
               {
                 verticalAlign: 'middle',
                 ...(fitMode === FitMode.Best && {
@@ -242,7 +243,14 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
                 }),
                 ...(fitMode === FitMode.Height && {
                   maxHeight: '100%'
-                })
+                }),
+                ...(i === 1 && file.id === preRenderId && {
+                  position: 'fixed',
+                  // zIndex: -2
+                }),
+                ...(i === 1 && file.id !== preRenderId && {
+                  display: 'none'
+                }),
               } : {
                 display: 'none'
               }

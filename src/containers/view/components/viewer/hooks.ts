@@ -1,8 +1,10 @@
 import {
   useEffect,
   useRef,
-  useCallback
+  useCallback,
+  useState
 } from 'react';
+import { useAbortSignal } from '../../../../lib/hooks';
 
 interface ScrollActionsOptions {
   wheelCount?: number;
@@ -129,6 +131,26 @@ const useScrollActions = (options: ScrollActionsOptions) => {
   };
 };
 
+const useDelayedId = (file?: gapi.client.drive.File) => {
+  const [ delayedId, setDelayedId ] = useState('');
+  const signal = useAbortSignal();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const delayedId = (file && file.id) ? file.id: '';
+      if (!signal.aborted) {
+        setDelayedId(delayedId);
+      }
+    }, 100);
+    return () => clearTimeout(timeout);
+  }, [
+    file,
+    signal.aborted
+  ]);
+  return delayedId;
+};
+
 export {
-  useScrollActions
+  useScrollActions,
+  useDelayedId
 }
