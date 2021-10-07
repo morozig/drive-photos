@@ -27,6 +27,7 @@ import FitHeightIcon from '@material-ui/icons/CropLandscape';
 import FitOriginalIcon from '@material-ui/icons/CropOriginal';
 import StartSlideshowIcon from '@material-ui/icons/PlayArrow';
 import EndSlideshowIcon from '@material-ui/icons/Pause';
+import ImageSkeleton from '../image-skeleton';
 
 const wheelCount = 3;
 const slideShowInterval = 5000;
@@ -193,6 +194,14 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     onToggleSlideshowPlaying,
     onClose
   ]);
+  const onClickContainer = useCallback(() => {
+    if (files[0]) {
+      onNextImage();
+    }
+  }, [
+    files,
+    onNextImage
+  ]);
   const preRenderId = useDelayedId(files[1]);
 
   return (
@@ -211,13 +220,59 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
           right: 0,
           bottom: 0,
           overflow: 'auto',
-          whiteSpace: 'nowrap',
-          ...(!!fileId && {
-            bgcolor: 'common.black'
-          })
+          whiteSpace: 'nowrap'
         }}
         ref={ref}
+        onClick={onClickContainer}
       >
+        <Box
+          component='div'
+          key={'back'}
+          sx={{
+            textAlign: 'center',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            overflow: 'hidden',
+            zIndex: -1,
+            whiteSpace: 'nowrap',
+            ...(!!fileId && {
+              bgcolor: 'common.black'
+            })
+          }}
+        >
+          <Box
+            component='span'
+            sx={{
+              height: '100%',
+              verticalAlign: 'middle',
+              display: 'inline-block'
+            }}
+          />
+          {
+            files[0] && files[0].imageMediaMetadata &&
+            files[0].imageMediaMetadata.width && files[0].imageMediaMetadata.height &&
+            <ImageSkeleton
+              width={files[0].imageMediaMetadata.width}
+              height={files[0].imageMediaMetadata.height}
+              sx={{
+                verticalAlign: 'middle',
+                ...(fitMode === FitMode.Best && {
+                  maxWidth: '100%',
+                  maxHeight: '100%'
+                }),
+                ...(fitMode === FitMode.Width && {
+                  maxWidth: '100%'
+                }),
+                ...(fitMode === FitMode.Height && {
+                  maxHeight: '100%'
+                }),
+              }}
+            />
+          }
+        </Box>
         <Box
           component='span'
           sx={{
@@ -246,7 +301,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
                 }),
                 ...(i === 1 && file.id === preRenderId && {
                   position: 'fixed',
-                  zIndex: -2
+                  zIndex: -2,
+                  right: '100px'
                 }),
                 ...(i === 1 && file.id !== preRenderId && {
                   display: 'none'
@@ -255,8 +311,6 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
                 display: 'none'
               }
             }
-            onClick={onNextImage}
-            // onLoad={i === 0 ? onImageLoad : undefined}
           />
         ))}
         <Menu
