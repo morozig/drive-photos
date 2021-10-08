@@ -41,7 +41,8 @@ const ImageSkeleton: React.FC<ImageSkeletonProps> = (props) => {
       xmlns='http://www.w3.org/2000/svg'
       viewBox={`0 0 ${width} ${height}`}
       sx={{
-        height: `${height}px`,
+        width: { xs: `${width}px`, md: undefined},
+        height: { xs: undefined, md: `${height}px`},
         bgcolor: 'grey.900',
         animation: `${pulseKeyframe} 1.5s ease-in-out 0.5s infinite`,
         ...sx,
