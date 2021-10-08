@@ -4,21 +4,28 @@ import {
   Box,
   ImageListItemBar
 } from '@material-ui/core';
+import { ItemProps } from './VirtualGrid';
 
-interface ThumbnailProps {
+interface GridItem {
   file: gapi.client.drive.File;
-  counter: number,
-  isActive: boolean;
-  onClick: () => void;
+  counter: number;
 }
 
-const Thumbnail: React.FC<ThumbnailProps> = (props: ThumbnailProps) => {
+type ThumbnailProps = ItemProps<GridItem>;
+
+export const itemToKey = (item: GridItem) => item.file.name || item.counter;
+
+const ThumbnailInner: React.FC<ThumbnailProps> = (props) => {
   const {
-    file,
-    counter,
+    item,
     isActive,
     onClick
   } = props;
+
+  const {
+    file,
+    counter
+  } = item;
 
   return (
     <Box
@@ -26,6 +33,7 @@ const Thumbnail: React.FC<ThumbnailProps> = (props: ThumbnailProps) => {
         height: 220,
         width: 220,
         borderRadius: '6px',
+        cursor: 'pointer',
         boxSizing: 'border-box',
         overflow: 'hidden',
         display: 'grid',
@@ -64,5 +72,16 @@ const Thumbnail: React.FC<ThumbnailProps> = (props: ThumbnailProps) => {
     </Box>
   );
 };
+
+const Thumbnail = React.memo(ThumbnailInner,
+  (prevProps, nextProps) => {
+    const areEqual = (
+      (prevProps.item.file.id === nextProps.item.file.id) &&
+      (prevProps.isActive === nextProps.isActive)
+    );
+    return areEqual;
+  }
+);
+
 
 export default Thumbnail;

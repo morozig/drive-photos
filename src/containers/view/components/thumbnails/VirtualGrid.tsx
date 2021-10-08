@@ -1,16 +1,17 @@
 import React, {
-  useMemo,
-  useEffect,
   useCallback,
+  useEffect,
+  useImperativeHandle,
   forwardRef,
-  useImperativeHandle
-} from 'react';
-import './VirtualGrid.css';
-import { useScrollAware } from './hooks';
-
-export interface ItemProps {
-  index: number;
-}
+  useMemo
+} from 'react'
+import { useRectSize, useScroll } from './hooks';
+import {
+  Box,
+} from '@material-ui/core';
+import {
+  SystemStyleObject
+} from '@material-ui/system';
 
 type ScrollToBlock = 'center' | 'smart';
 
@@ -18,122 +19,82 @@ export interface VirtualGridRef {
   scrollToIndex: (index: number, block?:  ScrollToBlock) => void;
 }
 
-interface VirtualGridProps {
-  Item: React.FC<ItemProps>;
-  itemsCount: number;
-  height: number;
-  itemHeight: number;
-  rowsAhead: number;
-  rowGap?: number;
-  columnGap?: number;
-  width?: number;
-  itemWidth?: number;
-  className?: string;
-  scrollBar?: 'right' | 'left' | 'none',
-  scrollToIndex?: number;
-  onVisibleRows?: (rows: number[]) => void;
-  center?: boolean;
+export interface ItemProps<Item> {
+  item: Item;
+  isActive: boolean;
+  onClick: () => void;
 }
 
-const scrollBarWidth = 19;
+interface VirtualGridProps<Item> {
+  items: Item[];
+  itemHeight: number;
+  itemWidth?: number;
+  ItemElement: React.FC<ItemProps<Item>>;
+  itemToKey: (item: Item) => React.Key;
+  activeIndex: number;
+  onActive: (index: number) => void;
+  scrollToIndex?: number;
+  onVisibleRows?: (rows: number[]) => void;
+  numColumns?: number;
+  center?: boolean;
+  sx?: SystemStyleObject;
+}
 
-const VirtualGrid = forwardRef<VirtualGridRef, VirtualGridProps>(
-  (props, scrollRef) => {
+const columnGap = 4;
+const rowGap = 4;
+const scrollBarWidth = 20;
+const rowsAhead = 1;
+
+const VirtualGridInner = <Item,>(
+  props: VirtualGridProps<Item>,
+  virtualGridRef?: React.ForwardedRef<VirtualGridRef>
+) => {
   const {
-    Item,
-    height,
+    items,
     itemHeight,
-    itemsCount,
-    rowsAhead,
-    rowGap = 0,
-    columnGap = 0,
-    width,
     itemWidth,
-    scrollBar = 'right',
+    ItemElement,
+    itemToKey,
+    activeIndex,
+    onActive,
     scrollToIndex,
     onVisibleRows,
-    center = false
+    numColumns,
+    center,
+    sx
   } = props;
 
-  const className = 'VirtualGrid '.concat(
-    props.className ? `${props.className} ` : '',
-    `VirtualGrid--${scrollBar}`
-  );
+  const {
+    ref,
+    rectSize
+  } = useRectSize();
 
-  const itemsInRow = (width && itemWidth && width > itemWidth) ?
-    Math.floor((width + columnGap - scrollBarWidth) /
-    (itemWidth + columnGap)) : 1;
+  const {
+    width,
+    height
+  } = useMemo(() => ({...rectSize}), [
+    rectSize
+  ]);
+
+  const itemsCount = items.length;
+
+  const itemsInRow = numColumns ?
+    numColumns :
+    (width && itemWidth) ?
+      Math.floor(
+        (width + columnGap - scrollBarWidth) /
+        (itemWidth + columnGap)
+      ) : 1;
+
   const rowsCount = Math.ceil(itemsCount / itemsInRow);
 
   const {
-    ref,
-    scrollTop
-  } = useScrollAware();
-
-  const indexToOffset = useCallback((index: number, block: ScrollToBlock) => {
-    const scrollToRow = index &&
-      Math.floor(index / itemsInRow);
-    let scrollOffset = 0;
-    if (block === 'smart') {
-      const scrollToRowTop = scrollToRow &&
-        Math.ceil(scrollToRow * (itemHeight + rowGap));
-      const scrollToRowBottom = scrollToRowTop + itemHeight;
-      const scrollBottom = scrollTop + height;
-
-      // console.log({scrollToRowTop, scrollBottom, height, itemHeight});
-
-      if (scrollToRowTop >= scrollTop && scrollToRowBottom <= scrollBottom) {
-        return scrollTop;
-      } else if (scrollToRowBottom > scrollTop && scrollToRowTop < scrollTop) {
-        scrollOffset = 0
-      } else if (scrollToRowTop < scrollBottom && scrollToRowBottom > scrollBottom) {
-        scrollOffset = height - itemHeight;
-      }
-    } else {
-      scrollOffset = Math.ceil(height / 2 - itemHeight / 2);
-    }
-    const scrollTo = index && scrollToRow &&
-      Math.ceil(scrollToRow * (itemHeight + rowGap)) -
-        scrollOffset;
-    return scrollTo;
-  }, [
-    rowGap,
-    height,
-    itemHeight,
-    itemsInRow,
-    scrollTop
-  ]);
+    scrollTop,
+    isScrolling
+  }= useScroll(ref);
 
   const totalHeight = rowsCount * itemHeight +
     (rowsCount - 1) * rowGap;
-
-  useImperativeHandle(scrollRef, () => ({
-    scrollToIndex(index: number, block = 'center') {
-      const scrollTo = indexToOffset(index, block);
-      if (ref.current) {
-        const div = ref.current;
-        div.scroll(0, scrollTo);
-      }
-    }
-  }), [
-    indexToOffset,
-    ref
-  ]);
-
-  useEffect(() => {
-    if (ref.current) {
-      if (scrollToIndex !== undefined) {
-        const scrollTo = indexToOffset(scrollToIndex, 'center');
-        const div = ref.current;
-        div.scroll(0, scrollTo);
-      }
-    }
-  }, [
-    indexToOffset,
-    ref,
-    scrollToIndex
-  ]);
-
   const startRow = Math.max(
     0,
     Math.floor(scrollTop / (itemHeight + rowGap)) - rowsAhead
@@ -142,8 +103,11 @@ const VirtualGrid = forwardRef<VirtualGridRef, VirtualGridProps>(
 
   const visibleItemsCount = Math.min(
     itemsCount - startItem,
-    (Math.ceil(height / (itemHeight + rowGap)) + 2 * rowsAhead)
-      * itemsInRow
+    (
+      rowsAhead + (
+        Math.ceil(height / (itemHeight + rowGap)) + 2 * rowsAhead
+      ) + rowsAhead
+    ) * itemsInRow
   );
 
   const offsetY = startRow * (itemHeight + rowGap);
@@ -169,61 +133,136 @@ const VirtualGrid = forwardRef<VirtualGridRef, VirtualGridProps>(
     onVisibleRows
   ]);
 
-  const visibleItems = useMemo(() =>
-    (visibleItemsCount > 0) ?
-      new Array(visibleItemsCount)
-        .fill(null)
-        .map((_ , index) => (
-          <Item
-            key={index + startItem}
-            index={index + startItem}
-          />
-        )) :
-      []
-  ,[startItem, visibleItemsCount, Item]);
+  const visibleItems = useMemo(() => items
+    .slice(startItem, startItem + visibleItemsCount)
+    .map((item, i) => (
+      <ItemElement
+        key={itemToKey(item)}
+        item={item}
+        isActive={startItem + i === activeIndex}
+        onClick={() => {
+          onActive(startItem + i)
+        }}
+      />
+    )),[
+      ItemElement,
+      activeIndex,
+      itemToKey,
+      items,
+      onActive,
+      startItem,
+      visibleItemsCount
+  ]);
 
-  const columnWidth = itemWidth ? `${itemWidth}px` : '1fr';
-  const gridTemplateColumns = `repeat(${itemsInRow}, ${columnWidth})`;
-  const rowWidth = itemWidth &&
-    itemsInRow > 1 ?
-      itemsInRow * itemWidth + (itemsInRow - 1) * columnGap :
-      undefined;
-  const totalWidth = (width && itemWidth && width < itemWidth) ?
-    Math.max(width, itemWidth) : rowWidth;
+  const gridTemplateColumns = width ?
+    `repeat(${itemsInRow}, ${itemWidth}px)` :
+    `repeat(auto-fill, ${itemWidth}px)`;
+
+  const doScrollToIndex = useCallback(
+    (scrollToIndex: number, block = 'center') => {
+      // console.log('doScrollToIndex', {scrollToIndex, block});
+      const scrollToRow = scrollToIndex &&
+        Math.floor(scrollToIndex / itemsInRow);
+      let scrollOffset = 0;
+      if (block === 'smart') {
+        const scrollToRowTop = scrollToRow &&
+          Math.ceil(scrollToRow * (itemHeight + rowGap));
+        const scrollToRowBottom = scrollToRowTop + itemHeight;
+        const scrollBottom = scrollTop + height;
+
+        // console.log({scrollToRowTop, scrollBottom, height, itemHeight});
+
+        if (scrollToRowTop >= scrollTop && scrollToRowBottom <= scrollBottom) {
+          return scrollTop;
+        } else if (scrollToRowBottom > scrollTop && scrollToRowTop < scrollTop) {
+          scrollOffset = 0
+        } else if (scrollToRowTop < scrollBottom && scrollToRowBottom > scrollBottom) {
+          scrollOffset = height - itemHeight;
+        }
+      } else {
+        scrollOffset = Math.ceil(height / 2 - itemHeight / 2);
+      }
+      const scrollTo = scrollToIndex && scrollToRow &&
+        Math.ceil(scrollToRow * (itemHeight + rowGap)) -
+          scrollOffset;
+          
+      if (ref.current) {
+        const div = ref.current;
+        div.scroll(0, scrollTo);
+      }
+  }, [
+    ref,
+    height,
+    itemHeight,
+    itemsInRow,
+    scrollTop
+  ]);
+
+  useImperativeHandle(virtualGridRef, () => ({
+    scrollToIndex(index: number, block = 'center') {
+      doScrollToIndex(index, block);
+    }
+  }), [
+    doScrollToIndex
+  ]);
+
+  useEffect(() => {
+    if (scrollToIndex !== undefined) {
+      doScrollToIndex(scrollToIndex);
+    }
+  }, [
+    doScrollToIndex,
+    scrollToIndex
+  ]);
 
   return (
-    <div
-      className={className}
+    <Box
+      component={'div'}
       ref={ref}
-      style={{
-        height,
-        width
+      sx={{
+        ...sx,
+        overflowY: 'auto',
+        willChange: 'transform'
       }}
     >
-      <div
-        className={'VirtualGrid-area'}
-        style={{
-          height: totalHeight,
-          width: totalWidth
-        }}
-      >
-        <div
-          className={'VirtualGrid-visible'}
-          style={{
-            top: `${offsetY}px`,
-            gap: `${rowGap}px ${columnGap}px`,
-            gridTemplateColumns,
-            ...(center && {
-              justifyContent: 'center',
-              justifyItems: 'center'
-            })
+      {width ?
+        <Box
+          component={'div'}
+          sx={{
+            overflow: 'hidden',
+            position: 'relative',
+            height: `${totalHeight}px`,
+            pointerEvents: isScrolling ? 'none' : undefined
           }}
         >
-          {visibleItems}
-        </div>
-      </div>
-    </div>
+          <Box
+            component={'div'}
+            sx={{
+              width: '100%',
+              position: 'absolute',
+              display: 'grid',
+              gap: '4px',
+              top: `${offsetY}px`,
+              gridTemplateColumns,
+              ...(center && {
+                justifyContent: 'center',
+                justifyItems: 'center'
+              })
+            }}
+          >
+            {visibleItems}
+          </Box>
+        </Box> : null
+      }
+    </Box>
   );
-});
+};
+
+const VirtualGrid = forwardRef(VirtualGridInner) as <Item>(
+  props: VirtualGridProps<Item> & {
+    ref?: React.ForwardedRef<VirtualGridRef>
+  }
+) => ReturnType<typeof VirtualGridInner>;
+
 
 export default VirtualGrid;

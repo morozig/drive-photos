@@ -24,10 +24,26 @@ const useDebounce = <T>(value: T, delay: number) => {
   return debouncedValue;
 };
 
-const useScrollAware = () => {
+const useScroll = (ref: React.RefObject<HTMLDivElement>) => {
   const [scrollTop, setScrollTop] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
+  // const debouncedScrollTop = useDebounce(scrollTop, 15);
   const signal = useAbortSignal();
+  const [ isScrolling, setScrolling ] = useState(false);
+  const isScrollingHandlerRef = useRef<NodeJS.Timeout>();
+
+  const setIsScrolling = useCallback(() => {
+    if (isScrollingHandlerRef.current) {
+      clearTimeout(isScrollingHandlerRef.current);
+    }
+    setScrolling(true);
+    isScrollingHandlerRef.current = setTimeout(() => {
+      if (!signal.aborted) {
+        setScrolling(false);
+      }
+    }, 300)
+  }, [
+    signal
+  ]);
 
   useEffect(() => {
     const scrollContainer = ref.current;
@@ -37,8 +53,9 @@ const useScrollAware = () => {
 
     const onScroll = (e: Event) => {
       const div = e.target as HTMLDivElement;
-      if (div && !signal.aborted) {
+      if (div) {
         setScrollTop(+div.scrollTop);
+        setIsScrolling();
       }
     };
 
@@ -46,13 +63,16 @@ const useScrollAware = () => {
     scrollContainer.addEventListener('scroll', onScroll);
     return () => scrollContainer.removeEventListener('scroll', onScroll);
   }, [
-    signal
+    ref,
+    setIsScrolling
   ]);
 
+  
   return {
     scrollTop,
-    ref
+    isScrolling
   };
+  // return debouncedScrollTop;
 };
 
 interface RectSize {
@@ -104,6 +124,6 @@ const useRectSize = () => {
 
 export {
   useDebounce,
-  useScrollAware,
+  useScroll,
   useRectSize
 }
