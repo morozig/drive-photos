@@ -14,10 +14,9 @@ import { Link as RouterLink } from 'react-router-dom';
 import OpenViewIcon from '@material-ui/icons/OpenInBrowser';
 
 interface ComixProps {
+  jumpHeight: number;
   sx?: SystemStyleObject;
 }
-
-export const jumpHeight = 2500;
 
 const OpenView: React.FC = () => {
   return (
@@ -411,6 +410,7 @@ export const slides = [
 
 const Comix: React.FC<ComixProps> = (props) => {
   const {
+    jumpHeight,
     sx
   } = props;
   return (
