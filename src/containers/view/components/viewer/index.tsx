@@ -298,7 +298,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
                 ...(i === 1 && file.id === preRenderId && {
                   position: 'fixed',
                   zIndex: -2,
-                  right: '100px'
+                  left: '110vw'
                 }),
                 ...(i === 1 && file.id !== preRenderId && {
                   display: 'none'
