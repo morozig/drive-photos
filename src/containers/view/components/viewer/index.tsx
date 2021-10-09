@@ -222,7 +222,11 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
           right: 0,
           bottom: 0,
           overflow: 'auto',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          zIndex: 1,
+          ...(!!fileId && {
+            bgcolor: 'common.black'
+          })
         }}
         ref={ref}
         onClick={onClickContainer}
@@ -239,11 +243,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
             right: 0,
             bottom: 0,
             overflow: 'hidden',
-            zIndex: -1,
             whiteSpace: 'nowrap',
-            ...(!!fileId && {
-              bgcolor: 'common.black'
-            })
+            zIndex: -1,
           }}
         >
           <Box
@@ -285,6 +286,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
             sx={i <= 1 ?
               {
                 verticalAlign: 'middle',
+                zIndex: 1,
                 ...(fitMode === FitMode.Best && {
                   maxWidth: '100%',
                   maxHeight: '100%'
