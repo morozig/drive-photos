@@ -75,7 +75,7 @@ const useScroll = (ref: React.RefObject<HTMLDivElement>) => {
   // return debouncedScrollTop;
 };
 
-interface RectSize {
+export interface RectSize {
   width: number;
   height: number;
 }

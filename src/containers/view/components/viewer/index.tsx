@@ -3,11 +3,10 @@ import React, {
   forwardRef,
   useImperativeHandle,
   useCallback,
-  useState
+  useState,
 } from 'react';
 import {
   SystemStyleObject,
-  styled
 } from '@material-ui/system';
 import {
   Box,
@@ -28,6 +27,7 @@ import FitOriginalIcon from '@material-ui/icons/CropOriginal';
 import StartSlideshowIcon from '@material-ui/icons/PlayArrow';
 import EndSlideshowIcon from '@material-ui/icons/Pause';
 import ImageSkeleton from '../image-skeleton';
+import { useRectSize } from '../thumbnails/hooks';
 
 const wheelCount = 3;
 const slideShowInterval = 5000;
@@ -54,8 +54,6 @@ interface Point {
   x: number;
   y: number;
 };
-
-const Img = styled('img')({});
 
 const Viewer = forwardRef<ViewerRef, ViewerProps>(
   (props, viewerRef) => {
@@ -203,6 +201,10 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     onNextImage
   ]);
   const preRenderId = useDelayedId(files[1]);
+  const {
+    ref: backRef,
+    rectSize: backRectSize
+  } = useRectSize();
 
   return (
     <Box sx={{
@@ -228,6 +230,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
         <Box
           component='div'
           key={'back'}
+          ref={backRef}
           sx={{
             textAlign: 'center',
             position: 'absolute',
@@ -257,18 +260,10 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
             <ImageSkeleton
               width={files[0].imageMediaMetadata.width}
               height={files[0].imageMediaMetadata.height}
+              containerRectSize={backRectSize}
+              fitMode={fitMode}
               sx={{
-                verticalAlign: 'middle',
-                ...(fitMode === FitMode.Best && {
-                  maxWidth: '100%',
-                  maxHeight: '100%'
-                }),
-                ...(fitMode === FitMode.Width && {
-                  maxWidth: '100%'
-                }),
-                ...(fitMode === FitMode.Height && {
-                  maxHeight: '100%'
-                }),
+                verticalAlign: 'middle'
               }}
             />
           }
@@ -282,7 +277,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
           }}
         />
         {files.map((file, i) => (
-          <Img
+          <Box
+            component={'img'}
             key={file.id}
             src={file.webContentLink}
             alt={file.name}
