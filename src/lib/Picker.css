@@ -5,3 +5,14 @@
 .picker-dialog {
   z-index: 20001 !important;
 }
+
+@media (max-width: 900px) {
+  .picker-dialog {
+    top: 0 !important;
+    height: 100vh !important;
+  }
+
+  .picker-dialog-content {
+    height: 99vh !important;
+  }
+}
