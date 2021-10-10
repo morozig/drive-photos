@@ -1,14 +1,14 @@
 {
   "files": {
-    "main.css": "./static/css/main.b515b97c.chunk.css",
-    "main.js": "./static/js/main.25770275.chunk.js",
-    "main.js.map": "./static/js/main.25770275.chunk.js.map",
+    "main.css": "./static/css/main.24eedb14.chunk.css",
+    "main.js": "./static/js/main.12ff7cfb.chunk.js",
+    "main.js.map": "./static/js/main.12ff7cfb.chunk.js.map",
     "runtime-main.js": "./static/js/runtime-main.b2eacd79.js",
     "runtime-main.js.map": "./static/js/runtime-main.b2eacd79.js.map",
     "static/js/2.e5ccd238.chunk.js": "./static/js/2.e5ccd238.chunk.js",
     "static/js/2.e5ccd238.chunk.js.map": "./static/js/2.e5ccd238.chunk.js.map",
     "index.html": "./index.html",
-    "static/css/main.b515b97c.chunk.css.map": "./static/css/main.b515b97c.chunk.css.map",
+    "static/css/main.24eedb14.chunk.css.map": "./static/css/main.24eedb14.chunk.css.map",
     "static/js/2.e5ccd238.chunk.js.LICENSE.txt": "./static/js/2.e5ccd238.chunk.js.LICENSE.txt",
     "static/media/ComicFont.css": "./static/media/ComicSansMS.de268b9e.woff2",
     "static/media/speech-bubble-wide.07d56428.svg": "./static/media/speech-bubble-wide.07d56428.svg",
@@ -17,7 +17,7 @@
   "entrypoints": [
     "static/js/runtime-main.b2eacd79.js",
     "static/js/2.e5ccd238.chunk.js",
-    "static/css/main.b515b97c.chunk.css",
-    "static/js/main.25770275.chunk.js"
+    "static/css/main.24eedb14.chunk.css",
+    "static/js/main.12ff7cfb.chunk.js"
   ]
 }
