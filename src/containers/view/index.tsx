@@ -291,6 +291,8 @@ const View: React.FC = () => {
     setFileId('');
     setParentId('');
     setIsScrollToBottom(false);
+    setTitle(defaultTitle);
+    document.title = defaultTitle;
   }, []);
   const onSignOut = useCallback(() => {
     onCloseFile();
