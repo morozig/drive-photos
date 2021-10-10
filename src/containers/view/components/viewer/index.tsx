@@ -192,14 +192,6 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     onToggleSlideshowPlaying,
     onClose
   ]);
-  const onClickContainer = useCallback(() => {
-    if (files[0]) {
-      onNextImage();
-    }
-  }, [
-    files,
-    onNextImage
-  ]);
   const preRenderId = useDelayedId(files[1]);
   const {
     ref: backRef,
@@ -229,12 +221,12 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
           })
         }}
         ref={ref}
-        onClick={onClickContainer}
       >
         <Box
           component='div'
           key={'back'}
           ref={backRef}
+          onClick={onNextImage}
           sx={{
             textAlign: 'center',
             position: 'absolute',
@@ -283,6 +275,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
             key={file.id}
             src={file.webContentLink}
             alt={file.name}
+            onClick={onNextImage}
             sx={i <= 1 ?
               {
                 verticalAlign: 'middle',
