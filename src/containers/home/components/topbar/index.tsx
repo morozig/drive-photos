@@ -16,6 +16,7 @@ import {
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import HelpIcon from '@material-ui/icons/HelpOutline';
+import AboutIcon from '@material-ui/icons/Info';
 import PolicyIcon from '@material-ui/icons/Policy';
 import TermsIcon from '@material-ui/icons/Gavel';
 import { Link } from 'react-router-dom';
@@ -111,6 +112,17 @@ const Topbar: React.FC = () => {
           'aria-labelledby': 'basic-button',
         }}
       >
+        <MenuItem
+          component='a'
+          href={`${process.env.PUBLIC_URL}/about.html`}
+        >
+          <ListItemIcon>
+            <AboutIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'About'}
+          </ListItemText>
+        </MenuItem>
         <MenuItem
           component='a'
           href={`${process.env.PUBLIC_URL}/privacy.html`}

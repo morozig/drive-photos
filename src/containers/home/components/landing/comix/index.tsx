@@ -387,9 +387,19 @@ export const slides = [
         }}
       >
         <Link
+          href={`${process.env.PUBLIC_URL}/about.html`}
+          color='inherit'
+          underline='none'
+        >
+          {'About'}
+        </Link>
+        <Link
           href={`${process.env.PUBLIC_URL}/privacy.html`}
           color='inherit'
           underline='none'
+          sx={{
+            marginLeft: '24px'
+          }}
         >
           {'Privacy Policy'}
         </Link>

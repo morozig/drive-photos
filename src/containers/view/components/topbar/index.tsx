@@ -36,6 +36,7 @@ import RecentFilesIcon from '@material-ui/icons/History';
 import DownloadFileIcon from '@material-ui/icons/FileDownload';
 import CloseFileIcon from '@material-ui/icons/Close';
 import HelpIcon from '@material-ui/icons/HelpOutline';
+import AboutIcon from '@material-ui/icons/Info';
 import PolicyIcon from '@material-ui/icons/Policy';
 import TermsIcon from '@material-ui/icons/Gavel';
 import SignOutIcon from '@material-ui/icons/Logout';
@@ -781,6 +782,17 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           'aria-labelledby': 'basic-button',
         }}
       >
+        <MenuItem
+          component='a'
+          href={`${process.env.PUBLIC_URL}/about.html`}
+        >
+          <ListItemIcon>
+            <AboutIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'About'}
+          </ListItemText>
+        </MenuItem>
         <MenuItem
           component='a'
           href={`${process.env.PUBLIC_URL}/privacy.html`}
