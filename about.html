@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      color: #595959;
+      margin: 0;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      height: 64px;
+      box-shadow: 0px 2px 4px -1px rgb(0 0 0 / 20%), 0px 4px 5px 0px rgb(0 0 0 / 14%), 0px 1px 10px 0px rgb(0 0 0 / 12%);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      background-color: white;
+      z-index: 1;
+    }
+    h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      line-height: 1.6;
+      letter-spacing: 0.0075em;
+    }
+    header a {
+      text-decoration: none;
+      color: inherit;
+    }
+    main {
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      max-width: 900px;
+      margin: 16px auto;
+      padding: 16px 32px 32px 32px;
+    }
+    i {
+      margin: 0 2px 0 -2px;
+    }
+    .table {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+    }
+    .column {
+      text-align: center;
+    }
+    .thead {
+      font-weight: bold;
+      min-height: 40px;
+    }
+    video {
+      max-width: 100%;
+    }
+    footer {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      background-color: #424242;
+      color: white;
+    }
+    footer a {
+      text-decoration: none;
+      color: inherit;
+      margin: 0 24px 0 0;
+    }
+    
+  </style>
+  <title>Drive Photos</title>
+</head>
+<body>
+  <header>
+    <h1>
+      <a href="/">Drive Photos</a>
+    </h1>
+  </header>
+  <main>
+    <div
+      class="table"
+      id="demo"
+    >
+      <div
+        class="column"
+      >
+        <div
+          class="thead"
+        >
+          Google Drive
+        </div>
+        <div>
+          <video
+            autoplay
+            loop
+            muted
+          >
+            <source
+              src="/assets/google-drive.mp4"
+              type="video/mp4"
+            >
+          </video>
+        </div>
+      </div>
+      <div
+        class="column"
+      >
+        <div
+          class="thead"
+        >
+          Drive Photos
+        </div>
+        <div>
+          <video
+            autoplay
+            loop
+            muted
+          >
+            <source
+              src="/assets/demo.mp4"
+              type="video/mp4"
+            >
+          </video>
+        </div>
+      </div>
+    </div>
+    <p>
+      <a
+        href="/view"
+      >
+        Open In Your Browser
+      </a>
+    </p>
+    <section id="intro">
+      <h2>
+        Why?
+      </h2>
+      <p>
+        This website was created due to
+        <a href="https://blog.google/products/photos/storage-changes/">
+          Google's storage policy change of June 1, 2021
+        </a>.
+        The author <i>might</i> have saved a lot of comics as images in Google Drive
+        while it provided unlimited free storage for high quality photos.
+        <a href="https://drive.google.com/">Standard web client</a>
+        is not very suitable to view sequences of images
+        because of lack of preloading and single zoom setting.
+        So the only option is to install
+        <a href="https://www.google.com/drive/download/">Drive for desktop</a>
+        and a nice comics reader like 
+        <a href="https://sourceforge.net/projects/mcomix/">Mcomix</a>.
+        This works great but not mobile friendly.
+        <a href="/">Drivephotos.co</a> is an online image viewer
+        for Google Drive accessible via browser from multiple devices
+      </p>
+    </section>
+    <section id="features">
+      <h2>
+        Features
+      </h2>
+      <ul>
+        <li>Allows viewing, searching and downloading images from Google Drive</li>
+        <li>Adjusts zoom for screen size</li>
+        <li>Preloads images for fast transition</li>
+        <li>Suitable for comics</li>
+        <li>Has fullscreen and slideshow modes</li>
+        <li>Mobile friendly</li>
+        <li>Keeps list of recent files in browser memory</li>
+        <li>Serverless, no private information is collected</li>
+        <li>No registration needed, only existing Google Account</li>
+      </ul>
+    </section>
+    <section id="archives">
+      <h2>
+        How to read CBR and CBZ files
+      </h2>
+      <p>
+        <a href="/">Drive Photos</a> was not designed to work with these file types or
+        other archives for simplicity and performance
+        (browsers are good at rendering images, not extracting huge zip files).
+        There are apps for that:
+      </p>
+      <uL>
+        <li>On desktop use <a href="https://sourceforge.net/projects/mcomix/">Mcomix</a></li>
+        <li>On Android use <a href="https://tachiyomi.org/">Tachiyomi</a></li>
+        <li>On iOS use <a href="https://www.yacreader.com/">YACReader</a></li>
+      </uL>
+      <p>
+        But if you want to read CBR and CBZ files across platforms for free
+        you could easily extract pictures from those archives with RAR or Zip respectively
+        and save to your Google Drive, then open them in <a href="/view">Drive Photos</a> from anywhere.
+      </p>
+    </section>
+    <section id="slideshow">
+      <h2>
+        How to start a slideshow from a folder in Google Drive
+      </h2>
+      <p>
+        There are several ways to achieve that:
+      </p>
+      <ul>
+        <li>
+          You can install and launch <a href="https://www.google.com/drive/download/">Drive for desktop</a>.
+          It will mount a new drive in your system. Then you can open this folder in any image viewer
+          and start a slideshow
+        </li>
+        <li>
+          You can open <a href="https://www.google.com/photos">Google Photos</a>, press Upload photos,
+          select Google Drive, choose your folder.
+          Then create a gallery from newly added photos and start a slideshow there
+        </li>
+        <li>
+          Or simply open your folder in <a href="/view">Drive Photos</a> and press play.
+          You may also switch to fullscreen for a better experience
+        </li>
+      </ul>
+    </section>
+    <section id="support">
+      <h2>
+        Maintenance And Support
+      </h2>
+      <p>
+        Please submit your issues and suggestions <a href="https://github.com/morozig/drive-photos">here</a>
+      </p>
+      <p>
+        This website is free and will always be free.
+        It is hosted by <a href="https://pages.github.com/">Github Pages</a>,
+        uses free <a href="https://developers.google.com/drive">Google Drive Api</a>.
+        The only maintenance cost is ownership of a domain which is relatively cheap for a .co.
+        As a web application it is backward compatible for a long period of time and
+        any future browser versions.
+        In the event of any unavailability you are welcome to clone and modify this project
+        or host at a new location.
+      </p>
+    </section>
+  </main>
+  <footer>
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/terms.html">Terms And Conditions</a>
+  </footer>
+</body>
+</html>
