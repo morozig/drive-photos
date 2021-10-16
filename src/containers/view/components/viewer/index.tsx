@@ -237,6 +237,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
             overflow: 'hidden',
             whiteSpace: 'nowrap',
             zIndex: -1,
+            bgcolor: 'common.black'
           }}
         >
           <Box
@@ -293,7 +294,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
                 ...(i === 1 && file.id === preRenderId && {
                   position: 'fixed',
                   zIndex: -2,
-                  left: '110vw'
+                  bottom: '99vh',
+                  right: '20px'
                 }),
                 ...(i === 1 && file.id !== preRenderId && {
                   display: 'none'
