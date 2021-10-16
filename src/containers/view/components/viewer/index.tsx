@@ -358,6 +358,10 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
           }
           <MenuItem
             onClick={onClickFitBest}
+            sx={{
+              backgroundColor: fitMode === FitMode.Best ?
+                'rgba(0, 0, 0, 0.08)' : undefined
+            }}
           >
             <ListItemIcon>
               <FitBestIcon/>
@@ -368,6 +372,10 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
           </MenuItem>
           <MenuItem
             onClick={onClickFitWidth}
+            sx={{
+              backgroundColor: fitMode === FitMode.Width ?
+                'rgba(0, 0, 0, 0.08)' : undefined
+            }}
           >
             <ListItemIcon>
               <FitWidthIcon/>
@@ -378,6 +386,10 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
           </MenuItem>
           <MenuItem
             onClick={onClickFitHeight}
+            sx={{
+              backgroundColor: fitMode === FitMode.Height ?
+                'rgba(0, 0, 0, 0.08)' : undefined
+            }}
           >
             <ListItemIcon>
               <FitHeightIcon/>
@@ -388,6 +400,10 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
           </MenuItem>
           <MenuItem
             onClick={onClickFitOriginal}
+            sx={{
+              backgroundColor: fitMode === FitMode.Original ?
+                'rgba(0, 0, 0, 0.08)' : undefined
+            }}
           >
             <ListItemIcon>
               <FitOriginalIcon/>
