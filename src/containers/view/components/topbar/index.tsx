@@ -628,7 +628,12 @@ const Topbar: React.FC<TopbarProps> = (props) => {
       <ToggleButtonGroup
         value={fitMode}
         exclusive
-        onChange={(e, value) => onFitModeChange(value)}
+        onChange={(e, value) => {
+          if (value) {
+            onFitModeChange(value)
+          }
+        }
+        }
         sx={{
           display: { xs: 'none', md: 'flex' }
         }}
