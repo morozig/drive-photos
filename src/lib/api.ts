@@ -1,9 +1,11 @@
 import Observable from './observable';
 import './Picker.css';
 
+const driveInfoScope = 'https://www.googleapis.com/auth/drive.metadata.readonly';
+const driveFileScope = 'https://www.googleapis.com/auth/drive.readonly';
 const scope = [
-  'https://www.googleapis.com/auth/drive.metadata.readonly',
-  'https://www.googleapis.com/auth/drive.readonly'
+  driveInfoScope,
+  driveFileScope
 ].join(' ');
 const discoveryDocs = [
   'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
@@ -19,7 +21,6 @@ let GoogleAuth: gapi.auth2.GoogleAuth | undefined;
 const gapiReadyObservable = new Observable<void>();
 let picker: google.picker.Picker | undefined;
 const pickObservable = new Observable<google.picker.ResponseObject>();
-const pickerReadyObservable = new Observable<void>();
 let gapiError = null as null | any;
 
 export interface Profile {
@@ -29,10 +30,7 @@ export interface Profile {
 const onSignedInChanged = (isSignedIn: boolean) => {
   // console.log('onSignedInChanged', isSignedIn);
   signedInObservable.push(isSignedIn);
-  if (isSignedIn) {
-    createPicker();
-    pickerReadyObservable.push();
-  } else {
+  if (!isSignedIn) {
     picker = undefined;
     pickObservable.unsubscribe(onPick);
   }
@@ -58,6 +56,57 @@ const onGapiLoaded = async () => {
     gapiError = err;
   }
 };
+
+let checkScopesPromise: Promise<void> | undefined;
+
+const checkScopes = () => new Promise<void>((resolve, reject) => {
+  if (!GoogleAuth) {
+    reject(new Error('not authed'));
+    return;
+  }
+  const user = GoogleAuth.currentUser.get();
+  const authResponse = user.getAuthResponse(true);
+  const scope = authResponse.scope;
+  const hasInfoScope = scope.includes(driveInfoScope);
+  const hasFileScope = scope.includes(driveFileScope);
+  if (hasInfoScope && hasFileScope) {
+    resolve();
+    return;
+  }
+  if (!checkScopesPromise) {
+    checkScopesPromise = new Promise<void>((resolve, reject) => {
+      const options = new gapi.auth2.SigninOptionsBuilder();
+      options.setScope(''.concat(
+        !hasInfoScope ? `${driveInfoScope} ` : ' ',
+        !hasFileScope ? `${driveFileScope} ` : ' ',
+      ));
+      user.grant(options).then(
+        () => {
+          checkScopesPromise = undefined;
+          // console.log('checkScopes granted');
+          const authResponse = user.getAuthResponse(true);
+          const scope = authResponse.scope;
+          const hasInfoScope = scope.includes(driveInfoScope);
+          const hasFileScope = scope.includes(driveFileScope);
+          if (hasInfoScope && hasFileScope) {
+            resolve();
+            return;
+          } else {
+            reject(new Error('access not granted'));
+          }
+        },
+        (err) => {
+          checkScopesPromise = undefined;
+          // console.log('checkScopes rejected');
+          reject(err);
+        }
+      );
+    });
+  }
+  checkScopesPromise
+    .then(resolve)
+    .catch(reject);
+});
 
 const onPick = (response: google.picker.ResponseObject) => {
   // console.log('onPick', response);
@@ -134,34 +183,31 @@ const pickFile = () => new Promise<google.picker.DocumentObject | null>(
       }
     };
 
-    if (picker) {
-      picker.setVisible(true);
-    } else {
-      pickerReadyObservable.once(() => {
+    checkScopes()
+      .then(() => {
+        if (!picker) {
+          createPicker();
+        }
         if (picker) {
           picker.setVisible(true);
         } else {
           reject(new Error('No Picker'));
         }
-      });
-    }
-
-    pickObservable.subscribe(onThisPick);
+    
+        pickObservable.subscribe(onThisPick);
+      })
+      .catch(reject);
   }
 );
 
 const getFile = async (fileId: string) => {
-  try {
-    const result = await gapi.client.drive.files.get({
-      fileId,
-      // fields: '*'
-      fields: 'id, name, thumbnailLink, webContentLink, imageMediaMetadata/*',
-    });
-    return result.result;
-  }
-  catch(err) {
-    console.log(err);
-  }
+  await checkScopes();
+  const result = await gapi.client.drive.files.get({
+    fileId,
+    // fields: '*'
+    fields: 'id, name, thumbnailLink, webContentLink, imageMediaMetadata/*',
+  });
+  return result.result;
 };
 
 export interface ListFilesOptions {
@@ -174,21 +220,17 @@ const listFiles = async (options: ListFilesOptions) => {
     parentId,
     pageToken
   } = options;
-  try {
-    const result = await gapi.client.drive.files.list({
-      q: `'${parentId}' in parents and mimeType contains 'image/'`,
-      fields: 'nextPageToken, files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
-      // fields: '*',
-      pageSize: 1000,
-      orderBy: 'name_natural',
-      pageToken
-    });
-    // console.log({result});
-    return result.result;
-  }
-  catch(err) {
-    console.log(err);
-  }
+  await checkScopes();
+  const result = await gapi.client.drive.files.list({
+    q: `'${parentId}' in parents and mimeType contains 'image/'`,
+    fields: 'nextPageToken, files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
+    // fields: '*',
+    pageSize: 1000,
+    orderBy: 'name_natural',
+    pageToken
+  });
+  // console.log({result});
+  return result.result;
 };
 
 export enum DirectoryEdge {
@@ -205,53 +247,40 @@ const getEdgeFiles = async (options: GetEdgeFileOptions) => {
     parentId,
     edge
   } = options;
-  try {
-    const result = await gapi.client.drive.files.list({
-      q: `'${parentId}' in parents and mimeType contains 'image/'`,
-      fields: 'files(id, name)',
-      pageSize: 1,
-      orderBy: edge === DirectoryEdge.Begin ?
-        'name_natural' : 'name_natural desc'
-    });
-    return (
-      result.result ?
-        result.result.files : []
-    );
-  }
-  catch(err) {
-    console.log(err);
-    return [];
-  }
+  await checkScopes();
+  const result = await gapi.client.drive.files.list({
+    q: `'${parentId}' in parents and mimeType contains 'image/'`,
+    fields: 'files(id, name)',
+    pageSize: 1,
+    orderBy: edge === DirectoryEdge.Begin ?
+      'name_natural' : 'name_natural desc'
+  });
+  return (
+    result.result && result.result.files ?
+      result.result.files : []
+  );
 };
 
 const getParent = async (parentId: string) => {
-  try {
-    const result = await gapi.client.drive.files.get({
-      fileId: parentId,
-      fields: '*'
-    });
-    return result.result;
-  }
-  catch(err) {
-    console.log(err);
-  }
+  await checkScopes();
+  const result = await gapi.client.drive.files.get({
+    fileId: parentId,
+    fields: '*'
+  });
+  return result.result;
 };
 
 const listDirectories = async (grandParentId: string) => {
-  try {
-    const result = await gapi.client.drive.files.list({
-      q: `'${grandParentId}' in parents and mimeType = 'application/vnd.google-apps.folder'`,
-      // fields: 'files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
-      fields: '*',
-      pageSize: 1000,
-      orderBy: 'name_natural'
-    });
-    // console.log({result});
-    return result.result;
-  }
-  catch(err) {
-    console.log(err);
-  }
+  await checkScopes();
+  const result = await gapi.client.drive.files.list({
+    q: `'${grandParentId}' in parents and mimeType = 'application/vnd.google-apps.folder'`,
+    // fields: 'files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
+    fields: '*',
+    pageSize: 1000,
+    orderBy: 'name_natural'
+  });
+  // console.log({result});
+  return result.result;
 };
 
 const getProfile = () => {

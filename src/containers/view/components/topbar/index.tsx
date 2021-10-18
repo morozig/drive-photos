@@ -137,9 +137,14 @@ const Topbar: React.FC<TopbarProps> = (props) => {
   }, []);
   const onOpenClick = useCallback(async () => {
     handleMenuClose();
-    const doc = await pickFile();
-    if (doc) {
-      onOpenFile(doc);
+    try {
+      const doc = await pickFile();
+      if (doc) {
+        onOpenFile(doc);
+      }
+    }
+    catch (err) {
+      console.log(err);
     }
   }, [
     handleMenuClose,
