@@ -21,6 +21,7 @@ import {
 import Thumbnails from './components/thumbnails';
 import Viewer, { ViewerRef } from './components/viewer';
 import Topbar from './components/topbar';
+import StartScreen from './components/start-screen';
 
 
 const drawerWidth = 260;
@@ -492,7 +493,7 @@ const View: React.FC = () => {
         flexDirection: 'column'
       }}>
         <Toolbar />
-        {!!fileId &&
+        {fileId ?
           <Viewer
             fitMode={fitMode}
             fileId={fileId}
@@ -508,6 +509,12 @@ const View: React.FC = () => {
               flexGrow: 1
             }}
             ref={viewerRef}
+          /> :
+          <StartScreen
+            onOpenFile={onOpenFile}
+            sx={{
+              flexGrow: 1
+            }}
           />
         }
       </Box>
