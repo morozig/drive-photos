@@ -58,6 +58,7 @@ const Topbar: React.FC = () => {
         anchorEl={menuRef.current}
         open={isMenuOpen}
         onClose={handleMenuClose}
+        disableScrollLock={true}
       >
         <MenuItem
           component={Link}
@@ -111,6 +112,7 @@ const Topbar: React.FC = () => {
         MenuListProps={{
           'aria-labelledby': 'basic-button',
         }}
+        disableScrollLock={true}
       >
         <MenuItem
           component='a'
