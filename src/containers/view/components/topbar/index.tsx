@@ -23,6 +23,7 @@ import FitBestIcon from '@material-ui/icons/CropDin';
 import FitWidthIcon from '@material-ui/icons/CropPortrait';
 import FitHeightIcon from '@material-ui/icons/CropLandscape';
 import FitOriginalIcon from '@material-ui/icons/CropOriginal';
+import FitManualIcon from '@material-ui/icons/ImageSearch';
 import FullscreenEnterIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import FirstImageIcon from '@material-ui/icons/FirstPage';
@@ -444,6 +445,24 @@ const Topbar: React.FC<TopbarProps> = (props) => {
             {'Original Size'}
           </ListItemText>
         </MenuItem>
+        <MenuItem
+          onClick={() => {
+            onFitModeChange(FitMode.Manual);
+            handleMenuClose();
+          }}
+          sx={{
+            display: { xs: 'flex', md: 'none' },
+            backgroundColor: fitMode === FitMode.Manual ?
+              'rgba(0, 0, 0, 0.08)' : undefined
+          }}
+        >
+          <ListItemIcon>
+            <FitManualIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Manual Zoom'}
+          </ListItemText>
+        </MenuItem>
         <Divider
           sx={{
             display: { xs: 'flex', md: 'none' }
@@ -736,6 +755,30 @@ const Topbar: React.FC<TopbarProps> = (props) => {
               }}
             >
               <FitOriginalIcon/>
+            </Box>
+          </Tooltip>
+        </ToggleButton>
+        <ToggleButton
+          value={FitMode.Manual}
+          aria-label='fit-manual'
+          sx={{
+            p: 0
+          }}
+        >
+          <Tooltip
+            title='Manual Zoom'
+          >
+            <Box
+              sx={{
+                height: 'min-content',
+                width: 'min-content',
+                p: '11px',
+                display: 'grid',
+                alignContent: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <FitManualIcon/>
             </Box>
           </Tooltip>
         </ToggleButton>

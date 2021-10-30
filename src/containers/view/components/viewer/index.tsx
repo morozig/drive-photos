@@ -13,9 +13,9 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
 } from '@material-ui/core';
-import { useDelayedId, useScrollActions } from './hooks';
+import { useDelayedId, useScrollActions, useZoom } from './hooks';
 import { FitMode } from '../..';
 import { useFullScreen } from '../../../../lib/hooks';
 import FullscreenEnterIcon from '@material-ui/icons/Fullscreen';
@@ -24,14 +24,15 @@ import FitBestIcon from '@material-ui/icons/CropDin';
 import FitWidthIcon from '@material-ui/icons/CropPortrait';
 import FitHeightIcon from '@material-ui/icons/CropLandscape';
 import FitOriginalIcon from '@material-ui/icons/CropOriginal';
+import FitManualIcon from '@material-ui/icons/ImageSearch';
 import StartSlideshowIcon from '@material-ui/icons/PlayArrow';
 import EndSlideshowIcon from '@material-ui/icons/Pause';
 import ImageSkeleton from '../image-skeleton';
 import { useRectSize } from '../thumbnails/hooks';
+import ZoomSlider from '../zoom-slider';
 
 const wheelCount = 3;
 const slideShowInterval = 5000;
-
 export interface ViewerRef {
   toggleFullscreen: () => void;
 }
@@ -185,6 +186,13 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     onFitModeChange,
     onClose
   ]);
+  const onClickFitManual = useCallback(() => {
+    onFitModeChange(FitMode.Manual);
+    onClose();
+  }, [
+    onFitModeChange,
+    onClose
+  ]);
   const onClickSlideshow = useCallback(() => {
     onToggleSlideshowPlaying();
     onClose();
@@ -197,6 +205,14 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     ref: backRef,
     rectSize: backRectSize
   } = useRectSize();
+  const {
+    sliderValue,
+    sliderScale,
+    onSliderChange,
+    onZoomMinus,
+    onZoomPlus,
+    zoom
+  } = useZoom();
 
   return (
     <Box sx={{
@@ -234,7 +250,6 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
             left: 0,
             right: 0,
             bottom: 0,
-            overflow: 'hidden',
             whiteSpace: 'nowrap',
             zIndex: -1,
             bgcolor: 'common.black'
@@ -256,6 +271,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
               height={files[0].imageMediaMetadata.height}
               containerRectSize={backRectSize}
               fitMode={fitMode}
+              zoom={zoom}
               sx={{
                 verticalAlign: 'middle'
               }}
@@ -290,6 +306,12 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
                 }),
                 ...(fitMode === FitMode.Height && {
                   maxHeight: '100%'
+                }),
+                ...(fitMode === FitMode.Manual && {
+                  height: file.imageMediaMetadata?.height &&
+                    `${file.imageMediaMetadata.height * zoom / 100}px`,
+                  width: file.imageMediaMetadata?.width &&
+                    `${file.imageMediaMetadata.width * zoom / 100}px`,
                 }),
                 ...(i === 1 && file.id === preRenderId && {
                   position: 'fixed',
@@ -412,8 +434,43 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
               {'Original Size'}
             </ListItemText>
           </MenuItem>
+          <MenuItem
+            onClick={onClickFitManual}
+            sx={{
+              backgroundColor: fitMode === FitMode.Manual ?
+                'rgba(0, 0, 0, 0.08)' : undefined
+            }}
+          >
+            <ListItemIcon>
+              <FitManualIcon/>
+            </ListItemIcon>
+            <ListItemText>
+              {'Manual Zoom'}
+            </ListItemText>
+          </MenuItem>
         </Menu>
+        {fitMode === FitMode.Manual && isFullscreen &&
+          <ZoomSlider
+            sliderValue={sliderValue}
+            onSliderChange={onSliderChange}
+            sliderScale={sliderScale}
+            onZoomMinus={onZoomMinus}
+            onZoomPlus={onZoomPlus}
+            sx={{
+              position: 'fixed'
+            }}
+          />
+        }
       </Box>
+      {fitMode === FitMode.Manual && !isFullscreen &&
+        <ZoomSlider
+          sliderValue={sliderValue}
+          onSliderChange={onSliderChange}
+          sliderScale={sliderScale}
+          onZoomMinus={onZoomMinus}
+          onZoomPlus={onZoomPlus}
+        />
+      }
     </Box>
   );
 });

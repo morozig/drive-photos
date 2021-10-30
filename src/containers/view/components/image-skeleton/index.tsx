@@ -28,6 +28,7 @@ interface ImageSkeletonProps {
   height: number;
   containerRectSize?: RectSize,
   fitMode?: FitMode;
+  zoom?: number;
   sx?: SystemStyleObject;
 };
 
@@ -37,6 +38,7 @@ const ImageSkeleton: React.FC<ImageSkeletonProps> = (props) => {
     height,
     containerRectSize,
     fitMode,
+    zoom = 100,
     sx
   } = props;
 
@@ -68,7 +70,7 @@ const ImageSkeleton: React.FC<ImageSkeletonProps> = (props) => {
       sx={{
         bgcolor: 'grey.900',
         animation: `${pulseKeyframe} 1.5s ease-in-out 0.5s infinite`,
-        ...(fitMode === FitMode.Best && 
+        ...(fitMode === FitMode.Best && (
           isBoundByWidth ? {
             width: `${width}px`,
             maxWidth: '100%'
@@ -76,7 +78,7 @@ const ImageSkeleton: React.FC<ImageSkeletonProps> = (props) => {
             height: `${height}px`,
             maxHeight: '100%'
           }
-        ),
+        )),
         ...(fitMode === FitMode.Width && {
           width: `${width}px`,
           maxWidth: '100%'
@@ -88,6 +90,10 @@ const ImageSkeleton: React.FC<ImageSkeletonProps> = (props) => {
         ...(fitMode === FitMode.Original && {
           width: `${width}px`,
           height: `${height}px`,
+        }),
+        ...(fitMode === FitMode.Manual && {
+          width: `${width * zoom / 100}px`,
+          height: `${height * zoom / 100}px`,
         }),
         ...sx,
       }}

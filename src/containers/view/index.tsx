@@ -10,19 +10,18 @@ import {
   Box,
   Toolbar,
   Drawer,
-  SwipeableDrawer
+  SwipeableDrawer,
 } from '@material-ui/core';
 import {
   RecentFile,
   useDrive,
   useIsSmallScreen,
-  useRecentFiles
+  useRecentFiles,
 } from '../../lib/hooks';
 import Thumbnails from './components/thumbnails';
 import Viewer, { ViewerRef } from './components/viewer';
 import Topbar from './components/topbar';
 import StartScreen from './components/start-screen';
-
 
 const drawerWidth = 260;
 const preloadCount = 3;
@@ -37,7 +36,8 @@ export enum FitMode {
   Best = 1,
   Width,
   Height,
-  Original
+  Original,
+  Manual
 }
 
 const View: React.FC = () => {
@@ -57,7 +57,6 @@ const View: React.FC = () => {
     setMobileDrawerOpen(current => !current);
   }, []);
   const isSmallScreen = useIsSmallScreen();
-
 
   const {
     isFinished,
@@ -517,6 +516,7 @@ const View: React.FC = () => {
             }}
           />
         }
+        
       </Box>
     </Box>
   );

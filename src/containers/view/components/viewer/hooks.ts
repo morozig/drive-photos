@@ -2,7 +2,8 @@ import {
   useEffect,
   useRef,
   useCallback,
-  useState
+  useState,
+  useMemo
 } from 'react';
 import { useAbortSignal } from '../../../../lib/hooks';
 
@@ -150,7 +151,49 @@ const useDelayedId = (file?: gapi.client.drive.File) => {
   return delayedId;
 };
 
+const zoomScale = 5;
+const useZoom = () => {
+  const [ sliderValue, setSliderValue ] = useState(0);
+  const signal = useAbortSignal();
+
+  const sliderScale = useCallback((sliderValue: number) => {
+    return Math.round(100 * zoomScale ** sliderValue)
+  }, []);
+
+  const onSliderChange = useCallback((event: Event, value: number | number[]) => {
+    requestAnimationFrame(() => {
+      if (!Array.isArray(value) && !signal.aborted) {
+        setSliderValue(value);
+      }
+    });
+  }, [
+    signal.aborted
+  ]);
+  const onZoomMinus = useCallback(() => {
+    setSliderValue(current => Math.max(-1, current - 1 / zoomScale));
+  }, []);
+  const onZoomPlus = useCallback(() => {
+    setSliderValue(current => Math.min(1, current + 1 / zoomScale));
+  }, []);
+  const zoom = useMemo(() => {
+    return sliderScale(sliderValue);
+  }, [
+    sliderValue,
+    sliderScale
+  ]);
+
+  return {
+    sliderValue,
+    sliderScale,
+    onSliderChange,
+    onZoomMinus,
+    onZoomPlus,
+    zoom
+  };
+};
+
 export {
   useScrollActions,
-  useDelayedId
+  useDelayedId,
+  useZoom
 }
