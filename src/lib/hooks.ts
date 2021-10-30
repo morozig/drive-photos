@@ -494,6 +494,11 @@ const useIsSmallScreen = () => {
   return isSmallScreen;
 };
 
+const useIsTouchScreen = () => {
+  const isTouchScreen = useMediaQuery('(pointer:coarse)');
+  return isTouchScreen;
+};
+
 export {
   useAbortSignal,
   useIsSignedIn,
@@ -503,4 +508,5 @@ export {
   useDrive,
   useRecentFiles,
   useIsSmallScreen,
+  useIsTouchScreen,
 };

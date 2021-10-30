@@ -15,7 +15,12 @@ import {
   ListItemIcon,
   ListItemText,
 } from '@material-ui/core';
-import { useDelayedId, useScrollActions, useZoom } from './hooks';
+import {
+  useDelayedId,
+  useScrollActions,
+  useSwipeActions,
+  useZoom
+} from './hooks';
 import { FitMode } from '../..';
 import { useFullScreen } from '../../../../lib/hooks';
 import FullscreenEnterIcon from '@material-ui/icons/Fullscreen';
@@ -83,6 +88,11 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     wheelCount,
     onScrollOverTop: onPrevImage,
     onScrollBelowBottom: onNextImage
+  });
+  useSwipeActions({
+    ref,
+    onSwipeLeft: onNextImage,
+    onSwipeRight: onPrevImage
   });
 
   useEffect(() => {

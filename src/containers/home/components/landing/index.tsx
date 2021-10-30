@@ -1,16 +1,17 @@
 import React, { useMemo, useState } from 'react';
 import {
-  Box, Toolbar, useMediaQuery
+  Box, Toolbar
 } from '@material-ui/core';
 import Comix, {
   slides
 } from './comix';
 import Space from './space';
 import { useScrollAware } from './hooks';
+import { useIsTouchScreen } from '../../../../lib/hooks';
 
 const Landing: React.FC = () => {
   const scrollTop = useScrollAware();
-  const isTouchScreen = useMediaQuery('(pointer:coarse)');
+  const isTouchScreen = useIsTouchScreen();
   const slideHeight = Math.round(2.03 * document.documentElement.clientHeight);
   const [ isJumping, setJumping ] = useState(false);
   const jumpHeight = useMemo(

@@ -46,7 +46,12 @@ import CookiesErrorIcon from '@material-ui/icons/VisibilityOff';
 import HideDrawerIcon from '@material-ui/icons/ArrowLeft';
 import ShowDrawerIcon from '@material-ui/icons/ArrowRight';
 import { defaultTitle, FitMode } from '../..';
-import { RecentFile, useFullScreen, useIsSignedIn } from '../../../../lib/hooks';
+import {
+  RecentFile,
+  useFullScreen,
+  useIsSignedIn,
+  useIsTouchScreen
+} from '../../../../lib/hooks';
 import {
   pickFile
 } from '../../../../lib/api';
@@ -206,6 +211,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
     handleProfileMenuClose,
     toggleSignedIn
   ]);
+  const isTouchScreen = useIsTouchScreen();
 
   return (
     <Toolbar>
@@ -572,7 +578,11 @@ const Topbar: React.FC<TopbarProps> = (props) => {
       <Tooltip
         title='Previous Image (Left Arrow)'
       >
-        <Box>
+        <Box
+          sx={{
+            display: isTouchScreen ? 'none' : 'block'
+          }}
+        >
           <IconButton
             size='large'
             color='inherit'
@@ -615,7 +625,11 @@ const Topbar: React.FC<TopbarProps> = (props) => {
       <Tooltip
         title='Next Image (Right Arrow, Scroll Below, Click)'
       >
-        <Box>
+        <Box
+          sx={{
+            display: isTouchScreen ? 'none' : 'block'
+          }}
+        >
           <IconButton
             size='large'
             color='inherit'
@@ -790,11 +804,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
             'Enter Fullscreen'
           }
         >
-          <Box
-            sx={{
-              display: { xs: 'none', md: 'block' }
-            }}
-          >
+          <Box>
             <IconButton
               size='large'
               color='inherit'

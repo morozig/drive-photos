@@ -1,4 +1,4 @@
-import {
+import React, {
   useEffect,
   useRef,
   useCallback,
@@ -195,8 +195,91 @@ const useZoom = () => {
   };
 };
 
+const swipeThreshold = 20;
+
+interface SwipeActionsOptions {
+  ref?: React.RefObject<HTMLDivElement>;
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
+};
+
+const useSwipeActions = (options: SwipeActionsOptions) => {
+  const {
+    ref,
+    onSwipeLeft,
+    onSwipeRight
+  } = options;
+  const touchRef = useRef<Touch | undefined>();
+  const scrollLeftRef = useRef<number | undefined>();
+  const scrollWidthRef = useRef<number | undefined>();
+
+  useEffect(() => {
+    const scrollContainer = ref?.current;
+    if (!scrollContainer) {
+      return;
+    }
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 1 && !touchRef.current) {
+        touchRef.current = e.touches[0];
+        scrollLeftRef.current = scrollContainer.scrollLeft;
+        scrollWidthRef.current = scrollContainer.scrollWidth - scrollContainer.offsetWidth;
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (
+        e.changedTouches.length === 1 &&
+        touchRef.current &&
+        touchRef.current.identifier === e.changedTouches[0].identifier &&
+        scrollLeftRef.current !== undefined &&
+        scrollWidthRef.current !== undefined
+      ) {
+        const deltaX = e.changedTouches[0].clientX - touchRef.current.clientX;
+        const deltaY = e.changedTouches[0].clientY - touchRef.current.clientY;
+        const scrollLeft = scrollLeftRef.current;
+        const scrollWidth = scrollWidthRef.current;
+        touchRef.current = undefined;
+        scrollLeftRef.current = undefined;
+        scrollWidthRef.current = undefined;
+
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          if (
+            deltaX < -swipeThreshold &&
+            scrollLeft >= scrollWidth &&
+            onSwipeLeft
+          ) {
+            onSwipeLeft();
+          }
+          if (
+            deltaX > swipeThreshold &&
+            scrollLeft <= 0 &&
+            onSwipeRight
+          ) {
+            onSwipeRight();
+          }
+        }
+      } else {
+        touchRef.current = undefined;
+      }
+    };
+
+    scrollContainer.addEventListener('touchstart', onTouchStart);
+    scrollContainer.addEventListener('touchend', onTouchEnd);
+    return () => {
+      scrollContainer.removeEventListener('touchstart', onTouchStart);
+      scrollContainer.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [
+    ref,
+    onSwipeLeft,
+    onSwipeRight
+  ]);
+};
+
 export {
   useScrollActions,
   useDelayedId,
-  useZoom
+  useZoom,
+  useSwipeActions
 }
