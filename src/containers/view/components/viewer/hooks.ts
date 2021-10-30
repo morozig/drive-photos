@@ -81,6 +81,9 @@ const useScrollActions = (options: ScrollActionsOptions) => {
 
     const onWheel = (e: WheelEvent) => {
       const div = ref.current;
+      if (e.shiftKey || e.ctrlKey) {
+        return;
+      }
       if (div) {
         const scrollHeight = div.scrollHeight - div.offsetHeight;
         if (e.deltaY < 0) {
