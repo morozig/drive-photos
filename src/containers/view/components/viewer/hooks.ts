@@ -223,7 +223,7 @@ const useSwipeActions = (options: SwipeActionsOptions) => {
       if (e.touches.length === 1 && !touchRef.current) {
         touchRef.current = e.touches[0];
         scrollLeftRef.current = scrollContainer.scrollLeft;
-        scrollWidthRef.current = scrollContainer.scrollWidth - scrollContainer.offsetWidth;
+        scrollWidthRef.current = scrollContainer.scrollWidth - scrollContainer.clientWidth;
       }
     };
 
