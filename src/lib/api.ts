@@ -14,12 +14,14 @@ const apiKey = process.env.NODE_ENV === 'production' ?
   'AIzaSyDAXtOKqc3gYjmuoxZAqQHnBm-xTQi1-Mw' :
     process.env.REACT_APP_GAPI_KEY;
 const clientId = '321539141956-kn4i96a10682t0l8agfo5158fln9ai5d.apps.googleusercontent.com';
+const pickerTimeout = 50 * 60 * 1000;
 
 const signedInObservable = new Observable<boolean>();
 const gapiErrorsObservable = new Observable<any>();
 let GoogleAuth: gapi.auth2.GoogleAuth | undefined;
 const gapiReadyObservable = new Observable<void>();
 let picker: google.picker.Picker | undefined;
+let pickerCreatedTime = 0;
 const pickObservable = new Observable<google.picker.ResponseObject>();
 let gapiError = null as null | any;
 
@@ -123,6 +125,8 @@ const createPicker = () => {
   const user = GoogleAuth.currentUser.get();
   const authResponse = user.getAuthResponse(true);
   const accessToken = authResponse.access_token;
+  const now = new Date().getTime();
+  pickerCreatedTime = now;
 
   const view = new google.picker.DocsView(google.picker.ViewId.DOCS_IMAGES)
     .setMimeTypes('image/apng,image/avif,image/gif,image/jpeg,image/png,image/svg+xml,image/webp')
@@ -137,6 +141,19 @@ const createPicker = () => {
     .setCallback(onPick)
     .build();
   // console.log({picker});
+};
+
+const checkPickerTimeout = () => {
+  if (picker) {
+    const now = new Date().getTime();
+    if (now - pickerCreatedTime > pickerTimeout) {
+      picker.setVisible(false);
+      picker.dispose();
+      picker = undefined;
+      createPicker();
+    }
+  }
+
 };
 
 // console.log(gapi);
@@ -188,6 +205,7 @@ const pickFile = () => new Promise<google.picker.DocumentObject | null>(
         if (!picker) {
           createPicker();
         }
+        checkPickerTimeout();
         if (picker) {
           picker.setVisible(true);
         } else {
