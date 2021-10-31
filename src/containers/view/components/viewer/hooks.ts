@@ -196,6 +196,7 @@ const useZoom = () => {
 };
 
 const swipeThreshold = 20;
+const androidMagicOffset = 5;
 
 interface SwipeActionsOptions {
   ref?: React.RefObject<HTMLDivElement>;
@@ -246,7 +247,7 @@ const useSwipeActions = (options: SwipeActionsOptions) => {
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
           if (
             deltaX < -swipeThreshold &&
-            scrollLeft >= scrollWidth &&
+            scrollLeft >= scrollWidth - androidMagicOffset &&
             onSwipeLeft
           ) {
             onSwipeLeft();
