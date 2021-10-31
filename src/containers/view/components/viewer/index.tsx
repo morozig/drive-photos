@@ -54,6 +54,7 @@ interface ViewerProps {
   isSlideshowEnabled?: boolean;
   isSlideshowPlaying?: boolean;
   onToggleSlideshowPlaying: () => void;
+  onImageError?: () => void;
 };
 
 interface Point {
@@ -74,7 +75,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     isScrollToBottom,
     isSlideshowEnabled,
     isSlideshowPlaying,
-    onToggleSlideshowPlaying
+    onToggleSlideshowPlaying,
+    onImageError
   } = props;
 
   const [ contextMenu, setContextMenu ] = useState<Point | null>(null);
@@ -303,6 +305,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
             src={file.webContentLink}
             alt={file.name}
             onClick={onNextImage}
+            onError={onImageError}
             sx={i <= 1 ?
               {
                 verticalAlign: 'middle',

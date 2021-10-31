@@ -9,6 +9,7 @@ import { ItemProps } from './VirtualGrid';
 interface GridItem {
   file: gapi.client.drive.File;
   counter: number;
+  onImageError?: () => void;
 }
 
 type ThumbnailProps = ItemProps<GridItem>;
@@ -24,7 +25,8 @@ const ThumbnailInner: React.FC<ThumbnailProps> = (props) => {
 
   const {
     file,
-    counter
+    counter,
+    onImageError
   } = item;
 
   return (
@@ -54,6 +56,7 @@ const ThumbnailInner: React.FC<ThumbnailProps> = (props) => {
       <img
         src={file.thumbnailLink}
         alt={file.name}
+        onError={onImageError}
       />
       <ImageListItemBar
         title={file.name}

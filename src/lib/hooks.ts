@@ -108,6 +108,7 @@ const useFiles = (fileId: string, parentId: string) => {
   const signal = useAbortSignal();
   const parentIdRef = useRef<string | undefined>(parentId);
   const [ isFinished, setFinished ] = useState(false);
+  const [ isCleared, setCleared ] = useState(false);
 
   useEffect(() => {
     const run = async () => {
@@ -122,7 +123,8 @@ const useFiles = (fileId: string, parentId: string) => {
       }
     };
 
-    if (parentId !== parentIdRef.current) {
+    if (parentId !== parentIdRef.current || isCleared) {
+      setCleared(false);
       if (parentIdRef.current) {
         setFiles([]);
         setFile(undefined);
@@ -139,6 +141,7 @@ const useFiles = (fileId: string, parentId: string) => {
   }, [
     parentId,
     fileId,
+    isCleared,
     signal
   ]);
 
@@ -173,6 +176,10 @@ const useFiles = (fileId: string, parentId: string) => {
     isFinished
   ]);
   
+  const clear = useCallback(() => {
+    setCleared(true);
+  }, []);
+
   const readyFiles = useMemo(() => {
     if (file && file.id && !files.find(other => other.id === file.id)) {
       return [ file ];
@@ -183,7 +190,8 @@ const useFiles = (fileId: string, parentId: string) => {
   ]);
   return {
     files: readyFiles,
-    isFinished
+    isFinished,
+    clear
   };
 };
 
@@ -371,10 +379,13 @@ const useDirectories = (grandParentId?: string) => {
   return directories;
 };
 
+const clearCooldown = 5 * 60 * 1000;
+
 const useDrive = (fileId: string, parentId: string) => {
   const {
     files,
-    isFinished
+    isFinished,
+    clear
    } = useFiles(fileId, parentId);
   const parent = useDirectory(parentId);
   const directories = useDirectories(
@@ -411,6 +422,18 @@ const useDrive = (fileId: string, parentId: string) => {
     edge: DirectoryEdge.Begin
   });
 
+  const lastClearedTimeRef = useRef(0);
+
+  const onImageError = useCallback(() => {
+    const now = new Date().getTime();
+    if (now - lastClearedTimeRef.current > clearCooldown) {
+      lastClearedTimeRef.current = now;
+      clear();
+    }
+  }, [
+    clear
+  ]);
+
   return {
     isFinished,
     files,
@@ -418,7 +441,8 @@ const useDrive = (fileId: string, parentId: string) => {
     prevDirFile,
     prevDirectory,
     nextDirFile,
-    nextDirectory
+    nextDirectory,
+    onImageError
   }
 };
 

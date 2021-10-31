@@ -14,6 +14,7 @@ interface ThumbnailsProps {
   fileId?: string;
   onSelect: (fileId: string) => void;
   onVisibleFiles?: (indices: number[]) => void;
+  onImageError?: () => void;
   sx?: SystemStyleObject;
 };
 
@@ -23,6 +24,7 @@ const Thumbnails: React.FC<ThumbnailsProps> = (props) => {
     fileId,
     onSelect,
     onVisibleFiles,
+    onImageError,
     sx
   } = props;
 
@@ -44,11 +46,13 @@ const Thumbnails: React.FC<ThumbnailsProps> = (props) => {
     return files.map(
       (file, i) => ({
         file,
-        counter: i + 1
+        counter: i + 1,
+        onImageError
       })
     );
   }, [
-    files
+    files,
+    onImageError
   ]);
   const onActive = useCallback((index: number) => {
     const file = files[index];

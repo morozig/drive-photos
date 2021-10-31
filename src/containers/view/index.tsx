@@ -66,6 +66,7 @@ const View: React.FC = () => {
     prevDirectory,
     nextDirFile,
     nextDirectory,
+    onImageError,
   } = useDrive(fileId, parentId);
 
   const {
@@ -455,6 +456,7 @@ const View: React.FC = () => {
             fileId={fileId}
             onSelect={onSelect}
             onVisibleFiles={setVisibleThumbnails}
+            onImageError={onImageError}
             sx={{
               flexGrow: 1
             }}
@@ -479,6 +481,7 @@ const View: React.FC = () => {
             fileId={fileId}
             onSelect={onSelect}
             onVisibleFiles={setVisibleThumbnails}
+            onImageError={onImageError}
             sx={{
               flexGrow: 1
             }}
