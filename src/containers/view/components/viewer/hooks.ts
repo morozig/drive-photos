@@ -195,7 +195,7 @@ const useZoom = () => {
   };
 };
 
-const swipeThreshold = 20;
+const swipeThreshold = 60;
 const androidMagicOffset = 5;
 
 interface SwipeActionsOptions {
