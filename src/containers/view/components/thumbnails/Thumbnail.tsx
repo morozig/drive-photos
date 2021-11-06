@@ -80,6 +80,7 @@ const Thumbnail = React.memo(ThumbnailInner,
   (prevProps, nextProps) => {
     const areEqual = (
       (prevProps.item.file.id === nextProps.item.file.id) &&
+      (prevProps.item.counter === nextProps.item.counter) &&
       (prevProps.isActive === nextProps.isActive)
     );
     return areEqual;
