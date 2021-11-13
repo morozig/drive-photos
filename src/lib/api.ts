@@ -14,7 +14,7 @@ const apiKey = process.env.NODE_ENV === 'production' ?
   'AIzaSyDAXtOKqc3gYjmuoxZAqQHnBm-xTQi1-Mw' :
     process.env.REACT_APP_GAPI_KEY;
 const clientId = '321539141956-kn4i96a10682t0l8agfo5158fln9ai5d.apps.googleusercontent.com';
-const pickerTimeout = 30 * 60 * 1000;
+const pickerTimeout = 50 * 60 * 1000;
 // const pickerTimeout = 0.5 * 60 * 1000;
 
 const signedInObservable = new Observable<boolean>();
@@ -131,6 +131,12 @@ const createPicker = () => {
   const accessToken = authResponse.access_token;
   const now = new Date().getTime();
   pickerCreatedTime = now;
+
+  console.log('create picker', {
+    now,
+    lastPickerNavHidden,
+    picker
+  });
 
   const view = new google.picker.DocsView(google.picker.ViewId.DOCS_IMAGES)
     .setMimeTypes('image/apng,image/avif,image/gif,image/jpeg,image/png,image/svg+xml,image/webp')
