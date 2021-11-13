@@ -162,7 +162,7 @@ const checkPickerTimeout = async () => {
     const now = new Date().getTime();
     const diff = now - pickerCreatedTime;
     const isTimedOut = diff > pickerTimeout;
-    // console.log({now, pickerCreatedTime, diff, isTimedOut});
+    console.log({now, pickerCreatedTime, diff, isTimedOut});
     if (isTimedOut) {
       picker.setVisible(false);
       picker.dispose();
