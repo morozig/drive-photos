@@ -14,7 +14,7 @@ const apiKey = process.env.NODE_ENV === 'production' ?
   'AIzaSyDAXtOKqc3gYjmuoxZAqQHnBm-xTQi1-Mw' :
     process.env.REACT_APP_GAPI_KEY;
 const clientId = '321539141956-kn4i96a10682t0l8agfo5158fln9ai5d.apps.googleusercontent.com';
-const pickerTimeout = 50 * 60 * 1000;
+const pickerTimeout = 30 * 60 * 1000;
 // const pickerTimeout = 0.5 * 60 * 1000;
 
 const signedInObservable = new Observable<boolean>();
