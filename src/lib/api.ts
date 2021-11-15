@@ -14,7 +14,7 @@ const apiKey = process.env.NODE_ENV === 'production' ?
   'AIzaSyDAXtOKqc3gYjmuoxZAqQHnBm-xTQi1-Mw' :
     process.env.REACT_APP_GAPI_KEY;
 const clientId = '321539141956-kn4i96a10682t0l8agfo5158fln9ai5d.apps.googleusercontent.com';
-const pickerTimeout = 50 * 60 * 1000;
+const pickerTimeout = 24 * 60 * 1000;
 // const pickerTimeout = 0.5 * 60 * 1000;
 
 const signedInObservable = new Observable<boolean>();
@@ -23,7 +23,6 @@ let GoogleAuth: gapi.auth2.GoogleAuth | undefined;
 const gapiReadyObservable = new Observable<void>();
 let picker: google.picker.Picker | undefined;
 let pickerCreatedTime = 0;
-let lastPickerNavHidden = true;
 const pickObservable = new Observable<google.picker.ResponseObject>();
 let gapiError = null as null | any;
 
@@ -132,27 +131,18 @@ const createPicker = () => {
   const now = new Date().getTime();
   pickerCreatedTime = now;
 
-  console.log('create picker', {
-    now,
-    lastPickerNavHidden,
-    picker
-  });
-
   const view = new google.picker.DocsView(google.picker.ViewId.DOCS_IMAGES)
     .setMimeTypes('image/apng,image/avif,image/gif,image/jpeg,image/png,image/svg+xml,image/webp')
     .setIncludeFolders(true)
     .setParent('root');
   
-  const builder = new google.picker.PickerBuilder()
+  picker = new google.picker.PickerBuilder()
     .addView(view)
+    .enableFeature(google.picker.Feature.NAV_HIDDEN)
     .setOAuthToken(accessToken)
     .setDeveloperKey(apiKey)
-    .setCallback(onPick);
-  if (lastPickerNavHidden) {
-    builder.enableFeature(google.picker.Feature.NAV_HIDDEN);
-  }
-  picker = builder.build();
-  lastPickerNavHidden = !lastPickerNavHidden;
+    .setCallback(onPick)
+    .build();
   // console.log({picker});
 
 };
@@ -162,7 +152,6 @@ const checkPickerTimeout = async () => {
     const now = new Date().getTime();
     const diff = now - pickerCreatedTime;
     const isTimedOut = diff > pickerTimeout;
-    console.log({now, pickerCreatedTime, diff, isTimedOut});
     if (isTimedOut) {
       picker.setVisible(false);
       picker.dispose();
