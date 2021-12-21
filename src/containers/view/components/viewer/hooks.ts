@@ -8,16 +8,20 @@ import React, {
 import { useAbortSignal } from '../../../../lib/hooks';
 
 interface ScrollActionsOptions {
+  isDisabled?: boolean;
   wheelCount?: number;
   onScrollOverTop?: () => void;
   onScrollBelowBottom?: () => void;
+  onOverflowChanged?: (isOverflow: boolean) => void;
 };
 
 const useScrollActions = (options: ScrollActionsOptions) => {
   const {
+    isDisabled,
     wheelCount = 3,
     onScrollOverTop,
-    onScrollBelowBottom
+    onScrollBelowBottom,
+    onOverflowChanged,
   } = options;
   const ref = useRef<HTMLDivElement>(null);
   const scrollTopRef = useRef(0);
@@ -53,6 +57,11 @@ const useScrollActions = (options: ScrollActionsOptions) => {
     onScrollBelowBottom
   ]);
 
+  const isOverflow = useOnOverflow({
+    ref,
+    onOverflowChanged
+  });
+
   useEffect(() => {
     const scrollContainer = ref.current;
     if (!scrollContainer) {
@@ -60,28 +69,31 @@ const useScrollActions = (options: ScrollActionsOptions) => {
     }
 
     const onScroll = (e: Event) => {
-      requestAnimationFrame(() => {
-        const div = e.target as HTMLDivElement;
-        if (div) {
-          scrollTopRef.current = +div.scrollTop;
-        }
-      });
+      if (!isDisabled) {
+        requestAnimationFrame(() => {
+          const div = e.target as HTMLDivElement;
+          if (div) {
+            scrollTopRef.current = +div.scrollTop;
+          }
+        });
+      }
     };
 
     scrollContainer.addEventListener('scroll', onScroll);
     return () => scrollContainer.removeEventListener('scroll', onScroll);
   }, [
+    isDisabled
   ]);
 
   useEffect(() => {
     const scrollContainer = ref.current;
-    if (!scrollContainer) {
+    if (!scrollContainer || isDisabled) {
       return;
     }
 
     const onWheel = (e: WheelEvent) => {
       const div = ref.current;
-      if (e.shiftKey || e.ctrlKey) {
+      if (isOverflow || e.shiftKey || e.ctrlKey) {
         return;
       }
       if (div) {
@@ -122,9 +134,11 @@ const useScrollActions = (options: ScrollActionsOptions) => {
     scrollContainer.addEventListener('wheel', onWheel);
     return () => scrollContainer.removeEventListener('wheel', onWheel);
   }, [
+    isDisabled,
     wheelCount,
     onScrollOverTop,
-    onScrollBelowBottom
+    onScrollBelowBottom,
+    isOverflow
   ]);
 
   return {
@@ -133,25 +147,6 @@ const useScrollActions = (options: ScrollActionsOptions) => {
     scrollToBottom,
     scrollNextSlide
   };
-};
-
-const useDelayedId = (file?: gapi.client.drive.File) => {
-  const [ delayedId, setDelayedId ] = useState('');
-  const signal = useAbortSignal();
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      const delayedId = (file && file.id) ? file.id: '';
-      if (!signal.aborted) {
-        setDelayedId(delayedId);
-      }
-    }, 100);
-    return () => clearTimeout(timeout);
-  }, [
-    file,
-    signal.aborted
-  ]);
-  return delayedId;
 };
 
 const zoomScale = 5;
@@ -278,9 +273,124 @@ const useSwipeActions = (options: SwipeActionsOptions) => {
   ]);
 };
 
+interface OnOverflowOptions {
+  ref: React.RefObject<HTMLDivElement>;
+  onOverflowChanged?: (isOverflow: boolean) => void;
+};
+
+const useOnOverflow = (options: OnOverflowOptions) => {
+  const {
+    ref,
+    onOverflowChanged
+  } = options;
+
+  const [ isOverflow, setOverflow ] = useState(false);
+
+  useEffect(() => {
+    const div = ref.current;
+    if (!div) {
+      return;
+    }
+
+    const check = () => {
+      const isOverflow = div.scrollWidth > div.offsetWidth;
+      setOverflow(isOverflow);
+    };
+
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, [
+    ref,
+    onOverflowChanged
+  ]);
+
+  useEffect(() => {
+    if (onOverflowChanged) {
+      onOverflowChanged(isOverflow);
+    }
+  }, [
+    isOverflow,
+    onOverflowChanged
+  ]);
+
+  return isOverflow;
+};
+
+interface TouchScrollOptions {
+  width: number;
+  gap: number;
+  ref: React.RefObject<HTMLDivElement>;
+  activeIndex: number;
+  contentHash?: string;
+  isEnabled?: boolean;
+  onPrevImage?: () => void;
+  onNextImage?: () => void;
+};
+
+const useTouchScroll = (options: TouchScrollOptions) => {
+  const {
+    width,
+    gap,
+    ref,
+    activeIndex,
+    contentHash,
+    isEnabled,
+    onPrevImage,
+    onNextImage,
+  } = options;
+
+  useEffect(() => {
+    if (isEnabled && width &&
+      ref.current
+    ) {
+      const scrollContainer = ref.current;
+      scrollContainer.scrollLeft = (width + 20) * activeIndex;
+    }
+  }, [
+    isEnabled,
+    width,
+    ref,
+    activeIndex,
+    contentHash
+  ]);
+
+  useEffect(() => {
+    const onScroll = (e: Event) => {
+      const div = e.target as HTMLDivElement;
+      if (div) {
+        const current = div.scrollLeft / (width + gap);
+        if (Math.ceil(current) < activeIndex && onPrevImage) {
+          onPrevImage();
+        }
+        if (Math.floor(current) > activeIndex && onNextImage) {
+          onNextImage();
+        }
+      }
+    };
+
+    if (isEnabled && width &&
+      ref.current
+    ) {
+      const scrollContainer = ref.current;
+      scrollContainer.addEventListener('scroll', onScroll);
+      return () => scrollContainer.removeEventListener('scroll', onScroll);
+    }
+  }, [
+    isEnabled,
+    width,
+    gap,
+    ref,
+    activeIndex,
+    onPrevImage,
+    onNextImage
+  ]);
+};
+
 export {
   useScrollActions,
-  useDelayedId,
   useZoom,
-  useSwipeActions
+  useSwipeActions,
+  useOnOverflow,
+  useTouchScroll
 }

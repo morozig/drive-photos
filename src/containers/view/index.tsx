@@ -309,11 +309,27 @@ const View: React.FC = () => {
     clear
   ]);
 
-  const viewFiles = useMemo(() => {
+  const {
+    activeFile,
+    canPrev,
+    prevFile,
+    canNext,
+    nextFile,
+    preloadFiles
+  } = useMemo(() => {
     if (activeIndex < 0 || files.length <= 0) {
-      return [];
+      return {
+        activeFile: undefined,
+        canPrev: false,
+        prevFile: undefined,
+        canNext: false,
+        nextFile: undefined,
+        preloadFiles: [] as gapi.client.drive.File[]
+      }
     }
     const activeFile = files[activeIndex];
+    const prevFile = files[activeIndex - 1];
+    const nextFile = files[activeIndex + 1];
     const preloadFiles = new Set<gapi.client.drive.File>();
     for (let i = 1; i <= preloadCount; i++) {
       const file = files[activeIndex + i];
@@ -346,11 +362,23 @@ const View: React.FC = () => {
       }
     }
     preloadFiles.delete(activeFile);
-    return [activeFile].concat(Array.from(preloadFiles));
+    preloadFiles.delete(prevFile);
+    preloadFiles.delete(nextFile);
+
+    return {
+      activeFile,
+      canPrev: !!prevFile || !!prevDirFile,
+      prevFile,
+      canNext: !!nextFile || !!nextDirFile,
+      nextFile,
+      preloadFiles: Array.from(preloadFiles)
+    };
   }, [
     activeIndex,
     files,
-    visibleThumbnails
+    visibleThumbnails,
+    prevDirFile,
+    nextDirFile
   ]);
 
   const viewerRef = useRef<ViewerRef>(null);
@@ -499,7 +527,12 @@ const View: React.FC = () => {
           <Viewer
             fitMode={fitMode}
             fileId={fileId}
-            files={viewFiles}
+            file={activeFile}
+            canPrev={canPrev}
+            prevFile={prevFile}
+            canNext={canNext}
+            nextFile={nextFile}
+            preloadFiles={preloadFiles}
             onPrevImage={onPrevImage}
             onNextImage={onNextImage}
             onFitModeChange={setFitMode}
@@ -507,6 +540,7 @@ const View: React.FC = () => {
             isSlideshowEnabled={isSlideshowEnabled}
             isSlideshowPlaying={isSlideshowPlaying}
             onToggleSlideshowPlaying={onToggleSlideshowPlaying}
+            onImageError={onImageError}
             sx={{
               flexGrow: 1
             }}
@@ -519,7 +553,6 @@ const View: React.FC = () => {
             }}
           />
         }
-        
       </Box>
     </Box>
   );

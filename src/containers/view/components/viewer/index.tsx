@@ -1,9 +1,9 @@
 import React, {
-  useEffect,
   forwardRef,
   useImperativeHandle,
   useCallback,
   useState,
+  useRef
 } from 'react';
 import {
   SystemStyleObject,
@@ -16,13 +16,11 @@ import {
   ListItemText,
 } from '@material-ui/core';
 import {
-  useDelayedId,
-  useScrollActions,
-  useSwipeActions,
+  useTouchScroll,
   useZoom
 } from './hooks';
 import { FitMode } from '../..';
-import { useFullScreen } from '../../../../lib/hooks';
+import { useFullScreen, useIsTouchScreen } from '../../../../lib/hooks';
 import FullscreenEnterIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
 import FitBestIcon from '@material-ui/icons/CropDin';
@@ -32,12 +30,13 @@ import FitOriginalIcon from '@material-ui/icons/CropOriginal';
 import FitManualIcon from '@material-ui/icons/ImageSearch';
 import StartSlideshowIcon from '@material-ui/icons/PlayArrow';
 import EndSlideshowIcon from '@material-ui/icons/Pause';
-import ImageSkeleton from '../image-skeleton';
-import { useRectSize } from '../thumbnails/hooks';
+import { useDebounce, useRectSize } from '../thumbnails/hooks';
 import ZoomSlider from '../zoom-slider';
+import ImageScreen from '../image-screen';
 
-const wheelCount = 3;
-const slideShowInterval = 5000;
+const delay = 100;
+const gap = 20;
+
 export interface ViewerRef {
   toggleFullscreen: () => void;
 }
@@ -45,7 +44,12 @@ export interface ViewerRef {
 interface ViewerProps {
   fitMode: FitMode;
   fileId: string;
-  files: gapi.client.drive.File[];
+  file?: gapi.client.drive.File;
+  canPrev: boolean;
+  prevFile?: gapi.client.drive.File;
+  canNext: boolean;
+  nextFile?: gapi.client.drive.File;
+  preloadFiles: gapi.client.drive.File[];
   onNextImage: () => void;
   onPrevImage: () => void;
   onFitModeChange: (fitMode: FitMode) => void;
@@ -67,7 +71,12 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
   const {
     fitMode,
     fileId,
-    files,
+    file,
+    canPrev,
+    prevFile,
+    canNext,
+    nextFile,
+    preloadFiles,
     onNextImage,
     onPrevImage,
     onFitModeChange,
@@ -80,50 +89,26 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
   } = props;
 
   const [ contextMenu, setContextMenu ] = useState<Point | null>(null);
+  const isTouchScreen = useIsTouchScreen();
 
   const {
-    ref,
-    scrollToTop,
-    scrollToBottom,
-    scrollNextSlide
-  } = useScrollActions({
-    wheelCount,
-    onScrollOverTop: onPrevImage,
-    onScrollBelowBottom: onNextImage
-  });
-  useSwipeActions({
-    ref,
-    onSwipeLeft: onNextImage,
-    onSwipeRight: onPrevImage
-  });
+    ref: containerRef,
+    rectSize: containerRectSize
+  } = useRectSize();
 
-  useEffect(() => {
-    if (isSlideshowPlaying) {
-      const timer = setInterval(scrollNextSlide, slideShowInterval);
-      return () => {
-        clearInterval(timer);
-      };
-    }
-  }, [
-    isSlideshowPlaying,
-    scrollNextSlide
-  ]);
+  const [ isOverflow, setOverflow ] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (fileId && ref.current) {
-      if (isScrollToBottom) {
-        scrollToBottom();
-      } else {
-        scrollToTop()
-      }
-    }
-  }, [
-    fileId,
-    ref,
-    scrollToTop,
-    isScrollToBottom,
-    scrollToBottom
-  ]);
+  useTouchScroll({
+    activeIndex: canPrev ? 1 : 0,
+    gap,
+    ref: scrollContainerRef,
+    width: containerRectSize.width,
+    contentHash: fileId,
+    isEnabled: isTouchScreen,
+    onPrevImage,
+    onNextImage
+  });
   
   const {
     isEnabled,
@@ -133,11 +118,11 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
   useImperativeHandle(viewerRef, () => ({
     toggleFullscreen() {
       if (isEnabled) {
-        toggleFullScreen(ref.current);
+        toggleFullScreen(containerRef.current);
       }
     }
   }), [
-    ref,
+    containerRef,
     isEnabled,
     toggleFullScreen
   ]);
@@ -160,12 +145,12 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
 
   const onClickFullscreen = useCallback(() => {
     if (isEnabled) {
-      toggleFullScreen(ref.current);
+      toggleFullScreen(containerRef.current);
     }
     onClose();
   }, [
     isEnabled,
-    ref,
+    containerRef,
     toggleFullScreen,
     onClose
   ]);
@@ -212,11 +197,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     onToggleSlideshowPlaying,
     onClose
   ]);
-  const preRenderId = useDelayedId(files[1]);
-  const {
-    ref: backRef,
-    rectSize: backRectSize
-  } = useRectSize();
+
   const {
     sliderValue,
     sliderScale,
@@ -226,256 +207,273 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     zoom
   } = useZoom();
 
+  const onOverflowChanged = useCallback((isOverflow: boolean) => {
+    const contentChanged = fileId || zoom || fitMode;
+    if (contentChanged) {
+      setOverflow(isOverflow);
+    }
+  }, [
+    fileId,
+    zoom,
+    fitMode
+  ]);
+
+  const prevDebounced = useDebounce(prevFile, isScrollToBottom ? delay : 0);
+  const nextDebounced = useDebounce(nextFile, isScrollToBottom ? 0 : delay);
+  const fitModeDebounced = useDebounce(fitMode, delay);
+  const zoomDebounced = useDebounce(zoom, delay);
+
   return (
-    <Box sx={{
-      ...sx,
-      position: 'relative'
-    }}>
-      <Box
-        component='div'
-        onContextMenu={onContextMenu}
+    <Box
+      sx={{
+        ...sx,
+        overflow: 'hidden',
+        bgcolor: 'common.black',
+        position: 'relative'
+      }}
+      ref={containerRef}
+      onContextMenu={onContextMenu}
+    >
+      <ImageScreen
         sx={{
-          textAlign: 'center',
           position: 'absolute',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          overflow: 'auto',
-          whiteSpace: 'nowrap',
-          zIndex: 1,
-          ...(!!fileId && {
-            bgcolor: 'common.black'
-          })
         }}
-        ref={ref}
+        file={isScrollToBottom ? prevDebounced : nextDebounced}
+        containerRectSize={containerRectSize}
+        fitMode={fitModeDebounced}
+        zoom={zoomDebounced}
+        isScrollDisabled
+        isPreload
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          bgcolor: 'common.black',
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          ...isOverflow ? {
+            overflow: 'hidden'
+          } : {
+            overflowX: 'scroll',
+            overflowY: 'hidden',
+            scrollSnapType: 'x mandatory',
+            "::-webkit-scrollbar": {
+              display: "none"
+            },
+          }
+        }}
+        ref={scrollContainerRef}
       >
         <Box
-          component='div'
-          key={'back'}
-          ref={backRef}
-          onClick={onNextImage}
           sx={{
-            textAlign: 'center',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            whiteSpace: 'nowrap',
-            zIndex: -1,
-            bgcolor: 'common.black'
+            display: 'flex',
+            height: '100%',
+            gap: `${gap}px`,
           }}
         >
-          <Box
-            component='span'
-            sx={{
-              height: '100%',
-              verticalAlign: 'middle',
-              display: 'inline-block'
-            }}
-          />
-          {
-            files[0] && files[0].imageMediaMetadata &&
-            files[0].imageMediaMetadata.width && files[0].imageMediaMetadata.height &&
-            <ImageSkeleton
-              width={files[0].imageMediaMetadata.width}
-              height={files[0].imageMediaMetadata.height}
-              containerRectSize={backRectSize}
-              fitMode={fitMode}
-              zoom={zoom}
+          {isTouchScreen && canPrev && 
+            <ImageScreen
+              key={prevFile?.id || 'prev'}
               sx={{
-                verticalAlign: 'middle'
+                flex: '1 0 100%',
+                scrollSnapAlign: 'center',
               }}
+              file={(prevDebounced?.id !== fileId) ?
+                prevDebounced : undefined
+              }
+              containerRectSize={containerRectSize}
+              fitMode={fitModeDebounced}
+              zoom={zoomDebounced}
+              isScrollDisabled
+              onImageError={onImageError}
             />
           }
-        </Box>
-        <Box
-          component='span'
-          sx={{
-            height: '100%',
-            verticalAlign: 'middle',
-            display: 'inline-block'
-          }}
-        />
-        {files.map((file, i) => (
-          <Box
-            component={'img'}
-            key={file.id}
-            src={file.webContentLink}
-            alt={file.name}
-            onClick={onNextImage}
-            onError={onImageError}
-            sx={i <= 1 ?
-              {
-                verticalAlign: 'middle',
-                zIndex: 1,
-                ...(fitMode === FitMode.Best && {
-                  maxWidth: '100%',
-                  maxHeight: '100%'
-                }),
-                ...(fitMode === FitMode.Width && {
-                  maxWidth: '100%'
-                }),
-                ...(fitMode === FitMode.Height && {
-                  maxHeight: '100%'
-                }),
-                ...(fitMode === FitMode.Manual && {
-                  height: file.imageMediaMetadata?.height &&
-                    `${file.imageMediaMetadata.height * zoom / 100}px`,
-                  width: file.imageMediaMetadata?.width &&
-                    `${file.imageMediaMetadata.width * zoom / 100}px`,
-                }),
-                ...(i === 1 && file.id === preRenderId && {
-                  position: 'fixed',
-                  zIndex: -2,
-                  bottom: '99vh',
-                  right: '20px'
-                }),
-                ...(i === 1 && file.id !== preRenderId && {
-                  display: 'none'
-                }),
-              } : {
-                display: 'none'
-              }
+          <ImageScreen
+            key={fileId || 'current'}
+            sx={{
+              flex: '1 0 100%',
+              scrollSnapAlign: 'center',
+            }}
+            file={file}
+            containerRectSize={containerRectSize}
+            fitMode={fitMode}
+            zoom={zoom}
+            isScrollToBottom={isTouchScreen ?
+              undefined : isScrollToBottom
             }
+            isSlideshowPlaying={isSlideshowPlaying}
+            onPrevImage={onPrevImage}
+            onNextImage={onNextImage}
+            onImageError={onImageError}
+            onOverflowChanged={onOverflowChanged}
           />
-        ))}
-        <Menu
-          container={ref.current}
-          disableScrollLock={true}
-          open={!!contextMenu}
-          onClose={onClose}
-          anchorReference='anchorPosition'
-          anchorPosition={!!contextMenu ?
-            {
-              top: contextMenu.y,
-              left: contextMenu.x
-            } :
-            undefined
+          {isTouchScreen && canNext &&
+            <ImageScreen
+              key={nextFile?.id || 'next'}
+              sx={{
+                flex: '1 0 100%',
+                scrollSnapAlign: 'center',
+              }}
+              file={(nextDebounced?.id !== fileId) ?
+                nextDebounced : undefined
+              }
+              containerRectSize={containerRectSize}
+              fitMode={fitModeDebounced}
+              zoom={zoomDebounced}
+              isScrollDisabled
+              onImageError={onImageError}
+            />
           }
-        >
-          {isEnabled &&
-            <MenuItem
-              onClick={onClickFullscreen}
-            >
-              <ListItemIcon>
-                {isFullscreen ?
-                  <FullscreenExitIcon /> :
-                  <FullscreenEnterIcon />
-                }
-              </ListItemIcon>
-              <ListItemText>
-                {isFullscreen ?
-                  'Exit Fullscreen' :
-                  'Enter Fullscreen'
-                }
-              </ListItemText>
-            </MenuItem>
-          }
-          {isSlideshowEnabled &&
-            <MenuItem
-              onClick={onClickSlideshow}
-            >
-              <ListItemIcon>
-                {isSlideshowPlaying ?
-                  <EndSlideshowIcon/> :
-                  <StartSlideshowIcon/>
-                }
-              </ListItemIcon>
-              <ListItemText>
-                {isSlideshowPlaying ?
-                  'End Slideshow' :
-                  'Start Slideshow'
-                }
-              </ListItemText>
-            </MenuItem>
-          }
-          <MenuItem
-            onClick={onClickFitBest}
-            sx={{
-              backgroundColor: fitMode === FitMode.Best ?
-                'rgba(0, 0, 0, 0.08)' : undefined
-            }}
-          >
-            <ListItemIcon>
-              <FitBestIcon/>
-            </ListItemIcon>
-            <ListItemText>
-              {'Best Fit'}
-            </ListItemText>
-          </MenuItem>
-          <MenuItem
-            onClick={onClickFitWidth}
-            sx={{
-              backgroundColor: fitMode === FitMode.Width ?
-                'rgba(0, 0, 0, 0.08)' : undefined
-            }}
-          >
-            <ListItemIcon>
-              <FitWidthIcon/>
-            </ListItemIcon>
-            <ListItemText>
-              {'Fit Width'}
-            </ListItemText>
-          </MenuItem>
-          <MenuItem
-            onClick={onClickFitHeight}
-            sx={{
-              backgroundColor: fitMode === FitMode.Height ?
-                'rgba(0, 0, 0, 0.08)' : undefined
-            }}
-          >
-            <ListItemIcon>
-              <FitHeightIcon/>
-            </ListItemIcon>
-            <ListItemText>
-              {'Fit Height'}
-            </ListItemText>
-          </MenuItem>
-          <MenuItem
-            onClick={onClickFitOriginal}
-            sx={{
-              backgroundColor: fitMode === FitMode.Original ?
-                'rgba(0, 0, 0, 0.08)' : undefined
-            }}
-          >
-            <ListItemIcon>
-              <FitOriginalIcon/>
-            </ListItemIcon>
-            <ListItemText>
-              {'Original Size'}
-            </ListItemText>
-          </MenuItem>
-          <MenuItem
-            onClick={onClickFitManual}
-            sx={{
-              backgroundColor: fitMode === FitMode.Manual ?
-                'rgba(0, 0, 0, 0.08)' : undefined
-            }}
-          >
-            <ListItemIcon>
-              <FitManualIcon/>
-            </ListItemIcon>
-            <ListItemText>
-              {'Manual Zoom'}
-            </ListItemText>
-          </MenuItem>
-        </Menu>
-        {fitMode === FitMode.Manual && isFullscreen &&
-          <ZoomSlider
-            sliderValue={sliderValue}
-            onSliderChange={onSliderChange}
-            sliderScale={sliderScale}
-            onZoomMinus={onZoomMinus}
-            onZoomPlus={onZoomPlus}
-            sx={{
-              position: 'fixed'
-            }}
-          />
-        }
+          {preloadFiles.map(file => (
+            <Box
+              component={'img'}
+              key={file.id}
+              src={file.webContentLink}
+              alt={file.name}
+              sx={{
+                display: 'none'
+              }}
+            />
+          ))}
+        </Box>
       </Box>
-      {fitMode === FitMode.Manual && !isFullscreen &&
+      <Menu
+        container={containerRef.current}
+        disableScrollLock={true}
+        open={!!contextMenu}
+        onClose={onClose}
+        anchorReference='anchorPosition'
+        anchorPosition={!!contextMenu ?
+          {
+            top: contextMenu.y,
+            left: contextMenu.x
+          } :
+          undefined
+        }
+      >
+        {isEnabled &&
+          <MenuItem
+            onClick={onClickFullscreen}
+          >
+            <ListItemIcon>
+              {isFullscreen ?
+                <FullscreenExitIcon /> :
+                <FullscreenEnterIcon />
+              }
+            </ListItemIcon>
+            <ListItemText>
+              {isFullscreen ?
+                'Exit Fullscreen' :
+                'Enter Fullscreen'
+              }
+            </ListItemText>
+          </MenuItem>
+        }
+        {isSlideshowEnabled &&
+          <MenuItem
+            onClick={onClickSlideshow}
+          >
+            <ListItemIcon>
+              {isSlideshowPlaying ?
+                <EndSlideshowIcon/> :
+                <StartSlideshowIcon/>
+              }
+            </ListItemIcon>
+            <ListItemText>
+              {isSlideshowPlaying ?
+                'End Slideshow' :
+                'Start Slideshow'
+              }
+            </ListItemText>
+          </MenuItem>
+        }
+        <MenuItem
+          onClick={onClickFitBest}
+          sx={{
+            backgroundColor: fitMode === FitMode.Best ?
+              'rgba(0, 0, 0, 0.08)' : undefined
+          }}
+        >
+          <ListItemIcon>
+            <FitBestIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Best Fit'}
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={onClickFitWidth}
+          sx={{
+            backgroundColor: fitMode === FitMode.Width ?
+              'rgba(0, 0, 0, 0.08)' : undefined
+          }}
+        >
+          <ListItemIcon>
+            <FitWidthIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Fit Width'}
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={onClickFitHeight}
+          sx={{
+            backgroundColor: fitMode === FitMode.Height ?
+              'rgba(0, 0, 0, 0.08)' : undefined
+          }}
+        >
+          <ListItemIcon>
+            <FitHeightIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Fit Height'}
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={onClickFitOriginal}
+          sx={{
+            backgroundColor: fitMode === FitMode.Original ?
+              'rgba(0, 0, 0, 0.08)' : undefined
+          }}
+        >
+          <ListItemIcon>
+            <FitOriginalIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Original Size'}
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          onClick={onClickFitManual}
+          sx={{
+            backgroundColor: fitMode === FitMode.Manual ?
+              'rgba(0, 0, 0, 0.08)' : undefined
+          }}
+        >
+          <ListItemIcon>
+            <FitManualIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Manual Zoom'}
+          </ListItemText>
+        </MenuItem>
+      </Menu>
+      {fitMode === FitMode.Manual &&
         <ZoomSlider
           sliderValue={sliderValue}
           onSliderChange={onSliderChange}
