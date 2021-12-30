@@ -1,4 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { 
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   SystemStyleObject,
 } from '@material-ui/system';
@@ -9,16 +14,25 @@ import { FitMode } from '../..';
 import { RectSize } from '../thumbnails/hooks';
 import { useScrollActions } from '../viewer/hooks';
 import ImageSkeleton from '../image-skeleton';
+import { useBrowserScrollbarWidth } from '../../../../lib/hooks';
 
 const wheelCount = 3;
 const slideShowInterval = 5000;
+const zoomStep = 0.4;
+
+interface FixedPoint {
+  localZoom: number;
+  offsetX: number;
+  offsetY: number;
+  scrollX: number;
+  scrollY: number;
+}
 
 interface ImageScreenProps {
   file?: gapi.client.drive.File;
-  containerRectSize?: RectSize,
+  containerRectSize: RectSize,
   fitMode?: FitMode;
   zoom?: number;
-  isScrollToBottom?: boolean;
   isSlideshowPlaying?: boolean;
   isScrollDisabled?: boolean;
   onPrevImage?: () => void;
@@ -35,7 +49,6 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
     containerRectSize,
     fitMode,
     zoom = 100,
-    isScrollToBottom,
     isSlideshowPlaying,
     isScrollDisabled,
     onPrevImage,
@@ -43,20 +56,23 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
     onImageError,
     isPreload,
     onOverflowChanged,
-    sx
+    sx,
   } = props;
+
+  const [ localZoom, setLocalZoom ] = useState(0);
+  const modeZoomRef = useRef(zoom);
+  const scrollbarWidth = useBrowserScrollbarWidth();
+  const isOferflowRef = useRef(false);
 
   const {
     ref,
-    scrollToTop,
-    scrollToBottom,
-    scrollNextSlide
+    scrollNextSlide,
   } = useScrollActions({
     isDisabled: isScrollDisabled,
     wheelCount,
     onScrollOverTop: onPrevImage,
     onScrollBelowBottom: onNextImage,
-    onOverflowChanged
+    isOverflow: isOferflowRef.current,
   });
 
   useEffect(() => {
@@ -72,19 +88,308 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
   ]);
 
   useEffect(() => {
-    if (file && ref.current && isScrollToBottom !== undefined) {
-      if (isScrollToBottom) {
-        scrollToBottom();
-      } else {
-        scrollToTop()
+    if (!file || !file.imageMediaMetadata ||
+      !file.imageMediaMetadata.width ||
+      !file.imageMediaMetadata.height ||
+      !containerRectSize.width ||
+      !containerRectSize.height
+    ) {
+      return;
+    }
+
+    const imageWidth = file.imageMediaMetadata.width;
+    const imageHeight = file.imageMediaMetadata.height;
+    const {
+      width,
+      height
+    } = containerRectSize;
+
+    if (fitMode === FitMode.Best) {
+      const horizontalScale = (imageWidth > width) ?
+        width / imageWidth : 1;
+      const verticalScale = (imageHeight > height) ?
+        height / imageHeight : 1;
+      const scale = Math.min(horizontalScale, verticalScale);
+      modeZoomRef.current = scale * 100;
+    } else if (fitMode === FitMode.Width) {
+      let scale = 1;
+      if (imageWidth > width) {
+        scale = width / imageWidth;
+        const scaledHeight = imageHeight * scale;
+        if (scaledHeight > height && width > scrollbarWidth) {
+          scale = (width - scrollbarWidth) / imageWidth;
+        }
+      }
+      modeZoomRef.current = scale * 100;
+    } else if (fitMode === FitMode.Height) {
+      let scale = 1;
+      if (imageHeight > height) {
+        scale = height / imageHeight;
+        const scaledWidth = imageWidth * scale;
+        if (scaledWidth > width && height > scrollbarWidth) {
+          scale = (height - scrollbarWidth) / imageHeight;
+        }
+      }
+      modeZoomRef.current = scale * 100;
+    } else if (fitMode === FitMode.Original) {
+      let scale = 1;
+      modeZoomRef.current = scale * 100;
+    } else if (fitMode === FitMode.Manual) {
+      modeZoomRef.current = zoom;
+    }
+    setLocalZoom(modeZoomRef.current);
+  }, [
+    containerRectSize,
+    file,
+    fitMode,
+    scrollbarWidth,
+    zoom,
+  ]);
+
+  const {
+    imageWidth,
+    imageHeight,
+    left,
+    top,
+  } = useMemo(() => {
+    if (!file || !file.imageMediaMetadata ||
+      !file.imageMediaMetadata.width ||
+      !file.imageMediaMetadata.height ||
+      !containerRectSize.width ||
+      !containerRectSize.height
+    ) {
+      return {
+        imageWidth: 0,
+        imageHeight: 0,
+        left: 0,
+        top: 0,
+      };
+    } else {
+      const imageWidth = file.imageMediaMetadata.width * localZoom / 100;
+      const imageHeight = file.imageMediaMetadata.height * localZoom / 100;
+      const isHorizontalScroll = imageWidth > containerRectSize.width;
+      const isVerticalScroll = imageHeight > containerRectSize.height;
+      const clientWidth = isVerticalScroll ?
+        containerRectSize.width - scrollbarWidth :
+        containerRectSize.width;
+      const clientHeight = isHorizontalScroll ?
+        containerRectSize.height - scrollbarWidth :
+        containerRectSize.height;
+      const left = imageWidth < clientWidth ?
+        (clientWidth - imageWidth) / 2 : 0;
+      const top = imageHeight < clientHeight ?
+        (clientHeight - imageHeight) / 2 : 0;
+      return {
+        imageWidth,
+        imageHeight,
+        left,
+        top,
+      };
+    }
+  }, [
+    containerRectSize.width,
+    containerRectSize.height,
+    file,
+    localZoom,
+    scrollbarWidth,
+  ]);
+
+  useEffect(() => {
+    if (imageWidth && containerRectSize.width) {
+      isOferflowRef.current = imageWidth > containerRectSize.width;
+      if (onOverflowChanged) {
+        onOverflowChanged(isOferflowRef.current);
       }
     }
   }, [
-    file,
+    onOverflowChanged,
+    imageWidth,
+    containerRectSize.width
+  ]);
+
+  const fixedPointRef = useRef<FixedPoint | null>(null);
+  useEffect(() => {
+    const div = ref.current;
+    if (!div) {
+      return;
+    }
+
+    const saveFixedPoint = (e: WheelEvent, localZoom: number) => {
+      fixedPointRef.current = {
+        localZoom,
+        offsetX: e.offsetX,
+        offsetY: e.offsetY,
+        scrollX: div.scrollLeft,
+        scrollY: div.scrollTop,
+      };
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey) {
+        return;
+      } else {
+        e.preventDefault();
+      }
+
+      if (e.deltaY < 0) {
+        setLocalZoom(current => {
+          const newLocalZoom = Math.min(100, current * (1 + zoomStep));
+          if (newLocalZoom !== current) {
+            saveFixedPoint(e, current);
+          }
+          return newLocalZoom;
+        })
+      } else if (e.deltaY > 0) {
+        setLocalZoom(current => {
+          const newLocalZoom = Math.max(modeZoomRef.current, current * (1 - zoomStep));
+          if (newLocalZoom !== current) {
+            saveFixedPoint(e, current);
+          }
+          return newLocalZoom;
+        })
+      }
+    };
+
+    div.addEventListener('wheel', onWheel);
+    return () => div.removeEventListener('wheel', onWheel);
+  }, [
     ref,
-    scrollToTop,
-    isScrollToBottom,
-    scrollToBottom
+  ]);
+
+  useEffect(() => {
+    const fixedPoint = fixedPointRef.current;
+    const div = ref.current;
+    if (!fixedPoint || !div || !fixedPoint.localZoom || !localZoom) {
+      return;
+    }
+    const offsetX = fixedPoint.offsetX / fixedPoint.localZoom * localZoom;
+    const offsetY = fixedPoint.offsetY / fixedPoint.localZoom * localZoom;
+    const scrollX = fixedPoint.scrollX - fixedPoint.offsetX + offsetX;
+    const scrollY = fixedPoint.scrollY - fixedPoint.offsetY + offsetY;
+    div.scroll(scrollX, scrollY);
+    fixedPointRef.current = null;
+  }, [
+    localZoom,
+    ref,
+  ]);
+
+  const touchesRef = useRef<PointerEvent[]>([]);
+  const diffRef = useRef(-1);
+
+  useEffect(() => {
+    const div = ref.current;
+    if (!div) {
+      return;
+    }
+
+    const saveFixedPoint = (
+      center: {
+        offsetX: number,
+        offsetY: number,
+      },
+      localZoom: number
+    ) => {
+      fixedPointRef.current = {
+        localZoom,
+        offsetX: center.offsetX,
+        offsetY: center.offsetY,
+        scrollX: div.scrollLeft,
+        scrollY: div.scrollTop,
+      };
+    };
+    
+    const onPointerDown = (e: PointerEvent) => {
+      touchesRef.current.push(e);
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      for (let i = 0; i < touchesRef.current.length; i++) {
+        if (e.pointerId === touchesRef.current[i].pointerId) {
+          touchesRef.current[i] = e;
+          break;
+        }
+      }
+      
+      if (touchesRef.current.length === 2) {
+        const newDiff = Math.sqrt(
+          Math.pow(
+            touchesRef.current[0].clientX - touchesRef.current[1].clientX,
+            2
+          ) + 
+          Math.pow(
+            touchesRef.current[0].clientY - touchesRef.current[1].clientY,
+            2
+          )
+        );
+
+        const center = {
+          offsetX: (
+            touchesRef.current[0].offsetX + touchesRef.current[1].offsetX
+          ) / 2,
+          offsetY: (
+            touchesRef.current[0].offsetY + touchesRef.current[1].offsetY
+          ) / 2
+        }
+
+        if (diffRef.current && diffRef.current > 0) {
+          if (newDiff > diffRef.current) {
+            setLocalZoom(current => {
+              const newLocalZoom = Math.min(
+                100,
+                current * newDiff / diffRef.current
+              );
+              if (newLocalZoom !== current) {
+                saveFixedPoint(center, current);
+              }
+              return newLocalZoom;
+            })
+          } else if (newDiff < diffRef.current) {
+            setLocalZoom(current => {
+              const newLocalZoom = Math.max(
+                modeZoomRef.current,
+                current * newDiff / diffRef.current
+              );
+              if (newLocalZoom !== current) {
+                saveFixedPoint(center, current);
+              }
+              return newLocalZoom;
+            })
+          }
+        }
+
+        diffRef.current = newDiff;
+      }
+    };
+
+    const onPointerUp = (e: PointerEvent) => {
+      for (let i = 0; i < touchesRef.current.length; i++) {
+        if (e.pointerId === touchesRef.current[i].pointerId) {
+          touchesRef.current.splice(i, 1);
+          break;
+        }
+      }
+
+      if (touchesRef.current.length < 2) {
+        diffRef.current = -1;
+      }
+    };
+
+    div.addEventListener('pointerdown', onPointerDown);
+    div.addEventListener('pointermove', onPointerMove);
+    div.addEventListener('pointerup', onPointerUp);
+    div.addEventListener('pointercancel', onPointerUp);
+    div.addEventListener('pointerout', onPointerUp);
+    div.addEventListener('pointerleave', onPointerUp);
+    return () => {
+      div.removeEventListener('pointerdown', onPointerDown);
+      div.removeEventListener('pointermove', onPointerMove);
+      div.removeEventListener('pointerup', onPointerUp);
+      div.removeEventListener('pointercancel', onPointerUp);
+      div.removeEventListener('pointerout', onPointerUp);
+      div.removeEventListener('pointerleave', onPointerUp);
+    };
+  }, [
+    ref,
   ]);
 
   return (
@@ -94,56 +399,24 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
         overflow: 'auto',
         whiteSpace: 'nowrap',
         position: 'relative',
+        touchAction: 'pan-x pan-y',
         ...sx
       }}
       ref={ref}
     >
-      {!!file &&
+      {!!file && localZoom > 0 &&
         <>
           {!isPreload &&
-            <Box
+            <ImageSkeleton
+              width={imageWidth}
+              height={imageHeight}
               sx={{
-                textAlign: 'center',
                 position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                whiteSpace: 'nowrap',
+                left: `${left}px`,
+                top: `${top}px`,
               }}
-            >
-              <Box
-                component='span'
-                sx={{
-                  height: '100%',
-                  verticalAlign: 'middle',
-                  display: 'inline-block'
-                }}
-              />
-              {
-                file.imageMediaMetadata &&
-                file.imageMediaMetadata.width && file.imageMediaMetadata.height &&
-                <ImageSkeleton
-                  width={file.imageMediaMetadata.width}
-                  height={file.imageMediaMetadata.height}
-                  containerRectSize={containerRectSize}
-                  fitMode={fitMode}
-                  zoom={zoom}
-                  sx={{
-                    verticalAlign: 'middle'
-                  }}
-                />
-              }
-            </Box>
+            />
           }
-          <Box
-            component='span'
-            sx={{
-              height: '100%',
-              verticalAlign: 'middle',
-              display: 'inline-block'
-            }}
-          />
           <Box
             component={'img'}
             key={file.id}
@@ -152,24 +425,11 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
             onClick={onNextImage}
             onError={onImageError}
             sx={{
-              position: 'relative',
-              verticalAlign: 'middle',
-              ...(fitMode === FitMode.Best && {
-                maxWidth: '100%',
-                maxHeight: '100%'
-              }),
-              ...(fitMode === FitMode.Width && {
-                maxWidth: '100%'
-              }),
-              ...(fitMode === FitMode.Height && {
-                maxHeight: '100%'
-              }),
-              ...(fitMode === FitMode.Manual && {
-                height: file.imageMediaMetadata?.height &&
-                  `${file.imageMediaMetadata.height * zoom / 100}px`,
-                width: file.imageMediaMetadata?.width &&
-                  `${file.imageMediaMetadata.width * zoom / 100}px`,
-              })
+              position: 'absolute',
+              left: `${left}px`,
+              top: `${top}px`,
+              height: `${imageHeight}px`,
+              width: `${imageWidth}px`,
             }}
           />
         </>

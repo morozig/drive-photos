@@ -12,7 +12,7 @@ interface ScrollActionsOptions {
   wheelCount?: number;
   onScrollOverTop?: () => void;
   onScrollBelowBottom?: () => void;
-  onOverflowChanged?: (isOverflow: boolean) => void;
+  isOverflow?: boolean;
 };
 
 const useScrollActions = (options: ScrollActionsOptions) => {
@@ -21,26 +21,12 @@ const useScrollActions = (options: ScrollActionsOptions) => {
     wheelCount = 3,
     onScrollOverTop,
     onScrollBelowBottom,
-    onOverflowChanged,
+    isOverflow,
   } = options;
   const ref = useRef<HTMLDivElement>(null);
   const scrollTopRef = useRef(0);
   const scrollOverTopCountRef = useRef(0);
   const scrollBelowBottomCountRef = useRef(0);
-
-  const scrollToTop = useCallback(() => {
-    if (ref.current) {
-      const div = ref.current;
-      div.scroll(0, 0);
-    }
-  }, []);
-
-  const scrollToBottom = useCallback(() => {
-    if (ref.current) {
-      const div = ref.current;
-      div.scroll(0, div.scrollHeight);
-    }
-  }, []);
 
   const scrollNextSlide = useCallback(() => {
     if (ref.current) {
@@ -57,10 +43,6 @@ const useScrollActions = (options: ScrollActionsOptions) => {
     onScrollBelowBottom
   ]);
 
-  const isOverflow = useOnOverflow({
-    ref,
-    onOverflowChanged
-  });
 
   useEffect(() => {
     const scrollContainer = ref.current;
@@ -138,13 +120,11 @@ const useScrollActions = (options: ScrollActionsOptions) => {
     wheelCount,
     onScrollOverTop,
     onScrollBelowBottom,
-    isOverflow
+    isOverflow,
   ]);
 
   return {
     ref,
-    scrollToTop,
-    scrollToBottom,
     scrollNextSlide
   };
 };
@@ -273,50 +253,6 @@ const useSwipeActions = (options: SwipeActionsOptions) => {
   ]);
 };
 
-interface OnOverflowOptions {
-  ref: React.RefObject<HTMLDivElement>;
-  onOverflowChanged?: (isOverflow: boolean) => void;
-};
-
-const useOnOverflow = (options: OnOverflowOptions) => {
-  const {
-    ref,
-    onOverflowChanged
-  } = options;
-
-  const [ isOverflow, setOverflow ] = useState(false);
-
-  useEffect(() => {
-    const div = ref.current;
-    if (!div) {
-      return;
-    }
-
-    const check = () => {
-      const isOverflow = div.scrollWidth > div.offsetWidth;
-      setOverflow(isOverflow);
-    };
-
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, [
-    ref,
-    onOverflowChanged
-  ]);
-
-  useEffect(() => {
-    if (onOverflowChanged) {
-      onOverflowChanged(isOverflow);
-    }
-  }, [
-    isOverflow,
-    onOverflowChanged
-  ]);
-
-  return isOverflow;
-};
-
 interface TouchScrollOptions {
   width: number;
   gap: number;
@@ -391,6 +327,5 @@ export {
   useScrollActions,
   useZoom,
   useSwipeActions,
-  useOnOverflow,
   useTouchScroll
 }

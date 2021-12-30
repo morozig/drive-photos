@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { } from 'react';
 import {
   SystemStyleObject,
 } from '@material-ui/system';
@@ -8,8 +8,6 @@ import {
 import {
   Box
 } from '@material-ui/core';
-import { FitMode } from '../..';
-import { RectSize } from '../thumbnails/hooks';
 
 const pulseKeyframe = keyframes`
   0% {
@@ -26,9 +24,6 @@ const pulseKeyframe = keyframes`
 interface ImageSkeletonProps {
   width: number;
   height: number;
-  containerRectSize?: RectSize,
-  fitMode?: FitMode;
-  zoom?: number;
   sx?: SystemStyleObject;
 };
 
@@ -36,31 +31,8 @@ const ImageSkeleton: React.FC<ImageSkeletonProps> = (props) => {
   const {
     width,
     height,
-    containerRectSize,
-    fitMode,
-    zoom = 100,
-    sx
+    sx,
   } = props;
-
-  const [ isBoundByWidth, setBoundByWidth ] = useState(false);
-
-  useEffect(() => {
-    if (fitMode === FitMode.Best && containerRectSize &&
-      containerRectSize.width && containerRectSize.height
-    ) {
-      const heightScale = containerRectSize.height < height ?
-        containerRectSize.height / height : 1;
-      const widthScale = containerRectSize.width < width ?
-        containerRectSize.width / width : 1;
-      const isBoundByWidth = (widthScale < heightScale);
-      setBoundByWidth(isBoundByWidth);
-    }
-  }, [
-    width,
-    height,
-    containerRectSize,
-    fitMode
-  ]);
 
   return (
     <Box
@@ -70,31 +42,8 @@ const ImageSkeleton: React.FC<ImageSkeletonProps> = (props) => {
       sx={{
         bgcolor: 'grey.900',
         animation: `${pulseKeyframe} 1.5s ease-in-out 0.5s infinite`,
-        ...(fitMode === FitMode.Best && (
-          isBoundByWidth ? {
-            width: `${width}px`,
-            maxWidth: '100%'
-          } : {
-            height: `${height}px`,
-            maxHeight: '100%'
-          }
-        )),
-        ...(fitMode === FitMode.Width && {
-          width: `${width}px`,
-          maxWidth: '100%'
-        }),
-        ...(fitMode === FitMode.Height && {
-          height: `${height}px`,
-          maxHeight: '100%'
-        }),
-        ...(fitMode === FitMode.Original && {
-          width: `${width}px`,
-          height: `${height}px`,
-        }),
-        ...(fitMode === FitMode.Manual && {
-          width: `${width * zoom / 100}px`,
-          height: `${height * zoom / 100}px`,
-        }),
+        width: `${width}px`,
+        height: `${height}px`,
         ...sx,
       }}
     />

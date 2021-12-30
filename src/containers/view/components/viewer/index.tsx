@@ -207,17 +207,6 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     zoom
   } = useZoom();
 
-  const onOverflowChanged = useCallback((isOverflow: boolean) => {
-    const contentChanged = fileId || zoom || fitMode;
-    if (contentChanged) {
-      setOverflow(isOverflow);
-    }
-  }, [
-    fileId,
-    zoom,
-    fitMode
-  ]);
-
   const prevDebounced = useDebounce(prevFile, isScrollToBottom ? delay : 0);
   const nextDebounced = useDebounce(nextFile, isScrollToBottom ? 0 : delay);
   const fitModeDebounced = useDebounce(fitMode, delay);
@@ -313,14 +302,11 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
             containerRectSize={containerRectSize}
             fitMode={fitMode}
             zoom={zoom}
-            isScrollToBottom={isTouchScreen ?
-              undefined : isScrollToBottom
-            }
             isSlideshowPlaying={isSlideshowPlaying}
             onPrevImage={onPrevImage}
             onNextImage={onNextImage}
             onImageError={onImageError}
-            onOverflowChanged={onOverflowChanged}
+            onOverflowChanged={setOverflow}
           />
           {isTouchScreen && canNext &&
             <ImageScreen
