@@ -282,21 +282,16 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
       return;
     }
 
-    const saveFixedPoint = (
-      center: {
-        offsetX: number,
-        offsetY: number,
-      },
-      localZoom: number
+    const scrollToFixedPoint = (
+      fixedPoint: FixedPoint,
+      newLocalZoom: number
     ) => {
-      fixedPointRef.current = {
-        localZoom,
-        offsetX: center.offsetX,
-        offsetY: center.offsetY,
-        scrollX: div.scrollLeft,
-        scrollY: div.scrollTop,
-      };
-    };
+      const offsetX = fixedPoint.offsetX / fixedPoint.localZoom * newLocalZoom;
+      const offsetY = fixedPoint.offsetY / fixedPoint.localZoom * newLocalZoom;
+      const scrollX = fixedPoint.scrollX - fixedPoint.offsetX + offsetX;
+      const scrollY = fixedPoint.scrollY - fixedPoint.offsetY + offsetY;
+      div.scroll(scrollX, scrollY);
+    }
     
     const onPointerDown = (e: PointerEvent) => {
       touchesRef.current.push(e);
@@ -332,31 +327,30 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
         }
 
         if (diffRef.current && diffRef.current > 0) {
-          if (newDiff > diffRef.current) {
+          if (newDiff !== diffRef.current) {
             setLocalZoom(current => {
-              const newLocalZoom = Math.min(
-                100,
-                current * newDiff / diffRef.current
-              );
+              const newLocalZoom = (newDiff > diffRef.current) ?
+                Math.min(
+                  100,
+                  current * newDiff / diffRef.current
+                ) : Math.max(
+                  modeZoomRef.current,
+                  current * newDiff / diffRef.current
+                );
               if (newLocalZoom !== current) {
-                saveFixedPoint(center, current);
+                const fixedPoint = {
+                  localZoom: current,
+                  offsetX: center.offsetX,
+                  offsetY: center.offsetY,
+                  scrollX: div.scrollLeft,
+                  scrollY: div.scrollTop,
+                };
+                scrollToFixedPoint(fixedPoint, newLocalZoom);
               }
               return newLocalZoom;
-            })
-          } else if (newDiff < diffRef.current) {
-            setLocalZoom(current => {
-              const newLocalZoom = Math.max(
-                modeZoomRef.current,
-                current * newDiff / diffRef.current
-              );
-              if (newLocalZoom !== current) {
-                saveFixedPoint(center, current);
-              }
-              return newLocalZoom;
-            })
+            });
           }
         }
-
         diffRef.current = newDiff;
       }
     };
