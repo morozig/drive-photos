@@ -165,8 +165,12 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
         top: 0,
       };
     } else {
-      const imageWidth = file.imageMediaMetadata.width * localZoom / 100;
-      const imageHeight = file.imageMediaMetadata.height * localZoom / 100;
+      const imageWidth = Math.round(
+        file.imageMediaMetadata.width * localZoom / 100
+      );
+      const imageHeight = Math.round(
+        file.imageMediaMetadata.height * localZoom / 100
+      );
       const isHorizontalScroll = imageWidth > containerRectSize.width;
       const isVerticalScroll = imageHeight > containerRectSize.height;
       const clientWidth = isVerticalScroll ?
