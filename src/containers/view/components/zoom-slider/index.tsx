@@ -38,7 +38,10 @@ const ZoomSlider: React.FC<ZoomSliderProps> = (props) => {
         position: 'absolute',
         left: '50%',
         transform: 'translate(-50%,0)',
-        bottom: '20px',
+        bottom: {
+          xs: '60px',
+          md: '20px',
+        },
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         width: '200px',
         zIndex: 1,

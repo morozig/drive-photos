@@ -339,14 +339,18 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
           if (newDiff !== diffRef.current) {
             const zoomSetter = (fitMode === FitMode.Manual && setZoom) ?
               setZoom : setLocalZoom;
+            const minLocalZoom = (fitMode === FitMode.Manual) ?
+              0 : modeZoomRef.current;
+            const maxLocalZoom = (fitMode === FitMode.Manual) ?
+              Infinity : 100;
 
             zoomSetter(current => {
               const newLocalZoom = (newDiff > diffRef.current) ?
                 Math.min(
-                  100,
+                  maxLocalZoom,
                   current * newDiff / diffRef.current
                 ) : Math.max(
-                  modeZoomRef.current,
+                  minLocalZoom,
                   current * newDiff / diffRef.current
                 );
               if (newLocalZoom !== current) {
@@ -357,7 +361,9 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
                   scrollX: div.scrollLeft,
                   scrollY: div.scrollTop,
                 };
-                scrollToFixedPoint(fixedPoint, newLocalZoom);
+                if (fitMode !== FitMode.Manual) {
+                  scrollToFixedPoint(fixedPoint, newLocalZoom);
+                }
               }
               return newLocalZoom;
             });
