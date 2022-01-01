@@ -12,7 +12,10 @@ import {
 } from '@material-ui/core';
 import { FitMode } from '../..';
 import { RectSize } from '../thumbnails/hooks';
-import { useScrollActions } from '../viewer/hooks';
+import {
+  useScrollActions,
+  ZoomSetter
+} from '../viewer/hooks';
 import ImageSkeleton from '../image-skeleton';
 import { useBrowserScrollbarWidth } from '../../../../lib/hooks';
 
@@ -40,6 +43,7 @@ interface ImageScreenProps {
   onImageError?: () => void;
   isPreload?: boolean;
   onOverflowChanged?: (isOverflow: boolean) => void;
+  setZoom?: (setter: ZoomSetter) => void;
   sx?: SystemStyleObject;
 };
 
@@ -56,6 +60,7 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
     onImageError,
     isPreload,
     onOverflowChanged,
+    setZoom,
     sx,
   } = props;
 
@@ -235,29 +240,29 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
         e.preventDefault();
       }
 
-      if (e.deltaY < 0) {
-        setLocalZoom(current => {
-          const newLocalZoom = Math.min(100, current * (1 + zoomStep));
-          if (newLocalZoom !== current) {
-            saveFixedPoint(e, current);
-          }
-          return newLocalZoom;
-        })
-      } else if (e.deltaY > 0) {
-        setLocalZoom(current => {
-          const newLocalZoom = Math.max(modeZoomRef.current, current * (1 - zoomStep));
-          if (newLocalZoom !== current) {
-            saveFixedPoint(e, current);
-          }
-          return newLocalZoom;
-        })
-      }
+      const zoomSetter = (fitMode === FitMode.Manual && setZoom) ?
+        setZoom : setLocalZoom;
+      const minLocalZoom = (fitMode === FitMode.Manual) ?
+        0 : modeZoomRef.current;
+      const maxLocalZoom = (fitMode === FitMode.Manual) ?
+        Infinity : 100;
+      zoomSetter(current => {
+        const newLocalZoom = (e.deltaY < 0) ?
+          Math.min(maxLocalZoom, current * (1 + zoomStep)) :
+          Math.max(minLocalZoom, current * (1 - zoomStep));
+        if (newLocalZoom !== current) {
+          saveFixedPoint(e, current);
+        }
+        return newLocalZoom;
+      })
     };
 
     div.addEventListener('wheel', onWheel);
     return () => div.removeEventListener('wheel', onWheel);
   }, [
     ref,
+    fitMode,
+    setZoom,
   ]);
 
   useEffect(() => {
@@ -332,7 +337,10 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
 
         if (diffRef.current && diffRef.current > 0) {
           if (newDiff !== diffRef.current) {
-            setLocalZoom(current => {
+            const zoomSetter = (fitMode === FitMode.Manual && setZoom) ?
+              setZoom : setLocalZoom;
+
+            zoomSetter(current => {
               const newLocalZoom = (newDiff > diffRef.current) ?
                 Math.min(
                   100,
@@ -388,6 +396,8 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
     };
   }, [
     ref,
+    fitMode,
+    setZoom,
   ]);
 
   return (

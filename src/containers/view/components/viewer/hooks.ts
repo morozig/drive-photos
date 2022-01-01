@@ -129,14 +129,16 @@ const useScrollActions = (options: ScrollActionsOptions) => {
   };
 };
 
+export type ZoomSetter = (current: number) => number;
 const zoomScale = 5;
+const sliderScale = (sliderValue: number) => 
+  Math.round(100 * zoomScale ** sliderValue);
+const zoomToValue = (zoom: number) =>
+  Math.log(zoom / 100) / Math.log(zoomScale);
+
 const useZoom = () => {
   const [ sliderValue, setSliderValue ] = useState(0);
   const signal = useAbortSignal();
-
-  const sliderScale = useCallback((sliderValue: number) => {
-    return Math.round(100 * zoomScale ** sliderValue)
-  }, []);
 
   const onSliderChange = useCallback((event: Event, value: number | number[]) => {
     requestAnimationFrame(() => {
@@ -157,8 +159,17 @@ const useZoom = () => {
     return sliderScale(sliderValue);
   }, [
     sliderValue,
-    sliderScale
   ]);
+  const setZoom = useCallback((setter: ZoomSetter) => {
+    setSliderValue(currentValue => {
+      const currentZoom = sliderScale(currentValue);
+      const newZoom = setter(currentZoom);
+      const newValue = zoomToValue(newZoom);
+      return newValue > currentValue ?
+        Math.min(1, newValue) :
+        Math.max(-1, newValue);
+    });
+  }, []);
 
   return {
     sliderValue,
@@ -166,7 +177,8 @@ const useZoom = () => {
     onSliderChange,
     onZoomMinus,
     onZoomPlus,
-    zoom
+    zoom,
+    setZoom,
   };
 };
 

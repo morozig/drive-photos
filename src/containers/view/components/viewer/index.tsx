@@ -204,7 +204,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     onSliderChange,
     onZoomMinus,
     onZoomPlus,
-    zoom
+    zoom,
+    setZoom,
   } = useZoom();
 
   const prevDebounced = useDebounce(prevFile, isScrollToBottom ? delay : 0);
@@ -307,6 +308,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
             onNextImage={onNextImage}
             onImageError={onImageError}
             onOverflowChanged={setOverflow}
+            setZoom={setZoom}
           />
           {isTouchScreen && canNext &&
             <ImageScreen
