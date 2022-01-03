@@ -156,7 +156,7 @@ const useFiles = (fileId: string, parentId: string) => {
           pageToken
         });
         if(!signal.aborted && result) {
-          setFiles(prevFiles => prevFiles.concat(result.files || []))
+          setFiles(prevFiles => prevFiles.concat(result.files || []));
           setFinished(!result.nextPageToken);
           setPageToken(result.nextPageToken);
         }
@@ -239,6 +239,20 @@ const useDirectory = (parentId?: string) => {
   ]);
   
   return directory;
+};
+
+const useGrandParentId = (parent?: gapi.client.drive.File) => {
+  const [ grandParentId, setGrandParentId ] = useState<string | undefined>();
+
+  useEffect(() => {
+    setGrandParentId((parent && parent.parents) ?
+      parent.parents[0] : undefined
+    );
+  }, [
+    parent,
+  ]);
+  
+  return grandParentId;
 };
 
 const useFullScreen = () => {
@@ -350,7 +364,26 @@ const useDirectories = (grandParentId?: string) => {
     directories,
     setDirectories
   ] = useState<gapi.client.drive.File[]>([]);
+  const [ pageToken, setPageToken ] = useState<string | undefined>();
+  const cacheIdRef = useRef<string | undefined>(grandParentId);
+  const cacheDirectoriesRef = useRef<gapi.client.drive.File[]>([]);
+  const [ isFinished, setFinished ] = useState(false);
   const signal = useAbortSignal();
+
+  useEffect(() => {
+    if (!grandParentId) {
+      setDirectories([]);
+      setPageToken(undefined);
+      setFinished(false);
+    } else if (grandParentId === cacheIdRef.current) {
+      setDirectories(cacheDirectoriesRef.current);
+      setPageToken(undefined);
+      setFinished(true);
+    }
+  }, [
+    grandParentId,
+    signal
+  ]);
 
   useEffect(() => {
     const run = async () => {
@@ -358,9 +391,16 @@ const useDirectories = (grandParentId?: string) => {
         return;
       }
       try {
-        const result = await listDirectories(grandParentId);
+        const result = await listDirectories({
+          grandParentId,
+          pageToken,
+        });
         if(!signal.aborted && result) {
-          setDirectories(result.files || [])
+          setDirectories(prevDirectories => 
+            prevDirectories.concat(result.files || [])
+          );
+          setFinished(!result.nextPageToken);
+          setPageToken(result.nextPageToken);
         }
       }
       catch(err) {
@@ -368,12 +408,27 @@ const useDirectories = (grandParentId?: string) => {
       }
     };
 
-    if (grandParentId) {
+    if (grandParentId && !isFinished &&
+      grandParentId !== cacheIdRef.current
+    ) {
       run();
     }
   }, [
     grandParentId,
-    signal
+    isFinished,
+    pageToken,
+    signal,
+  ]);
+
+  useEffect(() => {
+    if (isFinished && grandParentId) {
+      cacheDirectoriesRef.current = directories.slice();
+      cacheIdRef.current = grandParentId;
+    }
+  }, [
+    grandParentId,
+    directories,
+    isFinished,
   ]);
   
   return directories;
@@ -388,11 +443,9 @@ const useDrive = (fileId: string, parentId: string) => {
     clear
    } = useFiles(fileId, parentId);
   const parent = useDirectory(parentId);
-  const directories = useDirectories(
-    (parent && parent.parents) ?
-      parent.parents[0] :
-      ''
-  );
+  const grandParentId = useGrandParentId(parent);
+
+  const directories = useDirectories(grandParentId);
   const directoryIndex = useMemo(() => {
     return directories.findIndex(sibling => sibling.id === parentId);
   }, [

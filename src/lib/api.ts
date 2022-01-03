@@ -296,14 +296,24 @@ const getParent = async (parentId: string) => {
   return result.result;
 };
 
-const listDirectories = async (grandParentId: string) => {
+export interface ListDirectoriesOptions {
+  grandParentId: string;
+  pageToken?: string;
+};
+
+const listDirectories = async (options: ListDirectoriesOptions) => {
+  const {
+    grandParentId,
+    pageToken,
+  } = options;
   await checkScopes();
   const result = await gapi.client.drive.files.list({
     q: `'${grandParentId}' in parents and mimeType = 'application/vnd.google-apps.folder'`,
-    // fields: 'files(id, name, thumbnailLink, webContentLink, imageMediaMetadata/*)',
-    fields: '*',
+    fields: 'nextPageToken, files(id, name)',
+    // fields: '*',
     pageSize: 1000,
-    orderBy: 'name_natural'
+    orderBy: 'name_natural',
+    pageToken,
   });
   // console.log({result});
   return result.result;
