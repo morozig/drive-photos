@@ -303,16 +303,24 @@ const useTouchScroll = (options: TouchScrollOptions) => {
     contentHash
   ]);
 
+  const isSwipeLockedRef = useRef(false);
+
   useEffect(() => {
     const onScroll = (e: Event) => {
       const div = e.target as HTMLDivElement;
       if (div) {
-        const current = div.scrollLeft / (width + gap);
-        if (Math.ceil(current) < activeIndex && onPrevImage) {
-          onPrevImage();
-        }
-        if (Math.floor(current) > activeIndex && onNextImage) {
-          onNextImage();
+        if (!isSwipeLockedRef.current) {
+          const current = div.scrollLeft / (width + gap);
+          if (Math.ceil(current) < activeIndex && onPrevImage) {
+            isSwipeLockedRef.current = true;
+            onPrevImage();
+          }
+          if (Math.floor(current) > activeIndex && onNextImage) {
+            isSwipeLockedRef.current = true;
+            onNextImage();
+          }
+        } else {
+          isSwipeLockedRef.current = false;
         }
       }
     };
@@ -331,7 +339,8 @@ const useTouchScroll = (options: TouchScrollOptions) => {
     ref,
     activeIndex,
     onPrevImage,
-    onNextImage
+    onNextImage,
+    contentHash,
   ]);
 };
 
