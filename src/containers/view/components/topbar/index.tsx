@@ -50,7 +50,6 @@ import {
   RecentFile,
   useFullScreen,
   useIsSignedIn,
-  useIsTouchScreen
 } from '../../../../lib/hooks';
 import {
   pickFile
@@ -211,7 +210,6 @@ const Topbar: React.FC<TopbarProps> = (props) => {
     handleProfileMenuClose,
     toggleSignedIn
   ]);
-  const isTouchScreen = useIsTouchScreen();
 
   return (
     <Toolbar>
@@ -337,6 +335,23 @@ const Topbar: React.FC<TopbarProps> = (props) => {
         <MenuItem
           disabled={!fullscreenButtonActive}
           onClick={() => {
+            onPrevImage();
+            handleMenuClose();
+          }}
+          sx={{
+            display: { xs: 'flex', md: 'none' }
+          }}
+        >
+          <ListItemIcon>
+            <PrevImageIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Previous Image'}
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          disabled={!fullscreenButtonActive}
+          onClick={() => {
             onToggleSlideshowPlaying();
             handleMenuClose();
           }}
@@ -355,6 +370,23 @@ const Topbar: React.FC<TopbarProps> = (props) => {
               'End Slideshow' :
               'Start Slideshow'
             }
+          </ListItemText>
+        </MenuItem>
+        <MenuItem
+          disabled={!fullscreenButtonActive}
+          onClick={() => {
+            onNextImage();
+            handleMenuClose();
+          }}
+          sx={{
+            display: { xs: 'flex', md: 'none' }
+          }}
+        >
+          <ListItemIcon>
+            <NextImageIcon/>
+          </ListItemIcon>
+          <ListItemText>
+            {'Next Image'}
           </ListItemText>
         </MenuItem>
         <MenuItem
@@ -580,7 +612,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
       >
         <Box
           sx={{
-            display: isTouchScreen ? 'none' : 'block'
+            display: { xs: 'none', md: 'block' }
           }}
         >
           <IconButton
@@ -627,7 +659,7 @@ const Topbar: React.FC<TopbarProps> = (props) => {
       >
         <Box
           sx={{
-            display: isTouchScreen ? 'none' : 'block'
+            display: { xs: 'none', md: 'block' }
           }}
         >
           <IconButton
@@ -673,14 +705,15 @@ const Topbar: React.FC<TopbarProps> = (props) => {
         }
         }
         sx={{
-          display: { xs: 'none', md: 'flex' }
+          display: { xs: 'none', sm: 'flex' },
         }}
       >
         <ToggleButton
           value={FitMode.Best}
           aria-label='best-fit'
           sx={{
-            p: 0
+            p: 0,
+            display: { xs: 'none', sm: 'block' },
           }}
         >
           <Tooltip
@@ -704,7 +737,8 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           value={FitMode.Width}
           aria-label='fit-width'
           sx={{
-            p: 0
+            p: 0,
+            display: { xs: 'none', sm: 'block' },
           }}
         >
           <Tooltip
@@ -728,7 +762,8 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           value={FitMode.Height}
           aria-label='fit-height'
           sx={{
-            p: 0
+            p: 0,
+            display: { xs: 'none', md: 'block' },
           }}
         >
           <Tooltip
@@ -752,7 +787,8 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           value={FitMode.Original}
           aria-label='fit-original'
           sx={{
-            p: 0
+            p: 0,
+            display: { xs: 'none', md: 'block' },
           }}
         >
           <Tooltip
@@ -776,7 +812,8 @@ const Topbar: React.FC<TopbarProps> = (props) => {
           value={FitMode.Manual}
           aria-label='fit-manual'
           sx={{
-            p: 0
+            p: 0,
+            display: { xs: 'none', md: 'block' },
           }}
         >
           <Tooltip
