@@ -270,12 +270,15 @@ const View: React.FC = () => {
   const wasSlideshowPlayingRef = useRef(false);
   useEffect(() => {
     if (!isSlideshowEnabled && isSlideshowPlaying) {
-      wasSlideshowPlayingRef.current = true;
       setSlideshowPlaying(false);
+      if (activeIndex === -1) {
+        wasSlideshowPlayingRef.current = true;
+      }
     }
   }, [
     isSlideshowEnabled,
     isSlideshowPlaying,
+    activeIndex,
   ]);
   useEffect(() => {
     if (isSlideshowEnabled && !isSlideshowPlaying &&
