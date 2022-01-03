@@ -266,14 +266,29 @@ const View: React.FC = () => {
     setFileId(fileId);
     setIsScrollToBottom(false);
   }, []);
+
+  const wasSlideshowPlayingRef = useRef(false);
   useEffect(() => {
     if (!isSlideshowEnabled && isSlideshowPlaying) {
+      wasSlideshowPlayingRef.current = true;
       setSlideshowPlaying(false);
     }
   }, [
     isSlideshowEnabled,
-    isSlideshowPlaying
+    isSlideshowPlaying,
   ]);
+  useEffect(() => {
+    if (isSlideshowEnabled && !isSlideshowPlaying &&
+      wasSlideshowPlayingRef.current === true
+    ) {
+      wasSlideshowPlayingRef.current = false;
+      setSlideshowPlaying(true);
+    }
+  }, [
+    isSlideshowEnabled,
+    isSlideshowPlaying,
+  ]);
+
   const onToggleSlideshowPlaying = useCallback(() => {
     setSlideshowPlaying(current => !current);
   }, []);
