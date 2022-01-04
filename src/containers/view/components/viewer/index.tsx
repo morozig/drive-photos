@@ -19,7 +19,7 @@ import {
   useTouchScroll,
   useZoom
 } from './hooks';
-import { FitMode } from '../..';
+import { FitMode, VisiblePart } from '../..';
 import { useFullScreen, useIsTouchScreen } from '../../../../lib/hooks';
 import FullscreenEnterIcon from '@material-ui/icons/Fullscreen';
 import FullscreenExitIcon from '@material-ui/icons/FullscreenExit';
@@ -32,13 +32,14 @@ import StartSlideshowIcon from '@material-ui/icons/PlayArrow';
 import EndSlideshowIcon from '@material-ui/icons/Pause';
 import { useDebounce, useRectSize } from '../thumbnails/hooks';
 import ZoomSlider from '../zoom-slider';
-import ImageScreen from '../image-screen';
+import ImageScreen, { ImageScreenRef } from '../image-screen';
 
 const delay = 100;
 const gap = 20;
 
 export interface ViewerRef {
   toggleFullscreen: () => void;
+  scrollVisibleTo: (left: number, top: number) => void;
 }
 
 interface ViewerProps {
@@ -59,6 +60,7 @@ interface ViewerProps {
   isSlideshowPlaying?: boolean;
   onToggleSlideshowPlaying: () => void;
   onImageError?: () => void;
+  onVisibleChange: (options: VisiblePart) => void;
 };
 
 interface Point {
@@ -85,7 +87,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     isSlideshowEnabled,
     isSlideshowPlaying,
     onToggleSlideshowPlaying,
-    onImageError
+    onImageError,
+    onVisibleChange,
   } = props;
 
   const [ contextMenu, setContextMenu ] = useState<Point | null>(null);
@@ -98,6 +101,7 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
 
   const [ isOverflow, setOverflow ] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const currentImageScreenRef = useRef<ImageScreenRef>(null);
 
   useTouchScroll({
     activeIndex: canPrev ? 1 : 0,
@@ -115,16 +119,22 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
     isFullscreen,
     toggleFullScreen
   } = useFullScreen();
+
   useImperativeHandle(viewerRef, () => ({
     toggleFullscreen() {
       if (isEnabled) {
         toggleFullScreen(containerRef.current);
       }
+    },
+    scrollVisibleTo(left: number, top: number) {
+      if (currentImageScreenRef.current) {
+        currentImageScreenRef.current.scrollVisibleTo(left, top);
+      }
     }
   }), [
     containerRef,
     isEnabled,
-    toggleFullScreen
+    toggleFullScreen,
   ]);
 
   const onContextMenu = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -309,6 +319,8 @@ const Viewer = forwardRef<ViewerRef, ViewerProps>(
             onImageError={onImageError}
             onOverflowChanged={setOverflow}
             setZoom={setZoom}
+            onVisibleChange={onVisibleChange}
+            ref={currentImageScreenRef}
           />
           {isTouchScreen && canNext &&
             <ImageScreen

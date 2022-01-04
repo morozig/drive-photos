@@ -8,6 +8,7 @@ import VirtualGrid, {
 import {
   SystemStyleObject
 } from '@material-ui/system';
+import { VisiblePartHandler } from '../..';
 
 interface ThumbnailsProps {
   files?: gapi.client.drive.File[];
@@ -15,6 +16,8 @@ interface ThumbnailsProps {
   onSelect: (fileId: string) => void;
   onVisibleFiles?: (indices: number[]) => void;
   onImageError?: () => void;
+  subVisiblePart?: (cb: VisiblePartHandler) => void;
+  onMoveVisible?: (left: number, top: number) => void;
   sx?: SystemStyleObject;
 };
 
@@ -25,6 +28,8 @@ const Thumbnails: React.FC<ThumbnailsProps> = (props) => {
     onSelect,
     onVisibleFiles,
     onImageError,
+    subVisiblePart,
+    onMoveVisible,
     sx
   } = props;
 
@@ -47,12 +52,16 @@ const Thumbnails: React.FC<ThumbnailsProps> = (props) => {
       (file, i) => ({
         file,
         counter: i + 1,
-        onImageError
+        onImageError,
+        subVisiblePart,
+        onMoveVisible,
       })
     );
   }, [
     files,
-    onImageError
+    onImageError,
+    subVisiblePart,
+    onMoveVisible,
   ]);
   const onActive = useCallback((index: number) => {
     const file = files[index];

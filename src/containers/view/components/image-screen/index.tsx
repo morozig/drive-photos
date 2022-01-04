@@ -3,6 +3,8 @@ import React, {
   useMemo,
   useRef,
   useState,
+  forwardRef,
+  useImperativeHandle,
 } from 'react';
 import {
   SystemStyleObject,
@@ -10,7 +12,7 @@ import {
 import {
   Box
 } from '@material-ui/core';
-import { FitMode } from '../..';
+import { FitMode, VisiblePart } from '../..';
 import { RectSize } from '../thumbnails/hooks';
 import {
   useScrollActions,
@@ -31,6 +33,10 @@ interface FixedPoint {
   scrollY: number;
 }
 
+export interface ImageScreenRef {
+  scrollVisibleTo: (left: number, top: number) => void;
+}
+
 interface ImageScreenProps {
   file?: gapi.client.drive.File;
   containerRectSize: RectSize,
@@ -44,10 +50,12 @@ interface ImageScreenProps {
   isPreload?: boolean;
   onOverflowChanged?: (isOverflow: boolean) => void;
   setZoom?: (setter: ZoomSetter) => void;
+  onVisibleChange?: (options: VisiblePart) => void;
   sx?: SystemStyleObject;
 };
 
-const ImageScreen: React.FC<ImageScreenProps> = (props) => {
+const ImageScreen = forwardRef<ImageScreenRef, ImageScreenProps>(
+  (props, imageScreenRef) => {
   const {
     file,
     containerRectSize,
@@ -61,6 +69,7 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
     isPreload,
     onOverflowChanged,
     setZoom,
+    onVisibleChange,
     sx,
   } = props;
 
@@ -406,6 +415,60 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
     setZoom,
   ]);
 
+  useEffect(() => {
+    const div = ref.current;
+    if (!div) {
+      return;
+    }
+
+    const updateVisible = () => {
+      if (onVisibleChange) {
+        onVisibleChange({
+          width: (
+            div.scrollWidth <= div.offsetWidth &&
+            div.scrollWidth > 0
+          ) ? 1 : div.offsetWidth / div.scrollWidth,
+          height: (
+            div.scrollHeight <= div.offsetHeight &&
+            div.scrollHeight > 0
+          ) ? 1 : div.offsetHeight / div.scrollHeight,
+          left: (
+            div.scrollWidth > 0
+          ) ? div.scrollLeft / div.scrollWidth : 0,
+          top: (
+            div.scrollHeight > 0
+          ) ? div.scrollTop / div.scrollHeight : 0,
+        });
+      }
+    };
+
+    updateVisible();
+    div.addEventListener('scroll', updateVisible);
+
+    return () => {
+      div.removeEventListener('scroll', updateVisible);
+    };
+  }, [
+    ref,
+    localZoom,
+    onVisibleChange,
+  ]);
+
+  useImperativeHandle(imageScreenRef, () => ({
+    scrollVisibleTo(left: number, top: number) {
+      const div = ref.current;
+      if (!div) {
+        return;
+      }
+      div.scrollTo(
+        left * div.scrollWidth,
+        top * div.scrollHeight
+      );
+    }
+  }), [
+    ref,
+  ]);
+
   return (
     <Box
       sx={{
@@ -450,6 +513,6 @@ const ImageScreen: React.FC<ImageScreenProps> = (props) => {
       }
     </Box>
   );
-};
+});
 
 export default ImageScreen;

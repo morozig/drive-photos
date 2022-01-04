@@ -22,6 +22,7 @@ import Thumbnails from './components/thumbnails';
 import Viewer, { ViewerRef } from './components/viewer';
 import Topbar from './components/topbar';
 import StartScreen from './components/start-screen';
+import Observable from '../../lib/observable';
 
 const drawerWidth = 260;
 const preloadCount = 3;
@@ -39,6 +40,14 @@ export enum FitMode {
   Original,
   Manual
 }
+
+export interface VisiblePart {
+  width: number;
+  height: number;
+  left: number;
+  top: number;
+}
+export type VisiblePartHandler = (visiblePart: VisiblePart) => void;
 
 const View: React.FC = () => {
   const [ fitMode, setFitMode ] = useState<FitMode>(FitMode.Best);
@@ -445,6 +454,20 @@ const View: React.FC = () => {
     onToggleSlideshowPlaying
   ]);
 
+  const visiblePartObservable = useRef(new Observable<VisiblePart>());
+  const subVisiblePart = useCallback((cb: VisiblePartHandler) => {
+    visiblePartObservable.current.subscribe(cb);
+    return () => visiblePartObservable.current.unsubscribe(cb);
+  }, []);
+  const pubVisiblePart = useCallback((visiblePart: VisiblePart) => {
+    visiblePartObservable.current.push(visiblePart);
+  }, []);
+  const onMoveVisible = useCallback((left: number, top: number) => {
+    if (viewerRef.current) {
+      viewerRef.current.scrollVisibleTo(left, top);
+    }
+  }, []);
+
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position='fixed' sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
@@ -528,6 +551,8 @@ const View: React.FC = () => {
             onSelect={onSelect}
             onVisibleFiles={setVisibleThumbnails}
             onImageError={onImageError}
+            subVisiblePart={subVisiblePart}
+            onMoveVisible={onMoveVisible}
             sx={{
               flexGrow: 1
             }}
@@ -559,6 +584,7 @@ const View: React.FC = () => {
             isSlideshowPlaying={isSlideshowPlaying}
             onToggleSlideshowPlaying={onToggleSlideshowPlaying}
             onImageError={onImageError}
+            onVisibleChange={pubVisiblePart}
             sx={{
               flexGrow: 1
             }}
