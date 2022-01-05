@@ -19,7 +19,7 @@ interface GridItem {
 
 type ThumbnailProps = ItemProps<GridItem>;
 
-export const itemToKey = (item: GridItem) => item.file.name || item.counter;
+export const itemToKey = (item: GridItem) => item.file.id || item.counter;
 
 const ThumbnailInner: React.FC<ThumbnailProps> = (props) => {
   const {
